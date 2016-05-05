@@ -64,5 +64,5 @@ add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 install( TARGETS parse_json DESTINATION lib )
 
 foreach( CUR_PREFIX ${HEADER_FILES} )
-	install( FILES "${CUR_PREFIX}" DESTINATION include/daw/nodepp/parse_json )
+	install( FILES "${CUR_PREFIX}" DESTINATION include/daw/parse_json )
 endforeach( CUR_PREFIX )
