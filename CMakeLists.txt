@@ -60,8 +60,10 @@ set( SOURCE_FILES
 	daw_json_parser.cpp
  )
 
-add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
+add_library ( parse_json_static STATIC ${HEADER_FILES} ${SOURCE_FILES} )
+add_library ( parse_json SHARED ${HEADER_FILES} ${SOURCE_FILES} )
 install( TARGETS parse_json DESTINATION lib )
+install( TARGETS parse_json_static DESTINATION lib )
 
 foreach( CUR_PREFIX ${HEADER_FILES} )
 	install( FILES "${CUR_PREFIX}" DESTINATION include/daw/parse_json )
