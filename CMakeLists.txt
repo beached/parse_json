@@ -65,8 +65,8 @@ add_library ( parse_json SHARED ${HEADER_FILES} ${SOURCE_FILES} )
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_static DESTINATION lib )
 
-add_dependencies( parse_json header_libraries char_range );
-add_dependencies( parse_json_static header_libraries char_range );
+add_dependencies( parse_json header_libraries char_range )
+add_dependencies( parse_json_static header_libraries char_range )
 
 foreach( CUR_PREFIX ${HEADER_FILES} )
 	install( FILES "${CUR_PREFIX}" DESTINATION include/daw/parse_json )
