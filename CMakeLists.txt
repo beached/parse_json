@@ -19,9 +19,9 @@ elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
 endif( )
 
 ExternalProject_Add( 
-	char_range
-	GIT_REPOSITORY "https://github.com/beached/char_range.git"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/3rdparty/char_range"
+	header_libraries
+	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/3rdparty/header_libraries"
 	GIT_TAG "master"
 	PATCH_COMMAND ""
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
@@ -30,9 +30,9 @@ ExternalProject_Add(
  )
 
 ExternalProject_Add( 
-	header_libraries
-	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/3rdparty/header_libraries"
+	char_range
+	GIT_REPOSITORY "https://github.com/beached/char_range.git"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/3rdparty/char_range"
 	GIT_TAG "master"
 	PATCH_COMMAND ""
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
@@ -64,6 +64,9 @@ add_library ( parse_json_static STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_library ( parse_json SHARED ${HEADER_FILES} ${SOURCE_FILES} )
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_static DESTINATION lib )
+
+add_dependencies( parse_json header_libraries char_range );
+add_dependencies( parse_json_static header_libraries char_range );
 
 foreach( CUR_PREFIX ${HEADER_FILES} )
 	install( FILES "${CUR_PREFIX}" DESTINATION include/daw/parse_json )
