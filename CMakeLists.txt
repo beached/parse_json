@@ -21,7 +21,7 @@ endif( )
 ExternalProject_Add( 
 	header_libraries
 	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/3rdparty/header_libraries"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/header_libraries"
 	GIT_TAG "master"
 	PATCH_COMMAND ""
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
@@ -32,7 +32,7 @@ ExternalProject_Add(
 ExternalProject_Add( 
 	char_range
 	GIT_REPOSITORY "https://github.com/beached/char_range.git"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/3rdparty/char_range"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/char_range"
 	GIT_TAG "master"
 	PATCH_COMMAND ""
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
@@ -40,34 +40,36 @@ ExternalProject_Add(
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
  )
 
+
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
+set( HEADER_FOLDER "include" )
+include_directories( ${HEADER_FOLDER} )
+
 set( HEADER_FILES
-	daw_json.h
-	daw_json_details.h
-	daw_json_interface.h
-	daw_json_link.h
-	daw_json_parser.h
- )
+	${HEADER_FOLDER}/daw_json.h
+	${HEADER_FOLDER}/daw_json_details.h
+	${HEADER_FOLDER}/daw_json_interface.h
+	${HEADER_FOLDER}/daw_json_link.h
+	${HEADER_FOLDER}/daw_json_parser.h
+)
 
 set( SOURCE_FILES
 	daw_json.cpp
 	daw_json_link.cpp
 	daw_json_parser.cpp
- )
+)
 
 add_library ( parse_json_static STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_library ( parse_json SHARED ${HEADER_FILES} ${SOURCE_FILES} )
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_static DESTINATION lib )
+install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/parse_json )
 
 add_dependencies( parse_json header_libraries char_range )
 add_dependencies( parse_json_static header_libraries char_range )
 
-foreach( CUR_PREFIX ${HEADER_FILES} )
-	install( FILES "${CUR_PREFIX}" DESTINATION include/daw/parse_json )
-endforeach( CUR_PREFIX )
