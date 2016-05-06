@@ -19,7 +19,7 @@ elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
 endif( )
 
 ExternalProject_Add( 
-	header_libraries
+	header_libraries_prj
 	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/header_libraries"
 	GIT_TAG "master"
@@ -30,7 +30,7 @@ ExternalProject_Add(
  )
 
 ExternalProject_Add( 
-	char_range
+	char_range_prj
 	GIT_REPOSITORY "https://github.com/beached/char_range.git"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/char_range"
 	GIT_TAG "master"
@@ -64,12 +64,16 @@ set( SOURCE_FILES
 	daw_json_parser.cpp
 )
 
-add_library ( parse_json_static STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_library ( parse_json SHARED ${HEADER_FILES} ${SOURCE_FILES} )
+add_dependencies( parse_json header_libraries_prj char_range_prj )
+target_link_libraries( parse_json char_range )
+
+add_library ( parse_json_static STATIC ${HEADER_FILES} ${SOURCE_FILES} )
+add_dependencies( parse_json_static header_libraries_prj char_range_prj )
+target_link_libraries( parse_json char_range_static )
+
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_static DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/parse_json )
 
-add_dependencies( parse_json header_libraries char_range )
-add_dependencies( parse_json_static header_libraries char_range )
 
