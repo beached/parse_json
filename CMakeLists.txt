@@ -66,11 +66,12 @@ set( SOURCE_FILES
 
 add_library ( parse_json SHARED ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json header_libraries_prj char_range_prj )
-target_link_libraries( parse_json char_range )
+target_link_libraries( parse_json char_range ${Boost_Libraries} ${OPENSSL_LIBRARIES} )
 
 add_library ( parse_json_static STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json_static header_libraries_prj char_range_prj )
-target_link_libraries( parse_json char_range_static )
+target_link_libraries( parse_json char_range_static ${Boost_Libraries} ${OPENSSL_LIBRARIES} )
+
 
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_static DESTINATION lib )
