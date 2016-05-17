@@ -28,8 +28,10 @@
 #include "daw_json_parser.h"
 
 #ifndef WIN32
-void localtime_s( struct tm* result, std::time_t const * source ) {
-	localtime_r( source, result );
+namespace {
+	void localtime_s( std::time_t const * source, struct tm* result ) {
+		localtime_r( source, result );
+	}
 }
 #endif
 
@@ -39,7 +41,7 @@ namespace daw {
 		std::string ts_to_string( std::time_t const & timestamp, std::string format ) {
 			char buffer[200];
 			std::tm tm = { };
-			localtime_s( &tm, &timestamp );
+			localtime_s( &timestamp, &tm );
 			auto count = std::strftime( buffer, 200, format.c_str( ), &tm );
 			assert( count <200 );
 			return std::string( buffer, buffer + count + 1 );
