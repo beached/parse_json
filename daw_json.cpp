@@ -21,15 +21,15 @@
 // SOFTWARE.
 
 #include <cassert>
-#include <ctime>
 #include <iomanip>
-
+#include <time.h>
 #include "daw_json.h"
 #include "daw_json_parser.h"
 
 #ifndef WIN32
+
 namespace {
-	void localtime_s( std::time_t const * source, struct tm* result ) {
+	void localtime_s( std::time_t const * source, struct tm * result ) {
 		localtime_r( source, result );
 	}
 }
@@ -213,3 +213,4 @@ namespace daw {
 		}	// namespace parse
 	}	// namespace json
 }	// namespace daw1
+
