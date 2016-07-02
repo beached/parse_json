@@ -22,7 +22,7 @@ else( )
 endif( )
 
 externalproject_add( 
-	header_libraries_prj
+	headlibsprj
 	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
 	GIT_TAG "master"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/headlibs"
@@ -33,7 +33,7 @@ externalproject_add(
  )
 
 externalproject_add( 
-	char_range_prj
+	chrrngprj
 	GIT_REPOSITORY "https://github.com/beached/char_range.git"
 	GIT_TAG "master"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/chrrng"
@@ -67,7 +67,7 @@ set( SOURCE_FILES
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( parse_json header_libraries_prj char_range_prj )
+add_dependencies( parse_json headlibsprj chrrngprj )
 target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
