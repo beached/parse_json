@@ -37,6 +37,7 @@
 #include "daw_json.h"
 #include "daw_json_parser.h"
 #include <daw/char_range/daw_char_range.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace daw {
 	namespace json {
@@ -52,6 +53,7 @@ namespace daw {
 			::daw::json::impl::value_t get_schema( boost::string_ref name, bool const & );
 			::daw::json::impl::value_t get_schema( boost::string_ref name, std::nullptr_t );
 			::daw::json::impl::value_t get_schema( boost::string_ref name, std::string const & );
+			::daw::json::impl::value_t get_schema( boost::string_ref name, boost::posix_time::ptime const & );
 			::daw::json::impl::value_t make_type_obj( boost::string_ref name, ::daw::json::impl::value_t selected_type );
 
 			template<typename Key, typename Value>
@@ -575,7 +577,32 @@ namespace daw {
 				return *this;
 			}
 
-			//JsonLink & link_timestamp( std::string name, std::time_t& value );
+			JsonLink & link_timestamp( boost::string_ref name, boost::posix_time::ptime & value ) {
+				auto value_ptr = &value;
+				set_name( value, name );
+				data_description_t data_description;
+				using daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, value );
+				data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
+					assert( value_ptr );
+					json_text =  generate::value_to_json( name.to_string( ), boost::posix_time::to_iso_string( *value_ptr ) ); 
+				};
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					assert( member->second.is_string( ) );
+					*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+
+
+			}
 		};	// class JsonLink
 
 		// 		template<typename Derived>

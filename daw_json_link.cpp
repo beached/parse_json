@@ -1,4 +1,5 @@
 #include "daw_json_link.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace daw {
 	namespace json {
@@ -18,6 +19,10 @@ namespace daw {
 			}
 
 			value_t get_schema( boost::string_ref name, std::string const & ) {
+				return make_type_obj( name, value_t( std::string( "string" ) ) );
+			}
+
+			value_t get_schema( boost::string_ref name, boost::posix_time::ptime const & ) {
 				return make_type_obj( name, value_t( std::string( "string" ) ) );
 			}
 
