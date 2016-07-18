@@ -98,19 +98,19 @@ namespace daw {
 				return value_to_json(to_string_ref( name ) );
 			}
 
-			std::string value_to_json( boost::string_ref name, int const & value ) {
+			std::string value_to_json( boost::string_ref name, int32_t const & value ) {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, int const & value ) {
+			std::string value_to_json( impl::string_value name, int32_t const & value ) {
 				return value_to_json(to_string_ref( name ), value );
 			}
 
-			std::string value_to_json( boost::string_ref name, unsigned int const & value ) {
+			std::string value_to_json( boost::string_ref name, uint32_t const & value ) {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, unsigned int const & value ) {
+			std::string value_to_json( impl::string_value name, uint32_t const & value ) {
 				return value_to_json(to_string_ref( name ), value );
 			}
 
