@@ -519,7 +519,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink & link_map( boost::string_ref name, boost::optional<T>& value ) {
+			JsonLink & link_map( boost::string_ref name, boost::optional<T> & value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -600,9 +600,41 @@ namespace daw {
 				};
 				m_data_map[range::create_char_range( name )] = std::move( data_description );
 				return *this;
-
-
 			}
+
+			JsonLink & link_timestamp( boost::string_ref name, boost::optional<boost::posix_time::ptime> & value ) {
+				auto value_ptr = &value;
+				set_name( value, name );
+				data_description_t data_description;
+				using daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
+				data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
+					assert( value_ptr );
+					if( *value_ptr ) {
+						json_text =  generate::value_to_json( name.to_string( ), boost::posix_time::to_iso_string( *(*value_ptr) ) ); 
+					} else {
+						json_text =  generate::value_to_json( name.to_string( ) ); 
+					}
+				};
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					if( member->second.is_null( ) ) {
+						*value_ptr = boost::optional<boost::posix_time::ptime>{ };
+					} else {
+						assert( member->second.is_string( ) );
+						*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
+					}
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
+
 		};	// class JsonLink
 
 		// 		template<typename Derived>
