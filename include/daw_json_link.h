@@ -482,8 +482,9 @@ namespace daw {
 					using namespace parse;
 					json_to_value( *value_ptr, member->second );
 				};
-				//m_data_map[name.to_string( )] = std::move( data_description );
-				m_data_map[name.to_string( )] = data_description;
+				m_data_map[name.to_string( )] = std::move( data_description );
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+
 				return *this;
 			}
 
