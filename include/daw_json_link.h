@@ -42,7 +42,7 @@ namespace daw {
 	namespace json {
 		template<typename Derived> class JsonLink;
 
-		template<typename Derived> std::ostream& operator<<( std::ostream& os, JsonLink<Derived> const & data );
+		template<typename Derived> std::ostream& operator<<( std::ostream & os, JsonLink<Derived> const & data );
 		template<typename Derived> void json_to_value( JsonLink<Derived> & to, impl::value_t const & from );
 		template<typename Derived> std::string value_to_json( boost::string_ref name, JsonLink<Derived> const & obj );
 		template<typename Derived> ::daw::json::impl::value_t get_schema( boost::string_ref name, JsonLink<Derived> const & obj );
@@ -55,25 +55,27 @@ namespace daw {
 			::daw::json::impl::value_t make_type_obj( boost::string_ref name, ::daw::json::impl::value_t selected_type );
 
 			template<typename Key, typename Value>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, std::pair<Key, Value> const & );
+			auto get_schema( boost::string_ref name, std::pair<Key, Value> const & );
+			//::daw::json::impl::value_t get_schema( boost::string_ref name, std::pair<Key, Value> const & );
 
 			template<typename T, typename std::enable_if_t<daw::traits::is_container_not_string<T>::value, long> = 0>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & );
+			auto get_schema( boost::string_ref name, T const & );
 
 			template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long> = 0>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & );
+			auto get_schema( boost::string_ref name, T const & );
 
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<bool, T>::value, long> = 0>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & );
+			auto get_schema( boost::string_ref name, T const & );
 
 			template<typename T>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, boost::optional<T> const & );
+			auto get_schema( boost::string_ref name, boost::optional<T> const & );
 
 			template<typename T, typename std::enable_if_t<daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value && !std::is_same<std::string, T>::value, long> = 0>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & );
+			auto get_schema( boost::string_ref name, T const & );
 
 			template<typename Key, typename Value>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, std::pair<Key, Value> const & ) {
+			auto get_schema( boost::string_ref name, std::pair<Key, Value> const & ) {
+			//::daw::json::impl::value_t get_schema( boost::string_ref name, std::pair<Key, Value> const & ) {
 				using ::daw::json::impl::make_object_value_item;
 
 				::daw::json::impl::object_value result;
@@ -87,7 +89,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<daw::traits::is_container_not_string<T>::value, long>>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & ) {
+			auto get_schema( boost::string_ref name, T const & ) {
 				using ::daw::json::impl::make_object_value_item;
 				daw::json::impl::object_value result;
 
@@ -99,17 +101,17 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long>>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & ) {
+			auto get_schema( boost::string_ref name, T const & ) {
 				return make_type_obj( name, ::daw::json::impl::value_t( std::string( "real" ) ) );
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<bool, T>::value, long>>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & ) {
+			auto get_schema( boost::string_ref name, T const & ) {
 				return make_type_obj( name, ::daw::json::impl::value_t( std::string( "integer" ) ) );
 			}
 
 			template<typename T>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, boost::optional<T> const & ) {
+			auto get_schema( boost::string_ref name, boost::optional<T> const & ) {
 				T t;
 				auto result = get_schema( name, t );
 				auto & obj = result.get_object( );
@@ -118,7 +120,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value && !std::is_same<std::string, T>::value, long>>
-			::daw::json::impl::value_t get_schema( boost::string_ref name, T const & ) {
+			auto get_schema( boost::string_ref name, T const & ) {
 				auto result = make_type_obj( name, ::daw::json::impl::value_t( std::string( "string" ) ) );
 				auto & obj = result.get_object( );
 				obj.push_back( make_object_value_item( range::create_char_range( "string_object" ), ::daw::json::impl::value_t( std::string( "string_object" ) ) ) );
@@ -168,7 +170,7 @@ namespace daw {
 			std::unordered_map<impl::string_value, data_description_t> m_data_map;
 
 			template<typename T>
-			JsonLink& link_value( boost::string_ref name, T& value ) {
+			JsonLink & link_value( boost::string_ref name, T& value ) {
 				set_name( value, name );
 				data_description_t data_description;
 				data_description.json_type = ::daw::json::schema::get_schema( name, value );
@@ -184,9 +186,9 @@ namespace daw {
 
 			virtual ~JsonLink( ) = default;
 			JsonLink( JsonLink const & ) = default;
-			JsonLink& operator=( JsonLink const & ) = default;
+			JsonLink & operator=( JsonLink const & ) = default;
 			JsonLink( JsonLink &&  ) = default;
-			JsonLink& operator=( JsonLink && ) = default;
+			JsonLink & operator=( JsonLink && ) = default;
 
 			std::string & json_object_name( ) {
 				return m_name;
@@ -196,7 +198,7 @@ namespace daw {
 				return m_name;
 			}
 
-			::daw::json::impl::value_t get_schema_obj( ) const {
+			auto get_schema_obj( ) const {
 				::daw::json::impl::object_value result;
 				using mapped_value_t = typename decltype(m_data_map)::value_type;
 				std::transform( std::begin( m_data_map ), std::end( m_data_map ), std::back_inserter( result ), []( mapped_value_t const & value ) {
@@ -317,7 +319,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			JsonLink& link_integral( boost::string_ref name, T& value ) {
+			JsonLink & link_integral( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -338,7 +340,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			JsonLink& link_integral( boost::string_ref name, boost::optional<T>& value ) {
+			JsonLink & link_integral( boost::string_ref name, boost::optional<T>& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -360,7 +362,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink& link_real( boost::string_ref name, T& value ) {
+			JsonLink & link_real( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -372,24 +374,24 @@ namespace daw {
 				return *this;
 			}
 
-			JsonLink& link_string( boost::string_ref name, boost::optional<std::string> & value ) {
+			JsonLink & link_string( boost::string_ref name, boost::optional<std::string> & value ) {
 				return link_value( name, value );
 			}
 
-			JsonLink& link_string( boost::string_ref name, std::string & value ) {
+			JsonLink & link_string( boost::string_ref name, std::string & value ) {
 				return link_value( name, value );
 			}
 
-			JsonLink& link_boolean( boost::string_ref name, bool& value ) {
+			JsonLink & link_boolean( boost::string_ref name, bool& value ) {
 				return link_value( name, value );
 			}
 
-			JsonLink& link_boolean( boost::string_ref name, boost::optional<bool>& value ) {
+			JsonLink & link_boolean( boost::string_ref name, boost::optional<bool>& value ) {
 				return link_value( name, value );
 			}
 
 			template<typename T>
-			JsonLink& link_object( boost::string_ref name, JsonLink<T>& value ) {
+			JsonLink & link_object( boost::string_ref name, JsonLink<T>& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -411,7 +413,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-			JsonLink& link_object( boost::string_ref name, boost::optional<T>& value ) {
+			JsonLink & link_object( boost::string_ref name, boost::optional<T>& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -436,7 +438,7 @@ namespace daw {
 			}
 
 			template<typename U, typename T>
-			JsonLink& link_hex_array( boost::string_ref name, T& value ) {
+			JsonLink & link_hex_array( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -461,7 +463,7 @@ namespace daw {
 
 
 			template<typename T>
-			JsonLink& link_array( boost::string_ref name, T& value ) {
+			JsonLink & link_array( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -485,7 +487,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink& link_array( boost::string_ref name, boost::optional<T>& value ) {
+			JsonLink & link_array( boost::string_ref name, boost::optional<T>& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -513,7 +515,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink& link_map( boost::string_ref name, T& value ) {
+			JsonLink & link_map( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -537,7 +539,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink& link_map( boost::string_ref name, boost::optional<T>& value ) {
+			JsonLink & link_map( boost::string_ref name, boost::optional<T>& value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ) );
 				data_description_t data_description;
@@ -567,7 +569,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink& link_streamable( boost::string_ref name, T& value ) {
+			JsonLink & link_streamable( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
 				set_name( value, name );
 				data_description_t data_description;
@@ -594,7 +596,7 @@ namespace daw {
 				return *this;
 			}
 
-			//JsonLink& link_timestamp( std::string name, std::time_t& value );
+			//JsonLink & link_timestamp( std::string name, std::time_t& value );
 		};	// class JsonLink
 
 		// 		template<typename Derived>
@@ -615,7 +617,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		::daw::json::impl::value_t get_schema( boost::string_ref name, JsonLink<Derived> const & obj ) {
+		auto get_schema( boost::string_ref name, JsonLink<Derived> const & obj ) {
 			return obj.get_schema_obj( );
 		}
 	}	// namespace json
