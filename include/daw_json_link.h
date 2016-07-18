@@ -32,7 +32,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <map>
+#include <unordered_map>
 
 #include "daw_json.h"
 #include "daw_json_parser.h"
@@ -167,7 +167,7 @@ namespace daw {
 
 
 			std::string m_name;
-			std::map<impl::string_value, data_description_t> m_data_map;
+			std::unordered_map<impl::string_value, data_description_t> m_data_map;
 
 			template<typename T>
 			JsonLink & link_value( boost::string_ref name, T& value ) {
@@ -335,7 +335,7 @@ namespace daw {
 					assert( result>= std::numeric_limits<T>::min( ) );
 					*value_ptr = static_cast<T>(result);
 				};
-				m_data_map[range::create_char_range( name )] = data_description;
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
 				return *this;
 			}
 
