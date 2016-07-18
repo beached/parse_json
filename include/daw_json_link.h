@@ -435,6 +435,31 @@ namespace daw {
 				return *this;
 			}
 
+			template<typename U, typename T>
+			JsonLink& link_hex_array( boost::string_ref name, T& value ) {
+				auto value_ptr = &value;
+				set_name( value, name.to_string( ) );
+				data_description_t data_description;
+				using ::daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, value );
+				data_description.bind_functions.encode = standard_encoder( name, value );
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					assert( member->second.is_array( ) );
+					using namespace parse;
+					json_to_value( *value_ptr, member->second );
+				};
+				m_data_map[name.to_string( )] = std::move( data_description );
+				return *this;
+			}
+
+
 			template<typename T>
 			JsonLink& link_array( boost::string_ref name, T& value ) {
 				auto value_ptr = &value;
