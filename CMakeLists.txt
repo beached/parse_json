@@ -71,5 +71,5 @@ add_dependencies( parse_json headlibsprj chrrngprj )
 target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
-install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/parse_json )
+install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
