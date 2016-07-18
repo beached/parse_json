@@ -585,7 +585,7 @@ namespace daw {
 				data_description.json_type = get_schema( name, value );
 				data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
 					assert( value_ptr );
-					json_text =  generate::value_to_json( name.to_string( ), boost::posix_time::to_iso_string( *value_ptr ) ); 
+					json_text =  generate::value_to_json( name.to_string( ), boost::posix_time::to_iso_extended_string( *value_ptr ) + 'Z' ); 
 				};
 				data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
 					assert( value_ptr );
@@ -611,7 +611,7 @@ namespace daw {
 				data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
 					assert( value_ptr );
 					if( *value_ptr ) {
-						json_text =  generate::value_to_json( name.to_string( ), boost::posix_time::to_iso_string( *(*value_ptr) ) ); 
+						json_text =  generate::value_to_json( name.to_string( ), boost::posix_time::to_iso_extended_string( *(*value_ptr) ) + 'Z' ); 
 					} else {
 						json_text =  generate::value_to_json( name.to_string( ) ); 
 					}
