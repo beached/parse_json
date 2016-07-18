@@ -335,7 +335,7 @@ namespace daw {
 					assert( result>= std::numeric_limits<T>::min( ) );
 					*value_ptr = static_cast<T>(result);
 				};
-				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				m_data_map[range::create_char_range( name )] = data_description;
 				return *this;
 			}
 
