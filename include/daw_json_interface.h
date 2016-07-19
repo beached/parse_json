@@ -34,6 +34,7 @@
 #include <daw/daw_traits.h>
 
 namespace daw {
+	void localtime_s( std::time_t const * source, struct tm* result );
 	namespace json {
 		namespace details {
 			std::string json_name( boost::string_ref name );

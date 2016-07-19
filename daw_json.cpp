@@ -27,14 +27,12 @@
 #include "daw_json_parser.h"
 
 namespace daw {
-	namespace {
-		void localtime_s( std::time_t const * source, struct tm* result ) {
+	void localtime_s( std::time_t const * source, struct tm* result ) {
 		#ifndef WIN32
-			localtime_r( source, result );
+			::localtime_r( source, result );
 		#else
-			localtime_s( result, source );
+			::localtime_s( result, source );
 		#endif  // WIN32
-		}
 	}
 	namespace json {
 		using namespace generate;
