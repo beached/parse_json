@@ -214,7 +214,7 @@ namespace daw {
 			std::string encode( ) const {
 				std::stringstream result;
 				std::string tmp;
-				auto range = daw::range::make_range( m_data_map );
+				auto range = daw::range::make_range( m_data_map ).sort( );
 				if( !range.empty( ) ) {
 					range.front( ).second.bind_functions.encode( tmp );
 					result <<tmp;
