@@ -73,3 +73,10 @@ target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRAR
 install( TARGETS parse_json DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
+add_executable( parse_json_test EXCLUDE_FROM_ALL parse_json_test.cpp )
+add_dependencies( parse_json_test headlibsprj chrrngprj )
+target_link_libraries( parse_json_test parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+
+add_custom_target( tests )
+add_dependencies( tests parse_json_test )
+
