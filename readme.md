@@ -33,5 +33,7 @@ One can use parse_json to serialize and deserialize(less tested) their data.
 would output:
     "Test": { "b": 1234, "c": 10.000999999999999 }
 
+The order of the object element names is sorted in lexigraphical order of the codepoints.  This may or may not make sense depending on the situation 
+
 Parsing JSON
 -------------
