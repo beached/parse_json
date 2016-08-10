@@ -21,25 +21,21 @@ else( )
 endif( )
 
 externalproject_add( 
-	headlibsprj
+	header_libraries_prj
 	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
 	GIT_TAG "master"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/headlibs"
-	INSTALL_DIR "${CMAKE_BINARY_DIR}/inst"
-	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/inst
-	PATCH_COMMAND ""
-	TEST_COMMAND ""
+	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
  )
 
 externalproject_add( 
-	chrrngprj
+	char_range_prj
 	GIT_REPOSITORY "https://github.com/beached/char_range.git"
 	GIT_TAG "master"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/chrrng"
-	INSTALL_DIR "${CMAKE_BINARY_DIR}/inst"
-	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/inst
-	PATCH_COMMAND ""
-	TEST_COMMAND ""
+	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
  )
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/inst/include" )
@@ -66,14 +62,14 @@ set( SOURCE_FILES
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( parse_json headlibsprj chrrngprj )
+add_dependencies( parse_json header_libraries_prj char_range_prj )
 target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
 add_executable( parse_json_test EXCLUDE_FROM_ALL parse_json_test.cpp )
-add_dependencies( parse_json_test headlibsprj chrrngprj )
+add_dependencies( parse_json_test header_libraries_prj char_range_prj )
 target_link_libraries( parse_json_test parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 add_custom_target( tests )
