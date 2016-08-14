@@ -38,6 +38,7 @@
 #include "daw_json.h"
 #include "daw_json_parser.h"
 #include <daw/char_range/daw_char_range.h>
+#include <daw/daw_memory_mapped_file.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace daw {
