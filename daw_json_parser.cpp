@@ -331,25 +331,25 @@ namespace daw {
 						static_assert( sizeof( c ) == 1, "Src is assumed to be made of of bytes" );
 						switch( c ) {
 							case '\b':
-								result += "\\b";
+								result += "\\\\b";
 								break;
 							case '\f':
-								result += "\\f";
+								result += "\\\\f";
 								break;
 							case '\n':
-								result += "\\n";
+								result += "\\\\n";
 								break;
 							case '\r':
-								result += "\\r";
+								result += "\\\\r";
 								break;
 							case '\t':
-								result += "\\t";
+								result += "\\\\t";
 								break;
 							case '\"':
-								result += "\\\"";
+								result += "\\\\\"";
 								break;
 							case '\\':
-								result += "\\\\";
+								result += "\\\\\\\\";
 								break;
 							default:
 								result += c;
