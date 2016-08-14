@@ -228,23 +228,27 @@ namespace daw {
 				return details::json_name( m_name ) + details::enbrace( result.str( ) );
 			}
 
-			void decode( json_obj const & json_values ) {
+			JsonLink & decode( json_obj const & json_values ) {
 				for( auto & value : m_data_map ) {
 					value.second.bind_functions.decode( json_values );
 				}
+				return *this;
 			}
 
-			void decode( boost::string_ref const json_text ) {
+			JsonLink & decode( boost::string_ref const json_text ) {
 				decode( parse_json( json_text ) );
+				return *this;
 			}
 
-			void decode( char const * json_text_begin, char const * json_text_end ) {
+			JsonLink & decode( char const * json_text_begin, char const * json_text_end ) {
 				decode( parse_json( json_text_begin, json_text_end ) );
+				return *this;
 			}
 
-			void decode_file( boost::string_ref filename ) {
+			JsonLink & decode_file( boost::string_ref filename ) {
 				daw::filesystem::MemoryMappedFile<char> test_data( filename );
 				decode( test_data.begin( ), test_data.end( ) );
+				return *this;
 			}
 
 			void reset_jsonlink( ) {
