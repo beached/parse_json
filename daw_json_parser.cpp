@@ -324,6 +324,42 @@ namespace daw {
 				return m_value_type;
 			}
 
+			namespace {
+				std::string escape_string( boost::string_ref src ) {
+					std::string result;
+					for( auto c : src ) {
+						switch( c ) {
+							case '\b':
+								result += "\\b";
+								break;
+							case '\f':
+								result += "\\f";
+								break;
+							case '\n':
+								result += "\\n";
+								break;
+							case '\r':
+								result += "\\r";
+								break;
+							case '\t':
+								result += "\\t";
+								break;
+							case '\"':
+								result += "\\\"";
+								break;
+							case '\\':
+								result += "\\\\";
+								break;
+							default:
+								result += c;
+						}
+					}
+
+					return result;
+				}
+
+			}	// namespace anonymous
+
 			std::string to_string( value_t const & value) {
 				std::stringstream ss;
 				switch( value.type( ) ) {
@@ -364,7 +400,7 @@ namespace daw {
 					ss <<value.get_real( );
 					break;
 				case value_t::value_types::string:
-					ss <<'"' << value.get_string( ) << '"';
+					ss << '"' << escape_string( value.get_string( ) ) << '"';
 					break;
 				default:
 					throw std::runtime_error( "Unexpected value type" );
