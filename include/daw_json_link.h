@@ -237,6 +237,10 @@ namespace daw {
 				decode( parse_json( json_text ) );
 			}
 
+			void decode( char const * json_text_begin, char const * json_text_end ) {
+				decode( parse_json( json_text_begin, json_text_end ) );
+			}
+
 			void reset_jsonlink( ) {
 				m_data_map.clear( );
 				m_name.clear( );
