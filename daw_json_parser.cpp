@@ -537,6 +537,7 @@ namespace daw {
 				++range;
 				auto const it_first = range.begin( );
 				move_to_quote( range );
+				/*
 				std::string tmp_str;
 				for( auto it=it_first; it != range.begin( ); ++it ) {
 					if( *it == '\\' ) {
@@ -571,6 +572,8 @@ namespace daw {
 					}
 				}
 				value_t result( range::create_char_range( tmp_str.data( ), tmp_str.data( ) + tmp_str.size( ) ) );
+				*/
+				value_t result( range::create_char_range( it_first, range.begin( ) ) );
 				++range;
 				return result;
 			}
