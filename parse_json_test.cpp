@@ -155,7 +155,7 @@ int main( int, char** ) {
 	Test a;
 	a.b = 1234;
 	a.c = 10.001;
-	a.d = "\"This is a string\n\|";
+	a.d = "\"This is a string\nline two";
 	auto s = a.encode( );
 	std::cout << s << std::endl;
 	

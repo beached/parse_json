@@ -328,6 +328,7 @@ namespace daw {
 				std::string escape_string( boost::string_ref src ) {
 					std::string result;
 					for( auto c : src ) {
+						static_assert( sizeof( c ) == 1, "Src is assumed to be made of of bytes" );
 						switch( c ) {
 							case '\b':
 								result += "\\b";
@@ -400,8 +401,8 @@ namespace daw {
 					ss <<value.get_real( );
 					break;
 				case value_t::value_types::string:
-					//ss << '"' << escape_string( value.get_string( ) ) << '"';
-					ss << '"' << value.get_string( ) << '"';
+					ss << '"' << escape_string( value.get_string( ) ) << '"';
+					//ss << '"' << value.get_string( ) << '"';
 					break;
 				default:
 					throw std::runtime_error( "Unexpected value type" );
@@ -530,6 +531,7 @@ namespace daw {
 				}
 			}
 
+			// Strings are parsed here :)
 			value_t parse_string(range::CharRange & range ) {
 				if( !is_equal( range.begin( ), '"' ) ) {
 					throw JsonParserException( "Not a valid JSON string" );
@@ -537,32 +539,32 @@ namespace daw {
 				++range;
 				auto const it_first = range.begin( );
 				move_to_quote( range );
-				/*
-				std::string tmp_str;
+
+				std::u32string tmp_str;
 				for( auto it=it_first; it != range.begin( ); ++it ) {
-					if( *it == '\\' ) {
+					if( *it == U'\\' ) {
 						++it;
 						switch( *it ) {
-							case 'b':
-								tmp_str += '\b';
+							case U'b':
+								tmp_str += U'\b';
 								break;
-							case 'f':
-								tmp_str += '\f';
+							case U'f':
+								tmp_str += U'\f';
 								break;
-							case '\n':
-								tmp_str += '\n';
+							case U'\n':
+								tmp_str += U'\n';
 								break;
-							case '\r':
-								tmp_str += '\r';
+							case U'\r':
+								tmp_str += U'\r';
 								break;
-							case '\t':
-								tmp_str += '\t';
+							case U'\t':
+								tmp_str += U'\t';
 								break;
-							case '\"':
-								tmp_str += '\"';
+							case U'\"':
+								tmp_str += U'\"';
 								break;
-							case '\\':
-								tmp_str += '\\';
+							case U'\\':
+								tmp_str += U'\\';
 								break;
 							default:
 								throw std::runtime_error( "Unknown escape sequence" );
@@ -571,9 +573,10 @@ namespace daw {
 						tmp_str += *it;
 					}
 				}
-				value_t result( range::create_char_range( tmp_str.data( ), tmp_str.data( ) + tmp_str.size( ) ) );
-				*/
-				value_t result( range::create_char_range( it_first, range.begin( ) ) );
+				std::string u8string;
+				utf8::unchecked::utf32to8( tmp_str.begin( ), tmp_str.end( ), std::back_inserter( u8string ) );
+				value_t result( range::create_char_range( u8string.data( ), u8string.data( ) + u8string.size( ) ) );
+//				value_t result( range::create_char_range( it_first, range.begin( ) ) );
 				++range;
 				return result;
 			}
