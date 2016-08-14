@@ -324,42 +324,6 @@ namespace daw {
 				return m_value_type;
 			}
 
-			namespace {
-				std::string escape_string( boost::string_ref src ) {
-					std::string result;
-					for( auto c : src ) {
-						static_assert( sizeof( c ) == 1, "Src is assumed to be made of of bytes" );
-						switch( c ) {
-							case '\b':
-								result += "\\\\b";
-								break;
-							case '\f':
-								result += "\\\\f";
-								break;
-							case '\n':
-								result += "\\\\n";
-								break;
-							case '\r':
-								result += "\\\\r";
-								break;
-							case '\t':
-								result += "\\\\t";
-								break;
-							case '\"':
-								result += "\\\\\"";
-								break;
-							case '\\':
-								result += "\\\\\\\\";
-								break;
-							default:
-								result += c;
-						}
-					}
-
-					return result;
-				}
-
-			}	// namespace anonymous
 
 			std::string to_string( value_t const & value) {
 				std::stringstream ss;
@@ -401,7 +365,7 @@ namespace daw {
 					ss <<value.get_real( );
 					break;
 				case value_t::value_types::string:
-					ss << '"' << escape_string( value.get_string( ) ) << '"';
+					ss << '"' << value.get_string( ) << '"';
 					//ss << '"' << value.get_string( ) << '"';
 					break;
 				default:
@@ -540,43 +504,44 @@ namespace daw {
 				auto const it_first = range.begin( );
 				move_to_quote( range );
 
-				std::u32string tmp_str;
-				for( auto it=it_first; it != range.begin( ); ++it ) {
-					if( *it == U'\\' ) {
-						++it;
-						switch( *it ) {
-							case U'b':
-								tmp_str += U'\b';
-								break;
-							case U'f':
-								tmp_str += U'\f';
-								break;
-							case U'\n':
-								tmp_str += U'\n';
-								break;
-							case U'\r':
-								tmp_str += U'\r';
-								break;
-							case U'\t':
-								tmp_str += U'\t';
-								break;
-							case U'\"':
-								tmp_str += U'\"';
-								break;
-							case U'\\':
-								tmp_str += U'\\';
-								break;
-							default:
-								throw std::runtime_error( "Unknown escape sequence" );
-						}
-					} else {
-						tmp_str += *it;
-					}
-				}
-				std::string u8string;
-				utf8::unchecked::utf32to8( tmp_str.begin( ), tmp_str.end( ), std::back_inserter( u8string ) );
-				value_t result( range::create_char_range( u8string.data( ), u8string.data( ) + u8string.size( ) ) );
-//				value_t result( range::create_char_range( it_first, range.begin( ) ) );
+//				std::u32string tmp_str;
+//				for( auto it=it_first; it != range.begin( ); ++it ) {
+//					if( *it == U'\\' ) {
+//						++it;
+//						auto const & v = *it;
+//						switch( v ) {
+//							case U'b':
+//								tmp_str += U'\b';
+//								break;
+//							case U'f':
+//								tmp_str += U'\f';
+//								break;
+//							case U'n':
+//								tmp_str += U'\n';
+//								break;
+//							case U'r':
+//								tmp_str += U'\r';
+//								break;
+//							case U't':
+//								tmp_str += U'\t';
+//								break;
+//							case U'\"':
+//								tmp_str += U'\"';
+//								break;
+//							case U'\\':
+//								tmp_str += U'\\';
+//								break;
+//							default:
+//								throw std::runtime_error( "Unknown escape sequence" );
+//						}
+//					} else {
+//						tmp_str += *it;
+//					}
+//				}
+//				std::string u8string;
+//				utf8::unchecked::utf32to8( tmp_str.begin( ), tmp_str.end( ), std::back_inserter( u8string ) );
+//				value_t result( range::create_char_range( u8string.data( ), u8string.data( ) + u8string.size( ) ) );
+				value_t result( range::create_char_range( it_first, range.begin( ) ) );
 				++range;
 				return result;
 			}
@@ -659,7 +624,8 @@ namespace daw {
 				}
 				skip_ws( ++range );
 				auto value = parse_value( range );
-				return std::make_pair( std::move( label ), std::move( value ) );
+				auto result = std::make_pair( std::move( label ), std::move( value ) );
+				return result;
 			}
 
 			value_t parse_object(range::CharRange & range ) {
@@ -670,9 +636,12 @@ namespace daw {
 				object_value result;
 				do {
 					skip_ws( range );
-					if( is_equal( range.begin( ), '"' ) ) {
-						result.push_back( parse_object_item( range ) );
+					if( is_equal( range.begin( ), U'"' ) ) {
+						auto tmp = parse_object_item( range );
+						result.push_back( std::move( tmp ) );
 						skip_ws( range );
+					} else {
+						throw JsonParserException( "Invalid JSON Object" );
 					}
 					if( !is_equal( range.begin( ), ',' ) ) {
 						break;
@@ -716,20 +685,20 @@ namespace daw {
 				value_t result;
 				skip_ws( range );
 				switch( *range.begin( ) ) {
-				case '{':
+				case U'{':
 					result = parse_object( range );
 					break;
-				case '[':
+				case U'[':
 					result = parse_array( range );
 					break;
-				case '"':
+				case U'"':
 					result = parse_string( range );
 					break;
-				case 't':
-				case 'f':
+				case U't':
+				case U'f':
 					result = parse_bool( range );
 					break;
-				case 'n':
+				case U'n':
 					result = parse_null( range );
 					break;
 				default:

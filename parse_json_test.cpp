@@ -139,8 +139,8 @@ struct Test: public daw::json::JsonLink<Test> {
 	double c;
 	std::string d;
 	Test( ):
-			daw::json::JsonLink<Test>( "Test" ),	// This will break decode, find out why root object must be nameless
-			b{ 0 }, 
+			daw::json::JsonLink<Test>{ },	// Root objects must be nameless or it isn't valid json
+			b{ 0 },
 			c{ 0.0 },
 			d{ } {
 
