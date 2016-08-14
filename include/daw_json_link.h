@@ -241,6 +241,11 @@ namespace daw {
 				decode( parse_json( json_text_begin, json_text_end ) );
 			}
 
+			void decode_file( boost::string_ref filename ) {
+				daw::filesystem::MemoryMappedFile<char> test_data( filename );
+				decode( test_data.begin( ), test_data.end( ) );
+			}
+
 			void reset_jsonlink( ) {
 				m_data_map.clear( );
 				m_name.clear( );
