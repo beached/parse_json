@@ -4,7 +4,7 @@ project( parse_json_prj )
 
 include( ExternalProject )
 
-find_package( Boost 1.58.0 COMPONENTS iostreams REQUIRED )
+find_package( Boost 1.58.0 COMPONENTS system iostreams REQUIRED )
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 ) 
@@ -16,7 +16,8 @@ else( )
 	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" )
 		add_compile_options(-std=c++14 -stdlib=libc++ -ferror-limit=1 -Weverything -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)		
 	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
-		add_compile_options(-std=c++14 -Wall -Werror -fmax-errors=1 -Wno-deprecated-declarations)
+		#add_compile_options(-std=c++14 -Wall -Werror -fmax-errors=1 -Wno-deprecated-declarations)
+		add_compile_options(-std=c++14 -Wall -Wno-deprecated-declarations)
 	endif()
 endif( )
 

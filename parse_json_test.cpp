@@ -137,12 +137,16 @@ auto fsize( Stream & stream ) -> decltype(stream.tellg( )) {
 struct Test: public daw::json::JsonLink<Test> {
 	int b;
 	double c;
+	std::string d;
 	Test( ):
 			daw::json::JsonLink<Test>( "Test" ),	// This will break decode, find out why root object must be nameless
 			b{ 0 }, 
-			c{ 0.0 } {
+			c{ 0.0 },
+			d{ } {
+
 		link_integral( "b", b );
     	link_real( "c", c );
+    	link_string( "d", d );
 	}
 };
 
@@ -151,7 +155,7 @@ int main( int, char** ) {
 	Test a;
 	a.b = 1234;
 	a.c = 10.001;
-
+	a.d = "\"This is a string\n\|";
 	auto s = a.encode( );
 	std::cout << s << std::endl;
 	

@@ -25,6 +25,7 @@
 #include <boost/optional.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <cstdint>
+#include <chrono>
 #include <memory>
 #include <string>
 #include <type_traits>

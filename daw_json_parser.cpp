@@ -400,7 +400,8 @@ namespace daw {
 					ss <<value.get_real( );
 					break;
 				case value_t::value_types::string:
-					ss << '"' << escape_string( value.get_string( ) ) << '"';
+					//ss << '"' << escape_string( value.get_string( ) ) << '"';
+					ss << '"' << value.get_string( ) << '"';
 					break;
 				default:
 					throw std::runtime_error( "Unexpected value type" );
@@ -536,7 +537,40 @@ namespace daw {
 				++range;
 				auto const it_first = range.begin( );
 				move_to_quote( range );
-				value_t result(range::create_char_range( it_first, range.begin( ) ) );
+				std::string tmp_str;
+				for( auto it=it_first; it != range.begin( ); ++it ) {
+					if( *it == '\\' ) {
+						++it;
+						switch( *it ) {
+							case 'b':
+								tmp_str += '\b';
+								break;
+							case 'f':
+								tmp_str += '\f';
+								break;
+							case '\n':
+								tmp_str += '\n';
+								break;
+							case '\r':
+								tmp_str += '\r';
+								break;
+							case '\t':
+								tmp_str += '\t';
+								break;
+							case '\"':
+								tmp_str += '\"';
+								break;
+							case '\\':
+								tmp_str += '\\';
+								break;
+							default:
+								throw std::runtime_error( "Unknown escape sequence" );
+						}
+					} else {
+						tmp_str += *it;
+					}
+				}
+				value_t result( range::create_char_range( tmp_str.data( ), tmp_str.data( ) + tmp_str.size( ) ) );
 				++range;
 				return result;
 			}
