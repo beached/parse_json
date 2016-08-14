@@ -217,7 +217,8 @@ namespace daw {
 				std::string tmp;
 				auto range = daw::range::make_range( m_data_map );
 				if( !range.empty( ) ) {
-					range.front( ).second.bind_functions.encode( tmp );
+					auto const & enc = range.front( ).second.bind_functions.encode;
+					enc( tmp );
 					result <<tmp;
 					range.move_next( );
 					for( auto const & value : range ) {
