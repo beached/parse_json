@@ -257,8 +257,9 @@ namespace daw {
 			}
 
 			auto & decode_file( boost::string_ref filename ) {
-				daw::filesystem::MemoryMappedFile<char> test_data( filename );
-				decode( test_data.begin( ), test_data.end( ) );
+				daw::filesystem::MemoryMappedFile<char> const test_data( filename );
+				boost::string_ref file( test_data.data( ), test_data.size( ) );
+				decode( file );
 				return derived( );
 			}
 
