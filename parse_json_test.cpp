@@ -161,6 +161,7 @@ int main( int, char** ) {
 	
 	Test b;
 	b.decode( s );
+	std::cout << "b.d=>'" << b.d << "'\n";
 	std::cout << b.encode( ) << std::endl;
 	return EXIT_SUCCESS;
 }

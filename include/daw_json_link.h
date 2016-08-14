@@ -376,42 +376,42 @@ namespace daw {
 
 			static std::string unescape_string( boost::string_ref src ) {
 				auto rng = daw::range::create_char_range( src.begin( ), src.begin( ) + src.size( ));
-				std::u32string tmp_str;
+				std::string result;
+				auto last_it = rng.begin( );
 				for( auto it = rng.begin( ); it != rng.end( ); ++it ) {
 					if( *it == U'\\' ) {
+						utf8::unchecked::utf32to8( last_it, it, std::back_inserter( result ) );
 						++it;
+						last_it = std::next( it );
 						switch( *it ) {
 							case U'b':
-								tmp_str += U'\b';
+								result.push_back( '\b' );
 								break;
 							case U'f':
-								tmp_str += U'\f';
+								result.push_back( '\f' );
 								break;
 							case U'n':
-								tmp_str += U'\n';
+								result.push_back( '\n' );
 								break;
 							case U'r':
-								tmp_str += U'\r';
+								result.push_back( '\r' );
 								break;
 							case U't':
-								tmp_str += U'\t';
+								result.push_back( '\t' );
 								break;
 							case U'\"':
-								tmp_str += U'"';
+								result.push_back( '"' );
 								break;
 							case U'\\':
-								tmp_str += U'\\';
+								result.push_back( '\\' );
 								break;
 							default:
 								throw std::runtime_error( "Unknown escape sequence" );
 						}
-					} else {
-						tmp_str += *it;
 					}
 				}
-				std::string u8string;
-				utf8::unchecked::utf32to8( tmp_str.begin( ), tmp_str.end( ), std::back_inserter( u8string ));
-				return u8string;
+				utf8::unchecked::utf32to8( last_it, rng.end( ), std::back_inserter( result ) );
+				return result;
 			}
 
 
