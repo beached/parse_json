@@ -397,7 +397,7 @@ namespace daw {
 								tmp_str += U'\t';
 								break;
 							case U'\"':
-								tmp_str += U'\"';
+								tmp_str += U'"';
 								break;
 							case U'\\':
 								tmp_str += U'\\';
