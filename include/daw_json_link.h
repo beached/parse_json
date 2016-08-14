@@ -228,12 +228,16 @@ namespace daw {
 				return details::json_name( m_name ) + details::enbrace( result.str( ) );
 			}
 
-			private:
-				Derived & derived( ) { 
-					return *static_cast<Derived*>(this);
-				}
+		private:
+			Derived & derived( ) { 
+				return *static_cast<Derived*>(this);
+			}
+			
+			Derived const & derived( ) const {
+				return *static_cast<Derived*>(this);
+			}
 						                    }   
-			public:
+		public:
 	
 			virtual Derived & decode( json_obj const & json_values ) {
 				for( auto & value : m_data_map ) {
