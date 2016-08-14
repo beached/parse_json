@@ -239,25 +239,25 @@ namespace daw {
 
 		public:
 	
-			virtual Derived & decode( json_obj const & json_values ) {
+			Derived & decode( json_obj const & json_values ) {
 				for( auto & value : m_data_map ) {
 					value.second.bind_functions.decode( json_values );
 				}
 				return derived( );
 			}
 
-			virtual Derived & decode( boost::string_ref const json_text ) {
+			Derived & decode( boost::string_ref const json_text ) {
 				decode( parse_json( json_text ) );
 				return derived( );
 			}
 
-			virtual Derived & decode( char const * json_text_begin, char const * json_text_end ) {
+			Derived & decode( char const * json_text_begin, char const * json_text_end ) {
 				decode( parse_json( json_text_begin, json_text_end ) );
 				return derived( );
 			}
 			}
 
-			virtual Derived & decode_file( boost::string_ref filename ) {
+			Derived & decode_file( boost::string_ref filename ) {
 				daw::filesystem::MemoryMappedFile<char> test_data( filename );
 				decode( test_data.begin( ), test_data.end( ) );
 				return derived( );
