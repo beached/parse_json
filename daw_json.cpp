@@ -78,6 +78,9 @@ namespace daw {
 						case '\\':
 							result += "\\\\";
 							break;
+						case '/':
+							result += "\\/";
+							break;
 						default:
 							result += c;
 					}
