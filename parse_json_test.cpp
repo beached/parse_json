@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2015 Darrell Wright
+// Copyright (c) 2014-2016 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -138,15 +138,18 @@ struct Test: public daw::json::JsonLink<Test> {
 	int b;
 	double c;
 	std::string d;
+	std::string e;
 	Test( ):
 			daw::json::JsonLink<Test>{ },	// Root objects must be nameless or it isn't valid json
 			b{ 0 },
 			c{ 0.0 },
-			d{ } {
+			d{ },
+			e{ } {
 
 		link_integral( "b", b );
     	link_real( "c", c );
     	link_string( "d", d );
+    	link_string( "e", e );
 	}
 };
 
@@ -156,6 +159,7 @@ int main( int, char** ) {
 	a.b = 1234;
 	a.c = 10.001;
 	a.d = "\"This is a string\nline two";
+	a.e = "15\u00B0C";
 	auto s = a.encode( );
 	std::cout << s << std::endl;
 	
