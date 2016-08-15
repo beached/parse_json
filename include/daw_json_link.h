@@ -29,6 +29,7 @@
 #include <limits>
 #include <memory>
 #include <ostream>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -272,6 +273,15 @@ namespace daw {
 					}
 				}
 				return details::json_name( m_name ) + details::enbrace( result.str( ));
+			}
+
+			void encode_file( boost::string_ref filename ) const {
+				std::ofstream out_file{ filename.data( ) };
+				if( !out_file.is_open( ) ) {
+					throw std::runtime_error( "Could not open file for writing" );
+				}
+				out_file << encode( );
+				out_file.close( );
 			}
 
 		private:
