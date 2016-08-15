@@ -376,7 +376,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			uint8_t hex_to_integral( T && value ) {
+			static uint8_t hex_to_integral( T && value ) {
 				if( 'A' <= value && value <= 'F') {
 					return static_cast<uint8_t>((value - 'A') + 10);
 				} else if( 'a' <= value && value <= 'a') {
@@ -388,7 +388,7 @@ namespace daw {
 			}
 
 			template<typename ForwardIterator, typename T>
-			ForwardIterator get_cp( ForwardIterator first, ForwardIterator last, T & out ) {
+			static ForwardIterator get_cp( ForwardIterator first, ForwardIterator last, T & out ) {
 				auto count = sizeof( out );
 				daw::nibble_queue_gen<uint16_t, uint16_t> nibbles;
 				auto it = first;
@@ -402,7 +402,7 @@ namespace daw {
 				return it;
 			}
 
-			std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 ) { 
+			static std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 ) { 
 				std::vector<uint8_t> result;
 				if( ucs2 < 0x0080 ) {
 					result.push_back( static_cast<uint8_t>(ucs2) );
@@ -558,7 +558,6 @@ namespace daw {
 
 			template<typename T>
 			JsonLink &link_real( boost::string_ref name, T &value ) {
-				auto value_ptr = &value;
 				set_name( value, name.to_string( ));
 				data_description_t data_description;
 				using daw::json::schema::get_schema;
