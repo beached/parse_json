@@ -504,43 +504,6 @@ namespace daw {
 				auto const it_first = range.begin( );
 				move_to_quote( range );
 
-//				std::u32string tmp_str;
-//				for( auto it=it_first; it != range.begin( ); ++it ) {
-//					if( *it == U'\\' ) {
-//						++it;
-//						auto const & v = *it;
-//						switch( v ) {
-//							case U'b':
-//								tmp_str += U'\b';
-//								break;
-//							case U'f':
-//								tmp_str += U'\f';
-//								break;
-//							case U'n':
-//								tmp_str += U'\n';
-//								break;
-//							case U'r':
-//								tmp_str += U'\r';
-//								break;
-//							case U't':
-//								tmp_str += U'\t';
-//								break;
-//							case U'\"':
-//								tmp_str += U'\"';
-//								break;
-//							case U'\\':
-//								tmp_str += U'\\';
-//								break;
-//							default:
-//								throw std::runtime_error( "Unknown escape sequence" );
-//						}
-//					} else {
-//						tmp_str += *it;
-//					}
-//				}
-//				std::string u8string;
-//				utf8::unchecked::utf32to8( tmp_str.begin( ), tmp_str.end( ), std::back_inserter( u8string ) );
-//				value_t result( range::create_char_range( u8string.data( ), u8string.data( ) + u8string.size( ) ) );
 				value_t result( range::create_char_range( it_first, range.begin( ) ) );
 				++range;
 				return result;
