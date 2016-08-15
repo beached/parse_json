@@ -39,6 +39,7 @@
 #include "daw_json_parser.h"
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_memory_mapped_file.h>
+#include <daw/daw_bit_queues.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace daw {
@@ -374,6 +375,60 @@ namespace daw {
 				};
 			}
 
+			template<typename T>
+			uint8_t hex_to_integral( T && value ) {
+				if( 'A' <= value && value <= 'F') {
+					return static_cast<uint8_t>((value - 'A') + 10);
+				} else if( 'a' <= value && value <= 'a') {
+					return static_cast<uint8_t>((value - 'a') + 10);
+				} else if( '0' <= value && value <= '9') {
+					return static_cast<uint8_t>(value - '0');
+				}
+				throw std::runtime_error( "Unicode escape sequence was not properly formed" );
+			}
+
+			template<typename ForwardIterator, typename T>
+			ForwardIterator get_cp( ForwardIterator first, ForwardIterator last, T & out ) {
+				auto count = sizeof( out );
+				daw::nibble_queue_gen<uint16_t, uint16_t> nibbles;
+				auto it = first;
+				for( ; it != (first+count) && it != last; ++it ) {
+					nibbles.push_back( hex_to_integral( *it ) );
+				}
+				if( nibbles.full( ) ) {
+					throw std::runtime_error( "Unicode escape sequence was not properly formed" );
+				}
+				out = nibbles.pop_front( );
+				return it;
+			}
+
+			std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 ) { 
+				std::vector<uint8_t> result;
+				if( ucs2 < 0x0080 ) {
+					result.push_back( static_cast<uint8_t>(ucs2) );
+				} else if( ucs2 >= 0x0080  && ucs2 < 0x0800 ) {
+					result.push_back( static_cast<uint8_t>((ucs2 >> 6) | 0xC0) );
+					result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80) );
+				} else if( ucs2 >= 0x0800 && ucs2 < 0xFFFF ) {
+					if (ucs2 >= 0xD800 && ucs2 <= 0xDFFF) {
+						/* Ill-formed. */
+						throw std::runtime_error( "Unicode Surrogate Pair" );
+					}
+					result.push_back( static_cast<uint8_t>((ucs2 >> 12) | 0xE0 ));
+					result.push_back( static_cast<uint8_t>(((ucs2 >> 6 ) & 0x3F) | 0x80 ));
+					result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80 ) );
+				} else if( ucs2 >= 0x10000 && ucs2 < 0x10FFFF ) {
+					/* http://tidy.sourceforge.net/cgi-bin/lxr/source/src/utf8.c#L380 */
+					result.push_back( static_cast<uint8_t>(0xF0 | (ucs2 >> 18)) );
+					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 12) & 0x3F)) );
+					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 6) & 0x3F)) );
+					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 & 0x3F))) );
+				} else {
+					throw std::runtime_error( "Bad input" );
+				}
+				return result;
+			}
+
 			static std::string unescape_string( boost::string_ref src ) {
 				auto rng = daw::range::create_char_range( src.begin( ), src.begin( ) + src.size( ));
 				std::string result;
@@ -405,6 +460,18 @@ namespace daw {
 							case U'\\':
 								result.push_back( '\\' );
 								break;
+							case U'/':
+								result.push_back( '/' );
+								break;
+							case U'u': {
+								uint16_t cp;
+								it = get_cp( it, rng.end( ), cp );
+								auto utf8 = ucs2_to_utf8( cp );
+								std::copy( utf8.begin( ), utf8.end( ), std::back_inserter( result ) );
+								if( it == rng.end( ) ) {
+									break;
+								}
+							}
 							default:
 								throw std::runtime_error( "Unknown escape sequence" );
 						}
