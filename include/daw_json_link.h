@@ -543,6 +543,10 @@ namespace daw {
 				return *this;
 			}
 
+			bool unlink( boost::string_ref name ) {
+				return m_data_map.erase( range::create_char_range( name ) ) > 0;
+			}
+
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
 			JsonLink &link_integral( boost::string_ref name, boost::optional<T> &value ) {
 				auto value_ptr = &value;

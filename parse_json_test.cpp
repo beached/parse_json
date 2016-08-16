@@ -151,6 +151,10 @@ struct Test: public daw::json::JsonLink<Test> {
     	link_string( "d", d );
     	link_string( "e", e );
 	}
+
+	void something( ) {
+		unlink( "e" );
+	}
 };
 
 
@@ -167,6 +171,12 @@ int main( int, char** ) {
 	b.decode( s );
 	std::cout << "b.d=>'" << b.d << "'\n";
 	std::cout << b.encode( ) << std::endl;
+	b.something( );
+	std::cout << b.encode( ) << std::endl;
+	Test c;
+	c.something( );
+	c.decode( s );
+	std::cout << c.encode( ) << std::endl;
 	return EXIT_SUCCESS;
 }
 
