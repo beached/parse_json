@@ -41,6 +41,7 @@
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_bit_queues.h>
+#include <daw/daw_optional.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace daw {
@@ -75,7 +76,7 @@ namespace daw {
 			make_type_obj( boost::string_ref name, ::daw::json::impl::value_t selected_type );
 
 			template<typename Key, typename Value>
-			auto get_schema( boost::string_ref name, std::pair<Key, Value> const & );
+			auto get_schema( boost::string_ref name, std::pair <Key, Value> const & );
 			//::daw::json::impl::value_t get_schema( boost::string_ref name, std::pair<Key, Value> const & );
 
 			template<typename T, typename std::enable_if_t<daw::traits::is_container_not_string<T>::value, long> = 0>
@@ -89,7 +90,10 @@ namespace daw {
 			auto get_schema( boost::string_ref name, T const & );
 
 			template<typename T>
-			auto get_schema( boost::string_ref name, boost::optional<T> const & );
+			auto get_schema( boost::string_ref name, boost::optional <T> const & );
+
+			template<typename T>
+			auto get_schema( boost::string_ref name, daw::optional<T> const & );
 
 			template<typename T, typename std::enable_if_t<
 					daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value &&
@@ -97,7 +101,7 @@ namespace daw {
 			auto get_schema( boost::string_ref name, T const & );
 
 			template<typename Key, typename Value>
-			auto get_schema( boost::string_ref name, std::pair<Key, Value> const & ) {
+			auto get_schema( boost::string_ref name, std::pair <Key, Value> const & ) {
 				//::daw::json::impl::value_t get_schema( boost::string_ref name, std::pair<Key, Value> const & ) {
 				using ::daw::json::impl::make_object_value_item;
 
@@ -142,7 +146,17 @@ namespace daw {
 			}
 
 			template<typename T>
-			auto get_schema( boost::string_ref name, boost::optional<T> const & ) {
+			auto get_schema( boost::string_ref name, boost::optional <T> const & ) {
+				T t;
+				auto result = get_schema( name, t );
+				auto &obj = result.get_object( );
+				obj.push_back( make_object_value_item( range::create_char_range( "nullable" ),
+													   ::daw::json::impl::value_t( std::string( "nullable" ))));
+				return result;
+			}
+
+			template<typename T>
+			auto get_schema( boost::string_ref name, daw::optional<T> const & ) {
 				T t;
 				auto result = get_schema( name, t );
 				auto &obj = result.get_object( );
@@ -166,7 +180,7 @@ namespace daw {
 
 		template<typename Derived>
 		class JsonLink {
-			using encode_function_t = std::function<void( std::string &json_text )>;
+			using encode_function_t = std::function<void( std::string & json_text )>;
 			using decode_function_t = std::function<void( json_obj json_values )>;
 
 			struct bind_functions_t final {
@@ -174,8 +188,8 @@ namespace daw {
 				decode_function_t decode;
 
 				bind_functions_t( ):
-						encode( nullptr ),
-						decode( nullptr ) { }
+						encode{ nullptr },
+						decode{ nullptr } { }
 
 				~bind_functions_t( ) = default;
 
@@ -193,8 +207,8 @@ namespace daw {
 				bind_functions_t bind_functions;
 
 				data_description_t( ):
-						json_type( nullptr ),
-						bind_functions( ) { }
+						json_type{ nullptr },
+						bind_functions{ } { }
 
 				~data_description_t( ) = default;
 
@@ -211,8 +225,7 @@ namespace daw {
 
 
 			std::string m_name;
-			//std::unordered_map<impl::string_value, data_description_t> m_data_map;
-			std::map<impl::string_value, data_description_t> m_data_map;
+			std::map <impl::string_value, data_description_t> m_data_map;
 
 			template<typename T>
 			JsonLink &link_value( boost::string_ref name, T &value ) {
@@ -277,7 +290,7 @@ namespace daw {
 
 			void encode_file( boost::string_ref filename ) const {
 				std::ofstream out_file{ filename.data( ) };
-				if( !out_file.is_open( ) ) {
+				if( !out_file.is_open( )) {
 					throw std::runtime_error( "Could not open file for writing" );
 				}
 				out_file << encode( );
@@ -361,7 +374,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			static boost::optional<T> nullable_decoder_helper( boost::string_ref name, json_obj const &json_values ) {
+			static boost::optional <T> nullable_decoder_helper( boost::string_ref name, json_obj const &json_values ) {
 				auto obj = json_values.get_object( );
 				auto member = obj.find( name );
 				if( obj.end( ) == member ) {
@@ -386,53 +399,53 @@ namespace daw {
 			}
 
 			template<typename T>
-			static uint8_t hex_to_integral( T && value ) {
-				if( 'A' <= value && value <= 'F') {
+			static uint8_t hex_to_integral( T &&value ) {
+				if( 'A' <= value && value <= 'F' ) {
 					return static_cast<uint8_t>((value - 'A') + 10);
-				} else if( 'a' <= value && value <= 'a') {
+				} else if( 'a' <= value && value <= 'a' ) {
 					return static_cast<uint8_t>((value - 'a') + 10);
-				} else if( '0' <= value && value <= '9') {
+				} else if( '0' <= value && value <= '9' ) {
 					return static_cast<uint8_t>(value - '0');
 				}
 				throw std::runtime_error( "Unicode escape sequence was not properly formed" );
 			}
 
 			template<typename ForwardIterator, typename T>
-			static ForwardIterator get_cp( ForwardIterator first, ForwardIterator last, T & out ) {
+			static ForwardIterator get_cp( ForwardIterator first, ForwardIterator last, T &out ) {
 				auto count = sizeof( out );
 				daw::nibble_queue_gen<uint16_t, uint16_t> nibbles;
 				auto it = first;
-				for( ; it != (first+count) && it != last; ++it ) {
-					nibbles.push_back( hex_to_integral( *it ) );
+				for( ; it != (first + count) && it != last; ++it ) {
+					nibbles.push_back( hex_to_integral( *it ));
 				}
-				if( nibbles.full( ) ) {
+				if( nibbles.full( )) {
 					throw std::runtime_error( "Unicode escape sequence was not properly formed" );
 				}
 				out = nibbles.pop_front( );
 				return it;
 			}
 
-			static std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 ) { 
-				std::vector<uint8_t> result;
+			static std::vector <uint8_t> ucs2_to_utf8( uint16_t ucs2 ) {
+				std::vector <uint8_t> result;
 				if( ucs2 < 0x0080 ) {
-					result.push_back( static_cast<uint8_t>(ucs2) );
-				} else if( ucs2 >= 0x0080  && ucs2 < 0x0800 ) {
-					result.push_back( static_cast<uint8_t>((ucs2 >> 6) | 0xC0) );
-					result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80) );
+					result.push_back( static_cast<uint8_t>(ucs2));
+				} else if( ucs2 >= 0x0080 && ucs2 < 0x0800 ) {
+					result.push_back( static_cast<uint8_t>((ucs2 >> 6) | 0xC0));
+					result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80));
 				} else if( ucs2 >= 0x0800 && ucs2 < 0xFFFF ) {
-					if (ucs2 >= 0xD800 && ucs2 <= 0xDFFF) {
+					if( ucs2 >= 0xD800 && ucs2 <= 0xDFFF ) {
 						/* Ill-formed. */
 						throw std::runtime_error( "Unicode Surrogate Pair" );
 					}
 					result.push_back( static_cast<uint8_t>((ucs2 >> 12) | 0xE0 ));
-					result.push_back( static_cast<uint8_t>(((ucs2 >> 6 ) & 0x3F) | 0x80 ));
-					result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80 ) );
+					result.push_back( static_cast<uint8_t>(((ucs2 >> 6) & 0x3F) | 0x80 ));
+					result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80 ));
 				} else if( ucs2 >= 0x10000 && ucs2 < 0x10FFFF ) {
 					/* http://tidy.sourceforge.net/cgi-bin/lxr/source/src/utf8.c#L380 */
-					result.push_back( static_cast<uint8_t>(0xF0 | (ucs2 >> 18)) );
-					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 12) & 0x3F)) );
-					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 6) & 0x3F)) );
-					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 & 0x3F))) );
+					result.push_back( static_cast<uint8_t>(0xF0 | (ucs2 >> 18)));
+					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 12) & 0x3F)));
+					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 6) & 0x3F)));
+					result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 & 0x3F))));
 				} else {
 					throw std::runtime_error( "Bad input" );
 				}
@@ -445,7 +458,7 @@ namespace daw {
 				auto last_it = rng.begin( );
 				for( auto it = rng.begin( ); it != rng.end( ); ++it ) {
 					if( *it == U'\\' ) {
-						utf8::unchecked::utf32to8( last_it, it, std::back_inserter( result ) );
+						utf8::unchecked::utf32to8( last_it, it, std::back_inserter( result ));
 						++it;
 						last_it = std::next( it );
 						switch( *it ) {
@@ -477,8 +490,8 @@ namespace daw {
 								uint16_t cp;
 								it = get_cp( it, rng.end( ), cp );
 								auto utf8 = ucs2_to_utf8( cp );
-								std::copy( utf8.begin( ), utf8.end( ), std::back_inserter( result ) );
-								if( it == rng.end( ) ) {
+								std::copy( utf8.begin( ), utf8.end( ), std::back_inserter( result ));
+								if( it == rng.end( )) {
 									break;
 								}
 							}
@@ -487,7 +500,7 @@ namespace daw {
 						}
 					}
 				}
-				utf8::unchecked::utf32to8( last_it, rng.end( ), std::back_inserter( result ) );
+				utf8::unchecked::utf32to8( last_it, rng.end( ), std::back_inserter( result ));
 				return result;
 			}
 
@@ -504,13 +517,28 @@ namespace daw {
 			}
 
 			template<typename T, typename U = T>
-			static decode_function_t standard_decoder( boost::string_ref name, boost::optional<T> &value ) {
+			static decode_function_t standard_decoder( boost::string_ref name, boost::optional <T> &value ) {
 				auto value_ptr = &value;
 				auto name_copy = name.to_string( );
 				return [value_ptr, name_copy]( json_obj json_values ) mutable {
 					assert( value_ptr );
 					auto new_val = nullable_decoder_helper<U>( name_copy, json_values );
 					*value_ptr = new_val;
+				};
+			}
+
+			template<typename T, typename U = T>
+			static decode_function_t standard_decoder( boost::string_ref name, daw::optional<T> &value ) {
+				auto value_ptr = &value;
+				auto name_copy = name.to_string( );
+				return [value_ptr, name_copy]( json_obj json_values ) mutable {
+					assert( value_ptr );
+					auto new_val = nullable_decoder_helper<U>( name_copy, json_values );
+					if( new_val ) {
+						*value_ptr = std::move( new_val );
+					} else {
+						*value_ptr.reset( );
+					}
 				};
 			}
 
@@ -544,11 +572,35 @@ namespace daw {
 			}
 
 			bool unlink( boost::string_ref name ) {
-				return m_data_map.erase( range::create_char_range( name ) ) > 0;
+				return m_data_map.erase( range::create_char_range( name )) > 0;
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			JsonLink &link_integral( boost::string_ref name, boost::optional<T> &value ) {
+			JsonLink &link_integral( boost::string_ref name, boost::optional <T> &value ) {
+				auto value_ptr = &value;
+				set_name( value, name.to_string( ));
+				data_description_t data_description;
+				using daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, value );
+				data_description.bind_functions.encode = standard_encoder( name, value );
+
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const &json_values ) mutable {
+					assert( value_ptr );
+					auto result = nullable_decoder_helper<int64_t>( name, json_values );
+					if( result ) {
+						assert( *result <=
+								std::numeric_limits<T>::max( ));    // TODO determine if throwing is more appropriate
+						assert( *result >= std::numeric_limits<T>::min( ));
+					}
+					*value_ptr = static_cast<T>(*result);
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
+
+
+			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
+			JsonLink &link_integral( boost::string_ref name, daw::optional<T> &value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ));
 				data_description_t data_description;
@@ -583,7 +635,11 @@ namespace daw {
 				return *this;
 			}
 
-			JsonLink &link_string( boost::string_ref name, boost::optional<std::string> &value ) {
+			JsonLink &link_string( boost::string_ref name, boost::optional <std::string> &value ) {
+				return link_value( name, value );
+			}
+
+			JsonLink &link_string( boost::string_ref name, daw::optional<std::string> &value ) {
 				return link_value( name, value );
 			}
 
@@ -604,6 +660,10 @@ namespace daw {
 			}
 
 			JsonLink &link_boolean( boost::string_ref name, boost::optional<bool> &value ) {
+				return link_value( name, value );
+			}
+
+			JsonLink &link_boolean( boost::string_ref name, daw::optional<bool> &value ) {
 				return link_value( name, value );
 			}
 
@@ -630,7 +690,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-			JsonLink &link_object( boost::string_ref name, boost::optional<T> &value ) {
+			JsonLink &link_object( boost::string_ref name, boost::optional <T> &value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ));
 				data_description_t data_description;
@@ -646,6 +706,31 @@ namespace daw {
 					}
 					if( member->second.is_null( )) {
 						*value_ptr = boost::optional<T>( );
+					} else {
+						(*value_ptr)->decode( member->second );
+					}
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
+
+			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
+			JsonLink &link_object( boost::string_ref name, daw::optional<T> &value ) {
+				auto value_ptr = &value;
+				set_name( value, name.to_string( ));
+				data_description_t data_description;
+				data_description.json_type = (T { }).get_schema_obj( );
+				data_description.bind_functions.encode = standard_encoder( name, value );
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const &json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					if( member->second.is_null( )) {
+						*value_ptr.reset( );
 					} else {
 						(*value_ptr)->decode( member->second );
 					}
@@ -681,7 +766,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink &link_array( boost::string_ref name, boost::optional<T> &value ) {
+			JsonLink &link_array( boost::string_ref name, boost::optional <T> &value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ));
 				data_description_t data_description;
@@ -698,6 +783,34 @@ namespace daw {
 					}
 					if( member->second.is_null( )) {
 						*value_ptr = boost::optional<T>( );
+					} else {
+						assert( member->second.is_array( ));
+						using namespace parse;
+						json_to_value( *value_ptr, member->second );
+					}
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
+
+			template<typename T>
+			JsonLink &link_array( boost::string_ref name, daw::optional<T> &value ) {
+				auto value_ptr = &value;
+				set_name( value, name.to_string( ));
+				data_description_t data_description;
+				using ::daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, value );
+				data_description.bind_functions.encode = standard_encoder( name, value );
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const &json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					if( member->second.is_null( )) {
+						*value_ptr = daw::optional<T>{ };
 					} else {
 						assert( member->second.is_array( ));
 						using namespace parse;
@@ -733,7 +846,7 @@ namespace daw {
 			}
 
 			template<typename T>
-			JsonLink &link_map( boost::string_ref name, boost::optional<T> &value ) {
+			JsonLink &link_map( boost::string_ref name, boost::optional <T> &value ) {
 				auto value_ptr = &value;
 				set_name( value, name.to_string( ));
 				data_description_t data_description;
@@ -751,6 +864,38 @@ namespace daw {
 					} else {
 						if( member->second.is_null( )) {
 							*value_ptr = boost::optional<T>( );
+						} else {
+							assert( member->second.is_array( ));
+							using namespace parse;
+							json_to_value( *value_ptr, member->second );
+						}
+					}
+				};
+				//m_data_map[name.to_string( )] = std::move( data_description );
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
+
+
+			template<typename T>
+			JsonLink &link_map( boost::string_ref name, daw::optional<T> &value ) {
+				auto value_ptr = &value;
+				set_name( value, name.to_string( ));
+				data_description_t data_description;
+				data_description.json_type = "map?";
+				using ::daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, value );
+				data_description.bind_functions.encode = standard_encoder( name, value );
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const &json_values ) mutable {
+					assert( value_ptr );
+					auto val_obj = json_values.get_object( );
+					auto member = val_obj.find( name );
+					if( val_obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					} else {
+						if( member->second.is_null( )) {
+							*value_ptr = daw::optional<T>{ };
 						} else {
 							assert( member->second.is_array( ));
 							using namespace parse;
@@ -819,7 +964,7 @@ namespace daw {
 				return *this;
 			}
 
-			JsonLink &link_timestamp( boost::string_ref name, boost::optional<boost::posix_time::ptime> &value ) {
+			JsonLink &link_timestamp( boost::string_ref name, boost::optional <boost::posix_time::ptime> &value ) {
 				auto value_ptr = &value;
 				set_name( value, name );
 				data_description_t data_description;
@@ -829,7 +974,8 @@ namespace daw {
 					assert( value_ptr );
 					if( *value_ptr ) {
 						json_text = generate::value_to_json( name.to_string( ),
-															 boost::posix_time::to_iso_extended_string( *(*value_ptr)) +
+															 boost::posix_time::to_iso_extended_string(
+																	 *(*value_ptr)) +
 															 'Z' );
 					} else {
 						json_text = generate::value_to_json( name.to_string( ));
@@ -844,7 +990,7 @@ namespace daw {
 						throw std::runtime_error( "JSON object does not match expected object layout" );
 					}
 					if( member->second.is_null( )) {
-						*value_ptr = boost::optional<boost::posix_time::ptime>{ };
+						*value_ptr = boost::optional < boost::posix_time::ptime > { };
 					} else {
 						assert( member->second.is_string( ));
 						*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ));
@@ -854,13 +1000,44 @@ namespace daw {
 				return *this;
 			}
 
-		};    // class JsonLink
+			JsonLink &link_timestamp( boost::string_ref name, daw::optional<boost::posix_time::ptime> &value ) {
+				auto value_ptr = &value;
+				set_name( value, name );
+				data_description_t data_description;
+				using daw::json::schema::get_schema;
+				data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
+				data_description.bind_functions.encode = [value_ptr, name]( std::string &json_text ) {
+					assert( value_ptr );
+					if( *value_ptr ) {
+						json_text = generate::value_to_json( name.to_string( ),
+															 boost::posix_time::to_iso_extended_string(
+																	 *(*value_ptr)) +
+															 'Z' );
+					} else {
+						json_text = generate::value_to_json( name.to_string( ));
+					}
+				};
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const &json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					if( member->second.is_null( )) {
+						*value_ptr = daw::optional<boost::posix_time::ptime>{ };
+					} else {
+						assert( member->second.is_string( ));
+						*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ));
+					}
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
 
-		// 		template<typename Derived>
-		// 		std::ostream& operator<<(std::ostream& os, JsonLink<Derived> const & data) {
-		// 			os <<data.encode( );
-		// 			return os;
-		// 		}
+
+		};    // class JsonLink
 
 		template<typename Derived>
 		void json_to_value( JsonLink<Derived> &to, impl::value_t const &from ) {
