@@ -86,6 +86,15 @@ namespace daw {
 			}
 
 			template<typename T>
+			std::string value_to_json( boost::string_ref name, daw::optional<T> const & value ) {
+				if( value ) {
+					return value_to_json( name, *value );
+				} else {
+					return value_to_json( name );
+				}
+			}
+
+			template<typename T>
 			void value_to_json( boost::string_ref name, std::shared_ptr<T> const & value ) {
 				if( !value ) {
 					value_to_json( name );
