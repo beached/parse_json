@@ -732,7 +732,7 @@ namespace daw {
 					if( member->second.is_null( )) {
 						value_ptr->reset( );
 					} else {
-						value_ptr->decode( member->second );
+						(*value_ptr)->decode( member->second );
 					}
 				};
 				m_data_map[range::create_char_range( name )] = std::move( data_description );
