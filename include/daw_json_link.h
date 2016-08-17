@@ -730,9 +730,9 @@ namespace daw {
 						throw std::runtime_error( "JSON object does not match expected object layout" );
 					}
 					if( member->second.is_null( )) {
-						*value_ptr.reset( );
+						value_ptr->reset( );
 					} else {
-						(*value_ptr)->decode( member->second );
+						value_ptr->decode( member->second );
 					}
 				};
 				m_data_map[range::create_char_range( name )] = std::move( data_description );
