@@ -654,6 +654,31 @@ namespace daw {
 				return *this;
 			}
 
+			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
+			JsonLink &link_object( boost::string_ref name, std::shared_ptr<T> &value ) {
+				auto value_ptr = &value;
+				set_name( value, name.to_string( ));
+				data_description_t data_description;
+				data_description.json_type = (T { }).get_schema_obj( );
+				data_description.bind_functions.encode = standard_encoder( name, value );
+				data_description.bind_functions.decode = [value_ptr, name]( json_obj const &json_values ) mutable {
+					assert( value_ptr );
+					auto obj = json_values.get_object( );
+					auto member = obj.find( name );
+					if( obj.end( ) == member ) {
+						// TODO: determine if correct course of action
+						throw std::runtime_error( "JSON object does not match expected object layout" );
+					}
+					if( member->second.is_null( )) {
+						*value_ptr = std::shared_ptr<T>{ };
+					} else {
+						(*value_ptr)->decode( member->second );
+					}
+				};
+				m_data_map[range::create_char_range( name )] = std::move( data_description );
+				return *this;
+			}
+
 			template<typename T>
 			JsonLink &link_array( boost::string_ref name, T &value ) {
 				auto value_ptr = &value;
