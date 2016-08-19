@@ -166,7 +166,8 @@ int main( int, char** ) {
 	a.e = "15\u00B0C";
 	auto s = a.encode( );
 	std::cout << s << std::endl;
-	
+
+	auto f = from_file<Test>( "file.json" );
 	Test b;
 	b.decode( s );
 	std::cout << "b.d=>'" << b.d << "'\n";

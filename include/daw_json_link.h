@@ -1054,5 +1054,13 @@ namespace daw {
 		auto get_schema( boost::string_ref name, JsonLink<Derived> const &obj ) {
 			return obj.get_schema_obj( );
 		}
+
+		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
+		auto from_file( boost::string_ref file_name ) {
+			Derived result;
+			result.decode_file( file_name );
+			return result;
+		}
+
 	}    // namespace json
 }    // namespace daw
