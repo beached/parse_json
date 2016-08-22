@@ -176,7 +176,7 @@ namespace daw {
 													   ::daw::json::impl::value_t( std::string( "string_object" ))));
 				return result;
 			}
-		}
+		}	// namespace schema
 
 		template<typename Derived>
 		class JsonLink {
@@ -238,7 +238,7 @@ namespace daw {
 			}
 
 		public:
-			virtual ~JsonLink( ) = default;
+			virtual ~JsonLink( );
 
 			JsonLink( std::string name = "" ):
 					m_name( std::move( name )),
@@ -1062,5 +1062,7 @@ namespace daw {
 			return result;
 		}
 
+		template<typename Derived>
+		JsonLink<Derived>::~JsonLink( ) { }
 	}    // namespace json
 }    // namespace daw
