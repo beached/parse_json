@@ -34,25 +34,27 @@ using namespace daw::json;
 
 struct Streamable {
 	std::string a;
-	Streamable( ) : a( "This is a test!" ) { }
 
-	bool operator==(Streamable const & rhs) const {
+	Streamable( ):
+			a( "This is a test!" ) { }
+
+	bool operator==( Streamable const & rhs ) const {
 		return a == rhs.a;
 	}
 
-	bool operator!=(Streamable const & rhs) const {
+	bool operator!=( Streamable const & rhs ) const {
 		return a != rhs.a;
 	}
 };
 
-std::istream& operator>>(std::istream& is, Streamable & value) {
+std::istream & operator>>( std::istream & is, Streamable & value ) {
 	auto const data_size = static_cast<size_t>(is.rdbuf( )->in_avail( ));
 	value.a.reserve( data_size );
 	is.read( &value.a[0], data_size );
 	return is;
 }
 
-std::ostream& operator<<(std::ostream& os, Streamable const & value) {
+std::ostream & operator<<( std::ostream & os, Streamable const & value ) {
 	os << value.a;
 	return os;
 }
@@ -63,7 +65,9 @@ struct A: public daw::json::JsonLink<A> {
 	double c;
 	std::vector<int> d;
 	bool e;
-	A( ) : JsonLink<A>( ), a( 1 ), b( 2 ), c( 1.23456789 ), d( 100, 5 ), e( true ) {
+
+	A( ):
+			JsonLink<A>( ), a( 1 ), b( 2 ), c( 1.23456789 ), d( 100, 5 ), e( true ) {
 		link_integral( "a", a );
 		link_integral( "b", b );
 		link_real( "c", c );
@@ -71,11 +75,11 @@ struct A: public daw::json::JsonLink<A> {
 		link_boolean( "e", e );
 	}
 
-	bool operator==(A const & rhs) const {
+	bool operator==( A const & rhs ) const {
 		return a == rhs.a && b == rhs.b && c == rhs.c && std::equal( d.begin( ), d.end( ), rhs.d.begin( ) );
 	}
 
-	bool operator!=(A const & rhs) const {
+	bool operator!=( A const & rhs ) const {
 		return a != rhs.a || b != rhs.b || c != rhs.c || !std::equal( d.begin( ), d.end( ), rhs.d.begin( ) );
 	}
 };
@@ -85,35 +89,37 @@ struct B: public daw::json::JsonLink<B> {
 	std::string b;
 	Streamable c;
 	double d;
-	B( ) : JsonLink<B>( ), a( ), b( "hello" ), c( ), d( 1.9233434e-12 ) {
+
+	B( ):
+			JsonLink<B>( ), a( ), b( "hello" ), c( ), d( 1.9233434e-12 ) {
 		link_object( "a", a );
 		link_string( "b", b );
 		link_streamable( "c", c );
 		link_real( "d", d );
 	}
 
-	bool operator==(B const & rhs) const {
+	bool operator==( B const & rhs ) const {
 		return a == rhs.a && b == rhs.b && c == rhs.c;
 	}
 
-	bool operator!=(B const & rhs) const {
+	bool operator!=( B const & rhs ) const {
 		return a != rhs.a || b != rhs.b || c != rhs.c;
 	}
 };
 
 template<typename K, typename V>
-bool operator==( std::unordered_map<K, V> const & a, std::unordered_map<K, V> const & b ) {
-	return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ), b.begin( ) );
-}
+	bool operator==( std::unordered_map<K, V> const & a, std::unordered_map<K, V> const & b ) {
+		return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ), b.begin( ) );
+	}
 
 template<typename Stream>
-auto fsize( Stream & stream ) -> decltype(stream.tellg( )) {
-	auto cur_pos = stream.tellg( );
-	stream.seekg( 0, std::fstream::end );
-	auto result = stream.tellg( );
-	stream.seekg( cur_pos );
-	return result;
-}
+	auto fsize( Stream & stream ) -> decltype( stream.tellg( ) ) {
+		auto cur_pos = stream.tellg( );
+		stream.seekg( 0, std::fstream::end );
+		auto result = stream.tellg( );
+		stream.seekg( cur_pos );
+		return result;
+	}
 
 //BOOST_AUTO_TEST_CASE( SimpleTest ) {
 //	B b;
@@ -139,17 +145,18 @@ struct Test: public daw::json::JsonLink<Test> {
 	double c;
 	std::string d;
 	std::string e;
+
 	Test( ):
-			daw::json::JsonLink<Test>{ },	// Root objects must be nameless or it isn't valid json
+			daw::json::JsonLink<Test>{ },    // Root objects must be nameless or it isn't valid json
 			b{ 0 },
 			c{ 0.0 },
 			d{ },
 			e{ } {
 
 		link_integral( "b", b );
-    	link_real( "c", c );
-    	link_string( "d", d );
-    	link_string( "e", e );
+		link_real( "c", c );
+		link_string( "d", d );
+		link_string( "e", e );
 	}
 
 	void something( ) {
@@ -158,7 +165,7 @@ struct Test: public daw::json::JsonLink<Test> {
 };
 
 
-int main( int, char** ) {
+int main( int, char ** ) {
 	Test a;
 	a.b = 1234;
 	a.c = 10.001;

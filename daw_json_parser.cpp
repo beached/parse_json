@@ -34,14 +34,15 @@
 
 namespace daw {
 	namespace json {
-		JsonParserException::JsonParserException(std::string msg): message( std::move( msg ) ) { }
+		JsonParserException::JsonParserException( std::string msg ):
+				message( std::move( msg ) ) { }
 
 		namespace {
 			template<typename T>
-				T* copy_value( T* ptr ) {
+				T *copy_value( T *ptr ) {
 					return new T( *ptr );
 				}
-		}	// namespace anonymous
+		}    // namespace anonymous
 
 		namespace impl {
 
@@ -49,160 +50,142 @@ namespace daw {
 				memset( this, 0, sizeof( u_value_t ) );
 			}
 
-			value_t::value_t( ) : m_value_type( value_types::null ) { }
+			value_t::value_t( ):
+					m_value_type( value_types::null ) { }
 
-			value_t::value_t( int64_t const & value ) : m_value_type( value_types::integral ) {				
+			value_t::value_t( int64_t const & value ):
+					m_value_type( value_types::integral ) {
 				m_value.integral = value;
 			}
 
-			value_t::value_t( double const & value ) : m_value_type( value_types::real ) {
+			value_t::value_t( double const & value ):
+					m_value_type( value_types::real ) {
 				m_value.real = value;
 			}
 
-			value_t::value_t( std::string const & value ) : m_value_type( value_types::string ) {
-				m_value.string = new string_value{range::create_char_range( value ) };
+			value_t::value_t( std::string const & value ):
+					m_value_type( value_types::string ) {
+				m_value.string = new string_value{ range::create_char_range( value ) };
 			}
 
-			value_t::value_t( boost::string_ref value ): m_value_type( value_types::string ) {
+			value_t::value_t( boost::string_ref value ):
+					m_value_type( value_types::string ) {
 				range::UTFIterator it_begin{ value.begin( ) };
 				range::UTFIterator it_end{ value.end( ) };
 				m_value.string = new string_value{ it_begin, it_end };
 			}
 
-			value_t::value_t( string_value value ): m_value_type( value_types::string ) {
+			value_t::value_t( string_value value ):
+					m_value_type( value_types::string ) {
 				m_value.string = new string_value{ value };
 			}
 
-			value_t::value_t( bool value ) : m_value_type( value_types::boolean ) {
+			value_t::value_t( bool value ):
+					m_value_type( value_types::boolean ) {
 				m_value.boolean = std::move( value );
 			}
 
-			value_t::value_t( std::nullptr_t ) : m_value_type( value_types::null ) { }
+			value_t::value_t( std::nullptr_t ):
+					m_value_type( value_types::null ) { }
 
-			value_t::value_t( array_value value ) : m_value_type( value_types::array ) {
+			value_t::value_t( array_value value ):
+					m_value_type( value_types::array ) {
 				m_value.array_v = new array_value( std::move( value ) );
 			}
 
-			value_t::value_t( object_value value ) : m_value_type( value_types::object ) {
+			value_t::value_t( object_value value ):
+					m_value_type( value_types::object ) {
 				m_value.object = new object_value( std::move( value ) );
 			}
 
-			value_t::value_t( value_t const & other ): m_value_type( other.m_value_type ) {
+			value_t::value_t( value_t const & other ):
+					m_value_type( other.m_value_type ) {
 				switch( m_value_type ) {
-					case value_types::string:
-						m_value.string = copy_value( other.m_value.string );
-						break;
-					case value_types::array:
-						m_value.array_v = copy_value( other.m_value.array_v );
-						break;
-					case value_types::object:
-						m_value.object = copy_value( other.m_value.object );
-						break;
-					case value_types::integral:
-						m_value.integral = other.m_value.integral;
-						break;
-					case value_types::real:
-						m_value.real = other.m_value.real;
-						break;
-					case value_types::boolean:
-						m_value.boolean = other.m_value.boolean;
-						break;
-					case value_types::null:
-						break;
-					default:
-						throw std::runtime_error( "Unknown value_t type" );
+				case value_types::string: m_value.string = copy_value( other.m_value.string );
+					break;
+				case value_types::array: m_value.array_v = copy_value( other.m_value.array_v );
+					break;
+				case value_types::object: m_value.object = copy_value( other.m_value.object );
+					break;
+				case value_types::integral: m_value.integral = other.m_value.integral;
+					break;
+				case value_types::real: m_value.real = other.m_value.real;
+					break;
+				case value_types::boolean: m_value.boolean = other.m_value.boolean;
+					break;
+				case value_types::null: break;
+				default: throw std::runtime_error( "Unknown value_t type" );
 				}
 			}
 
-			value_t & value_t::operator=(value_t const & rhs) {
+			value_t & value_t::operator=( value_t const & rhs ) {
 				if( this != &rhs ) {
 					m_value_type = rhs.m_value_type;
 					switch( m_value_type ) {
-						case value_types::string:
-							m_value.string = copy_value( rhs.m_value.string );
-							break;
-						case value_types::array:
-							m_value.array_v = copy_value( rhs.m_value.array_v );
-							break;
-						case value_types::object:
-							m_value.object = copy_value( rhs.m_value.object );
-							break;
-						case value_types::integral:
-							m_value.integral = rhs.m_value.integral;
-							break;
-						case value_types::real:
-							m_value.real = rhs.m_value.real;
-							break;
-						case value_types::boolean:
-							m_value.boolean = rhs.m_value.boolean;
-							break;
-						case value_types::null:
-							break;
-						default:
-							throw std::runtime_error( "Unknown value_t type" );
+					case value_types::string: m_value.string = copy_value( rhs.m_value.string );
+						break;
+					case value_types::array: m_value.array_v = copy_value( rhs.m_value.array_v );
+						break;
+					case value_types::object: m_value.object = copy_value( rhs.m_value.object );
+						break;
+					case value_types::integral: m_value.integral = rhs.m_value.integral;
+						break;
+					case value_types::real: m_value.real = rhs.m_value.real;
+						break;
+					case value_types::boolean: m_value.boolean = rhs.m_value.boolean;
+						break;
+					case value_types::null: break;
+					default: throw std::runtime_error( "Unknown value_t type" );
 					}
 				}
 
 				return *this;
 			}
 
-			value_t::value_t( value_t && other ) : m_value_type( other.m_value_type ) {
+			value_t::value_t( value_t && other ):
+					m_value_type( other.m_value_type ) {
 				switch( m_value_type ) {
-					case value_types::array:
-						m_value.array_v = other.m_value.array_v;
-						other.m_value_type = value_types::null;
-						break;
-					case value_types::object: 
-						m_value.object = other.m_value.object;
-						other.m_value_type = value_types::null;
-						break;
-					case value_types::string:
-						m_value.string = other.m_value.string;
-						other.m_value_type = value_types::null;
-						break;
-					case value_types::integral:
-						m_value.integral = other.m_value.integral;
-						break;
-					case value_types::real:
-						m_value.real = other.m_value.real;
-						break;
-					case value_types::boolean:
-						m_value.boolean = other.m_value.boolean;
-						break;
-					case value_types::null: break;
-					default:
-											throw std::runtime_error( "Unexpected value_t type" );
+				case value_types::array: m_value.array_v = other.m_value.array_v;
+					other.m_value_type = value_types::null;
+					break;
+				case value_types::object: m_value.object = other.m_value.object;
+					other.m_value_type = value_types::null;
+					break;
+				case value_types::string: m_value.string = other.m_value.string;
+					other.m_value_type = value_types::null;
+					break;
+				case value_types::integral: m_value.integral = other.m_value.integral;
+					break;
+				case value_types::real: m_value.real = other.m_value.real;
+					break;
+				case value_types::boolean: m_value.boolean = other.m_value.boolean;
+					break;
+				case value_types::null: break;
+				default: throw std::runtime_error( "Unexpected value_t type" );
 				}
 			}
 
-			value_t & value_t::operator=(value_t && rhs) {
+			value_t & value_t::operator=( value_t && rhs ) {
 				if( this != &rhs ) {
 					m_value_type = rhs.m_value_type;
 					switch( m_value_type ) {
-						case value_types::array:
-							m_value.array_v = rhs.m_value.array_v;
-							rhs.m_value_type = value_types::null;
-							break;
-						case value_types::object:
-							m_value.object = rhs.m_value.object;
-							rhs.m_value_type = value_types::null;
-							break;
-						case value_types::string:
-							m_value.string = rhs.m_value.string;
-							rhs.m_value_type = value_types::null;
-							break;
-						case value_types::integral:
-							m_value.integral = rhs.m_value.integral;
-							break;
-						case value_types::real:
-							m_value.real = rhs.m_value.real;
-							break;
-						case value_types::boolean:
-							m_value.boolean = rhs.m_value.boolean;
-							break;
-						case value_types::null: break;
-						default:
-												throw std::runtime_error( "Unexpected value_t type" );
+					case value_types::array: m_value.array_v = rhs.m_value.array_v;
+						rhs.m_value_type = value_types::null;
+						break;
+					case value_types::object: m_value.object = rhs.m_value.object;
+						rhs.m_value_type = value_types::null;
+						break;
+					case value_types::string: m_value.string = rhs.m_value.string;
+						rhs.m_value_type = value_types::null;
+						break;
+					case value_types::integral: m_value.integral = rhs.m_value.integral;
+						break;
+					case value_types::real: m_value.real = rhs.m_value.real;
+						break;
+					case value_types::boolean: m_value.boolean = rhs.m_value.boolean;
+						break;
+					case value_types::null: break;
+					default: throw std::runtime_error( "Unexpected value_t type" );
 					}
 				}
 				return *this;
@@ -248,7 +231,7 @@ namespace daw {
 				return to_string( *m_value.string );
 			}
 
-			string_value value_t::get_string_value() const {
+			string_value value_t::get_string_value( ) const {
 				assert( m_value_type == value_types::string );
 				assert( m_value.string != nullptr );
 				return *m_value.string;
@@ -325,50 +308,44 @@ namespace daw {
 			}
 
 
-			std::string to_string( value_t const & value) {
+			std::string to_string( value_t const & value ) {
 				std::stringstream ss;
 				switch( value.type( ) ) {
-					case value_t::value_types::array: {
-														  ss <<"[ ";
-														  const auto & arry = value.get_array( );
-														  if( !arry.empty( ) ) {
-															  ss << arry[0];
-															  for( size_t n = 1; n <arry.size( ); ++n ) {
-																  ss << ", " << arry[n];
-															  }
-														  }
-														  ss <<" ]";
-													  }
-													  break;
-					case value_t::value_types::boolean:
-													  ss <<(value.get_boolean( ) ? "True" : "False");
-													  break;
-					case value_t::value_types::integral:
-													  ss <<value.get_integral( );
-													  break;
-					case value_t::value_types::null:
-													  ss << "null";
-													  break;
-					case value_t::value_types::object: {
-														   ss << "{ ";
-														   const auto & items = value.get_object( ).members_v;
-														   if( !items.empty( ) ) {
-															   ss << '"' <<items[0].first <<"\" : " <<items[0].second;
-															   for( size_t n = 1; n <items.size( ); ++n ) {
-																   ss <<", \"" <<items[n].first <<"\" : " <<items[n].second;
-															   }
-														   }
-														   ss <<" }";
-														   break;
-													   }					
-					case value_t::value_types::real:
-													   ss <<value.get_real( );
-													   break;
-					case value_t::value_types::string:
-													   ss << '"' << value.get_string( ) << '"';
-													   break;
-					default:
-													   throw std::runtime_error( "Unexpected value type" );
+				case value_t::value_types::array: {
+					ss << "[ ";
+					const auto & arry = value.get_array( );
+					if( !arry.empty( ) ) {
+						ss << arry[0];
+						for( size_t n = 1; n < arry.size( ); ++n ) {
+							ss << ", " << arry[n];
+						}
+					}
+					ss << " ]";
+				}
+					break;
+				case value_t::value_types::boolean: ss << (value.get_boolean( ) ? "True" : "False");
+					break;
+				case value_t::value_types::integral: ss << value.get_integral( );
+					break;
+				case value_t::value_types::null: ss << "null";
+					break;
+				case value_t::value_types::object: {
+					ss << "{ ";
+					const auto & items = value.get_object( ).members_v;
+					if( !items.empty( ) ) {
+						ss << '"' << items[0].first << "\" : " << items[0].second;
+						for( size_t n = 1; n < items.size( ); ++n ) {
+							ss << ", \"" << items[n].first << "\" : " << items[n].second;
+						}
+					}
+					ss << " }";
+					break;
+				}
+				case value_t::value_types::real: ss << value.get_real( );
+					break;
+				case value_t::value_types::string: ss << '"' << value.get_string( ) << '"';
+					break;
+				default: throw std::runtime_error( "Unexpected value type" );
 				}
 				return ss.str( );
 			}
@@ -380,13 +357,13 @@ namespace daw {
 				return "{ null }";
 			}
 
-			std::ostream& operator<<( std::ostream& os, value_t const & value ) {
-				os <<to_string( value );
+			std::ostream & operator<<( std::ostream & os, value_t const & value ) {
+				os << to_string( value );
 				return os;
 			}
 
-			std::ostream& operator<<(std::ostream& os, std::shared_ptr<value_t> const & value) {
-				os <<to_string( value );
+			std::ostream & operator<<( std::ostream & os, std::shared_ptr<value_t> const & value ) {
+				os << to_string( value );
 				return os;
 			}
 
@@ -396,20 +373,20 @@ namespace daw {
 
 			object_value::iterator object_value::find( boost::string_ref const key ) {
 				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
-						return item.first == key;
-						} );
+					return item.first == key;
+				} );
 			}
 
 			object_value::const_iterator object_value::find( boost::string_ref const key ) const {
 				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
-						return item.first == key;
-						} );
+					return item.first == key;
+				} );
 			}
 
 			object_value::mapped_type & object_value::operator[]( boost::string_ref key ) {
 				auto pos = find( key );
 				if( end( ) == pos ) {
-					pos = insert( pos, std::make_pair<string_value, value_t>(range::create_char_range( key ), value_t( nullptr ) ) );
+					pos = insert( pos, std::make_pair<string_value, value_t>( range::create_char_range( key ), value_t( nullptr ) ) );
 				}
 				return pos->second;
 			}
@@ -427,7 +404,7 @@ namespace daw {
 					return std::find( first, last, key ) != last;
 				}
 
-			bool is_ws(range::UTFValType val ) {
+			bool is_ws( range::UTFValType val ) {
 				size_t result1 = static_cast<range::UTFValType>(0x0009) - val == 0;
 				size_t result2 = static_cast<range::UTFValType>(0x000A) - val == 0;
 				size_t result3 = static_cast<range::UTFValType>(0x000D) - val == 0;
@@ -439,15 +416,15 @@ namespace daw {
 				return val | static_cast<range::UTFValType>(' ');
 			}
 
-			bool is_equal(range::UTFIterator it, range::UTFValType val ) {
+			bool is_equal( range::UTFIterator it, range::UTFValType val ) {
 				return *it == val;
 			}
 
-			bool is_equal_nc(range::UTFIterator it, range::UTFValType val ) {
+			bool is_equal_nc( range::UTFIterator it, range::UTFValType val ) {
 				return ascii_lower_case( *it ) == ascii_lower_case( val );
 			}
 
-			void skip_ws(range::CharRange & range ) {
+			void skip_ws( range::CharRange & range ) {
 				size_t last_inc = is_ws( *range.begin( ) );
 				range.advance( last_inc );
 				if( last_inc && range.size( ) > 2 ) {
@@ -470,7 +447,7 @@ namespace daw {
 				}
 			}
 
-			bool move_range_forward_if_equal(range::CharRange & range, boost::string_ref const value ) {
+			bool move_range_forward_if_equal( range::CharRange & range, boost::string_ref const value ) {
 				auto const value_size = static_cast<size_t>( std::distance( value.begin( ), value.end( ) ) );
 				auto result = std::equal( value.begin( ), value.end( ), range.begin( ) );
 				if( result ) {
@@ -479,7 +456,7 @@ namespace daw {
 				return result;
 			}
 
-			void move_to_quote(range::CharRange & range ) { 
+			void move_to_quote( range::CharRange & range ) {
 				size_t slash_count = 0;
 				while( range.size( ) > 0 ) {
 					auto const cur_val = *range.begin( );
@@ -495,7 +472,7 @@ namespace daw {
 			}
 
 			// Strings are parsed here :)
-			value_t parse_string(range::CharRange & range ) {
+			value_t parse_string( range::CharRange & range ) {
 				if( !is_equal( range.begin( ), '"' ) ) {
 					throw JsonParserException( "Not a valid JSON string" );
 				}
@@ -508,7 +485,7 @@ namespace daw {
 				return result;
 			}
 
-			value_t parse_bool(range::CharRange & range ) {
+			value_t parse_bool( range::CharRange & range ) {
 				if( move_range_forward_if_equal( range, "true" ) ) {
 					return value_t( true );
 				} else if( move_range_forward_if_equal( range, "false" ) ) {
@@ -517,19 +494,19 @@ namespace daw {
 				throw JsonParserException( "Not a valid JSON bool" );
 			}
 
-			value_t parse_null(range::CharRange & range ) {
+			value_t parse_null( range::CharRange & range ) {
 				if( !move_range_forward_if_equal( range, "null" ) ) {
 					throw JsonParserException( "Not a valid JSON null" );
 				}
 				return value_t( nullptr );
 			}
 
-			bool is_digit(range::UTFIterator it ) {
+			bool is_digit( range::UTFIterator it ) {
 				auto const & test = *it;
 				return '0' <= test && test <= '9';
 			}
 
-			value_t parse_number(range::CharRange & range ) {
+			value_t parse_number( range::CharRange & range ) {
 				auto const first = range.begin( );
 				auto const first_range_size = range.size( );
 				move_range_forward_if_equal( range, "-" );
@@ -557,8 +534,8 @@ namespace daw {
 				auto const number_range_size = static_cast<size_t>(first_range_size - range.size( ));
 				auto number_range = std::make_unique<char[]>( number_range_size );
 				std::transform( first, range.begin( ), number_range.get( ), []( std::iterator_traits<range::UTFIterator>::value_type const & value ) {
-						return static_cast<char>(value);
-						} );
+					return static_cast<char>(value);
+				} );
 				if( is_float ) {
 					try {
 
@@ -569,17 +546,17 @@ namespace daw {
 					}
 				}
 				try {
-					auto result = value_t( boost::lexical_cast<int64_t>(number_range.get( ), number_range_size) );
+					auto result = value_t( boost::lexical_cast<int64_t>( number_range.get( ), number_range_size ) );
 					return result;
 				} catch( boost::bad_lexical_cast const & ) {
 					throw JsonParserException( "Not a valid JSON number" );
-				}									
+				}
 			}
 
-			value_t parse_value(range::CharRange & range );			
+			value_t parse_value( range::CharRange & range );
 
-			object_value_item parse_object_item(range::CharRange & range ) {
-				auto label = parse_string( range ).get_string_value();
+			object_value_item parse_object_item( range::CharRange & range ) {
+				auto label = parse_string( range ).get_string_value( );
 				skip_ws( range );
 				if( !is_equal( range.begin( ), U':' ) ) {
 					throw JsonParserException( "Not a valid JSON object item" );
@@ -590,7 +567,7 @@ namespace daw {
 				return result;
 			}
 
-			value_t parse_object(range::CharRange & range ) {
+			value_t parse_object( range::CharRange & range ) {
 				if( !is_equal( range.begin( ), U'{' ) ) {
 					throw JsonParserException( "Not a valid JSON object" );
 				}
@@ -618,7 +595,7 @@ namespace daw {
 				return value_t( std::move( result ) );
 			}
 
-			value_t parse_array(range::CharRange & range ) {
+			value_t parse_array( range::CharRange & range ) {
 				if( !is_equal( range.begin( ), U'[' ) ) {
 					throw JsonParserException( "Not a valid JSON array" );
 				}
@@ -643,40 +620,34 @@ namespace daw {
 				return value_t( std::move( results ) );
 			}
 
-			value_t parse_value(range::CharRange& range ) {
+			value_t parse_value( range::CharRange & range ) {
 				value_t result;
 				skip_ws( range );
 				switch( *range.begin( ) ) {
-					case U'{':
-						result = parse_object( range );
-						break;
-					case U'[':
-						result = parse_array( range );
-						break;
-					case U'"':
-						result = parse_string( range );
-						break;
-					case U't':
-					case U'f':
-						result = parse_bool( range );
-						break;
-					case U'n':
-						result = parse_null( range );
-						break;
-					default:
-						result = parse_number( range );
+				case U'{': result = parse_object( range );
+					break;
+				case U'[': result = parse_array( range );
+					break;
+				case U'"': result = parse_string( range );
+					break;
+				case U't':
+				case U'f': result = parse_bool( range );
+					break;
+				case U'n': result = parse_null( range );
+					break;
+				default: result = parse_number( range );
 				}
 				skip_ws( range );
 				return result;
 			}
 
-		}	// namespace impl
+		}    // namespace impl
 
 		json_obj parse_json( range::CharIterator Begin, range::CharIterator End ) {
 			try {
 				range::UTFIterator it_begin( Begin );
 				range::UTFIterator it_end( End );
-				range::CharRange range { it_begin, it_end };
+				range::CharRange range{ it_begin, it_end };
 				return impl::parse_value( range );
 			} catch( JsonParserException const & ) {
 				return impl::value_t( nullptr );
@@ -711,7 +682,7 @@ namespace daw {
 			return val.get_array( );
 		}
 
-	}	// namespace json
-}	// namespace daw
+	}    // namespace json
+}    // namespace daw
 
 
