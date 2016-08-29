@@ -22,27 +22,28 @@
 
 #pragma once
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/string_ref.hpp>
+#include <fstream>
 #include <functional>
 #include <limits>
 #include <memory>
 #include <ostream>
-#include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <map>
 
-#include "daw_json.h"
-#include "daw_json_parser.h"
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_bit_queues.h>
 #include <daw/daw_optional.h>
-#include <boost/date_time/posix_time/posix_time.hpp>
+
+#include "daw_json.h"
+#include "daw_json_parser.h"
 
 namespace daw {
 	namespace json {
@@ -227,15 +228,18 @@ namespace daw {
 				std::string m_name;
 				std::map<impl::string_value, data_description_t> m_data_map;
 
-				template<typename T>
-					JsonLink & link_value( boost::string_ref name, T & value ) {
-						set_name( value, name );
-						data_description_t data_description;
-						data_description.json_type = ::daw::json::schema::get_schema( name, value );
-						data_description.bind_functions = standard_bind_functions( name, value );
-						m_data_map[range::create_char_range( name )] = std::move( data_description );
-						return *this;
-					}
+				///
+				/// \param name - name of integral value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
+				template<typename T> JsonLink & link_value( boost::string_ref name, T & value ) {
+					set_name( value, name );
+					data_description_t data_description;
+					data_description.json_type = ::daw::json::schema::get_schema( name, value );
+					data_description.bind_functions = standard_bind_functions( name, value );
+					m_data_map[range::create_char_range( name )] = std::move( data_description );
+					return *this;
+				}
 
 			public:
 				virtual ~JsonLink( );
@@ -541,31 +545,43 @@ namespace daw {
 						return bind_functions;
 					}
 
+				///
+				/// \param name - name of integral value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-					JsonLink & link_integral( boost::string_ref name, T & value ) {
-						auto value_ptr = &value;
-						set_name( value, name.to_string( ) );
-						data_description_t data_description;
-						using daw::json::schema::get_schema;
-						data_description.json_type = get_schema( name, value );
+				JsonLink & link_integral( boost::string_ref name, T & value ) {
+					auto value_ptr = &value;
+					set_name( value, name.to_string( ) );
+					data_description_t data_description;
+					using daw::json::schema::get_schema;
+					data_description.json_type = get_schema( name, value );
 
-						data_description.bind_functions.encode = standard_encoder( name, value );
+					data_description.bind_functions.encode = standard_encoder( name, value );
 
-						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
-							auto result = decoder_helper<int64_t>( name, json_values );
-							assert( result <= std::numeric_limits<T>::max( ) );
-							assert( result >= std::numeric_limits<T>::min( ) );
-							*value_ptr = static_cast<T>(result);
-						};
-						m_data_map[range::create_char_range( name )] = std::move( data_description );
-						return *this;
-					}
+					data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+						assert( value_ptr );
+						auto result = decoder_helper<int64_t>( name, json_values );
+						assert( result <= std::numeric_limits<T>::max( ) );
+						assert( result >= std::numeric_limits<T>::min( ) );
+						*value_ptr = static_cast<T>(result);
+					};
+					m_data_map[range::create_char_range( name )] = std::move( data_description );
+					return *this;
+				}
 
+				///
+				/// \param name - name of value to remove link from
+				/// \return - whether the linked name was found
 				bool unlink( boost::string_ref name ) {
 					return m_data_map.erase( range::create_char_range( name ) ) > 0;
 				}
 
+
+				///
+				/// \param name - name of integral value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
 					JsonLink & link_integral( boost::string_ref name, boost::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -590,6 +606,10 @@ namespace daw {
 					}
 
 
+				///
+				/// \param name - name of integral value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
 					JsonLink & link_integral( boost::string_ref name, daw::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -613,6 +633,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of real(float/double...) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_real( boost::string_ref name, T & value ) {
 						set_name( value, name.to_string( ) );
@@ -626,14 +650,26 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of string value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_string( boost::string_ref name, boost::optional<std::string> & value ) {
 					return link_value( name, value );
 				}
 
+				///
+				/// \param name - name of string value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_string( boost::string_ref name, daw::optional<std::string> & value ) {
 					return link_value( name, value );
 				}
 
+				///
+				/// \param name - name of string value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_string( boost::string_ref name, std::string & value ) {
 					//return link_value( name, value );
 					// Need to parse escaped values
@@ -646,18 +682,34 @@ namespace daw {
 					return *this;
 				}
 
+				///
+				/// \param name - name of boolean(true/false) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_boolean( boost::string_ref name, bool & value ) {
 					return link_value( name, value );
 				}
 
+				///
+				/// \param name - name of boolean(true/false) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_boolean( boost::string_ref name, boost::optional<bool> & value ) {
 					return link_value( name, value );
 				}
 
+				///
+				/// \param name - name of boolean(true/false) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_boolean( boost::string_ref name, daw::optional<bool> & value ) {
 					return link_value( name, value );
 				}
 
+				///
+				/// \param name - name of JsonLink<type> obect value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_object( boost::string_ref name, JsonLink<T> & value ) {
 						auto value_ptr = &value;
@@ -680,6 +732,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of JsonLink<type> obect value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
 					JsonLink & link_object( boost::string_ref name, boost::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -705,6 +761,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of JsonLink<type> obect value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
 					JsonLink & link_object( boost::string_ref name, daw::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -730,6 +790,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of array(vector) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_array( boost::string_ref name, T & value ) {
 						auto value_ptr = &value;
@@ -756,6 +820,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of array(vector) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_array( boost::string_ref name, boost::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -784,6 +852,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of array(vector) value to link
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_array( boost::string_ref name, daw::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -812,6 +884,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of map(unorderd_map/map) value to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_map( boost::string_ref name, T & value ) {
 						auto value_ptr = &value;
@@ -836,6 +912,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of map(unorderd_map/map) value to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_map( boost::string_ref name, boost::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -868,6 +948,10 @@ namespace daw {
 					}
 
 
+				///
+				/// \param name - name of map(unorderd_map/map) value to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_map( boost::string_ref name, daw::optional<T> & value ) {
 						auto value_ptr = &value;
@@ -899,6 +983,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of streamable value(operator<<, operator>>) to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				template<typename T>
 					JsonLink & link_streamable( boost::string_ref name, T & value ) {
 						auto value_ptr = &value;
@@ -928,6 +1016,10 @@ namespace daw {
 						return *this;
 					}
 
+				///
+				/// \param name - name of timestamp value(boost ptime) to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_timestamp( boost::string_ref name, boost::posix_time::ptime & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
@@ -955,6 +1047,10 @@ namespace daw {
 					return *this;
 				}
 
+				///
+				/// \param name - name of timestamp value(boost ptime) to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_timestamp( boost::string_ref name, boost::optional<boost::posix_time::ptime> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
@@ -991,6 +1087,10 @@ namespace daw {
 					return *this;
 				}
 
+				///
+				/// \param name - name of timestamp value(boost ptime) to link.
+				/// \param value - a reference to the linked value
+				/// \return - Returns a reference to self
 				JsonLink & link_timestamp( boost::string_ref name, daw::optional<boost::posix_time::ptime> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
