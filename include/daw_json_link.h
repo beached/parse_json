@@ -34,7 +34,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 #include <map>
 
 #include <daw/char_range/daw_char_range.h>
