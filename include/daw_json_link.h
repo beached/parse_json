@@ -40,6 +40,7 @@
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_bit_queues.h>
 #include <daw/daw_optional.h>
+#include <daw/daw_optional_heap.h>
 
 #include "daw_json.h"
 #include "daw_json_parser.h"
@@ -94,6 +95,9 @@ namespace daw {
 
 			template<typename T>
 				auto get_schema( boost::string_ref name, daw::optional<T> const & );
+
+			template<typename T>
+				auto get_schema( boost::string_ref name, daw::optional_heap<T> const & );
 
 			template<typename T, typename std::enable_if_t<
 				daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value &&
@@ -157,6 +161,16 @@ namespace daw {
 
 				template<typename T>
 					auto get_schema( boost::string_ref name, daw::optional<T> const & ) {
+						T t;
+						auto result = get_schema( name, t );
+						auto & obj = result.get_object( );
+						obj.push_back( make_object_value_item( range::create_char_range( "nullable" ),
+									::daw::json::impl::value_t( std::string( "nullable" ) ) ) );
+						return result;
+					}
+
+				template<typename T>
+					auto get_schema( boost::string_ref name, daw::optional_heap<T> const & ) {
 						T t;
 						auto result = get_schema( name, t );
 						auto & obj = result.get_object( );
@@ -537,6 +551,21 @@ namespace daw {
 							};
 						}
 
+					template<typename T, typename U = T>
+						static decode_function_t standard_decoder( boost::string_ref name, daw::optional_heap<T> & value ) {
+							auto value_ptr = &value;
+							auto name_copy = name.to_string( );
+							return [value_ptr, name_copy]( json_obj json_values ) mutable {
+								assert( value_ptr );
+								auto new_val = nullable_decoder_helper<U>( name_copy, json_values );
+								if( new_val ) {
+									*value_ptr = std::move( new_val );
+								} else {
+									*value_ptr.reset( );
+								}
+							};
+						}
+
 					template<typename T>
 						static bind_functions_t standard_bind_functions( boost::string_ref name, T & value ) {
 							bind_functions_t bind_functions;
@@ -634,6 +663,33 @@ namespace daw {
 						}
 
 					///
+					/// \param name - name of integral value to link
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
+						JsonLink & link_integral( boost::string_ref name, daw::optional_heap<T> & value ) {
+							auto value_ptr = &value;
+							set_name( value, name.to_string( ) );
+							data_description_t data_description;
+							using daw::json::schema::get_schema;
+							data_description.json_type = get_schema( name, value );
+							data_description.bind_functions.encode = standard_encoder( name, value );
+
+							data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+								assert( value_ptr );
+								auto result = nullable_decoder_helper<int64_t>( name, json_values );
+								if( result ) {
+									assert( *result <=
+											std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
+									assert( *result >= std::numeric_limits<T>::min( ) );
+								}
+								*value_ptr = static_cast<T>(*result);
+							};
+							m_data_map[range::create_char_range( name )] = std::move( data_description );
+							return *this;
+						}
+
+					///
 					/// \param name - name of real(float/double...) value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
@@ -670,6 +726,14 @@ namespace daw {
 					/// \param name - name of string value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
+					JsonLink & link_string( boost::string_ref name, daw::optional_heap<std::string> & value ) {
+						return link_value( name, value );
+					}
+
+					///
+					/// \param name - name of string value to link
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
 					JsonLink & link_string( boost::string_ref name, std::string & value ) {
 						//return link_value( name, value );
 						// Need to parse escaped values
@@ -697,12 +761,20 @@ namespace daw {
 					JsonLink & link_boolean( boost::string_ref name, boost::optional<bool> & value ) {
 						return link_value( name, value );
 					}
-
+		
 					///
 					/// \param name - name of boolean(true/false) value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
 					JsonLink & link_boolean( boost::string_ref name, daw::optional<bool> & value ) {
+						return link_value( name, value );
+					}
+
+					///
+					/// \param name - name of boolean(true/false) value to link
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					JsonLink & link_boolean( boost::string_ref name, daw::optional_heap<bool> & value ) {
 						return link_value( name, value );
 					}
 
@@ -791,6 +863,35 @@ namespace daw {
 						}
 
 					///
+					/// \param name - name of JsonLink<type> obect value to link
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
+						JsonLink & link_object( boost::string_ref name, daw::optional_heap<T> & value ) {
+							auto value_ptr = &value;
+							set_name( value, name.to_string( ) );
+							data_description_t data_description;
+							data_description.json_type = (T { }).get_schema_obj( );
+							data_description.bind_functions.encode = standard_encoder( name, value );
+							data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+								assert( value_ptr );
+								auto obj = json_values.get_object( );
+								auto member = obj.find( name );
+								if( obj.end( ) == member ) {
+									// TODO: determine if correct course of action
+									throw std::runtime_error( "JSON object does not match expected object layout" );
+								}
+								if( member->second.is_null( ) ) {
+									value_ptr->reset( );
+								} else {
+									(*value_ptr)->decode( member->second );
+								}
+							};
+							m_data_map[range::create_char_range( name )] = std::move( data_description );
+							return *this;
+						}
+
+					///
 					/// \param name - name of array(vector) value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
@@ -851,7 +952,7 @@ namespace daw {
 							m_data_map[range::create_char_range( name )] = std::move( data_description );
 							return *this;
 						}
-
+					
 					///
 					/// \param name - name of array(vector) value to link
 					/// \param value - a reference to the linked value
@@ -874,6 +975,39 @@ namespace daw {
 								}
 								if( member->second.is_null( ) ) {
 									*value_ptr = daw::optional<T>{ };
+								} else {
+									assert( member->second.is_array( ) );
+									using namespace parse;
+									json_to_value( *value_ptr, member->second );
+								}
+							};
+							m_data_map[range::create_char_range( name )] = std::move( data_description );
+							return *this;
+						}
+
+
+					///
+					/// \param name - name of array(vector) value to link
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					template<typename T>
+						JsonLink & link_array( boost::string_ref name, daw::optional_heap<T> & value ) {
+							auto value_ptr = &value;
+							set_name( value, name.to_string( ) );
+							data_description_t data_description;
+							using ::daw::json::schema::get_schema;
+							data_description.json_type = get_schema( name, value );
+							data_description.bind_functions.encode = standard_encoder( name, value );
+							data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+								assert( value_ptr );
+								auto obj = json_values.get_object( );
+								auto member = obj.find( name );
+								if( obj.end( ) == member ) {
+									// TODO: determine if correct course of action
+									throw std::runtime_error( "JSON object does not match expected object layout" );
+								}
+								if( member->second.is_null( ) ) {
+									*value_ptr = daw::optional_heap<T>{ };
 								} else {
 									assert( member->second.is_array( ) );
 									using namespace parse;
@@ -947,7 +1081,6 @@ namespace daw {
 							return *this;
 						}
 
-
 					///
 					/// \param name - name of map(unorderd_map/map) value to link.
 					/// \param value - a reference to the linked value
@@ -971,6 +1104,42 @@ namespace daw {
 								} else {
 									if( member->second.is_null( ) ) {
 										*value_ptr = daw::optional<T>{ };
+									} else {
+										assert( member->second.is_array( ) );
+										using namespace parse;
+										json_to_value( *value_ptr, member->second );
+									}
+								}
+							};
+							//m_data_map[name.to_string( )] = std::move( data_description );
+							m_data_map[range::create_char_range( name )] = std::move( data_description );
+							return *this;
+						}
+
+
+					///
+					/// \param name - name of map(unorderd_map/map) value to link.
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					template<typename T>
+						JsonLink & link_map( boost::string_ref name, daw::optional_heap<T> & value ) {
+							auto value_ptr = &value;
+							set_name( value, name.to_string( ) );
+							data_description_t data_description;
+							data_description.json_type = "map?";
+							using ::daw::json::schema::get_schema;
+							data_description.json_type = get_schema( name, value );
+							data_description.bind_functions.encode = standard_encoder( name, value );
+							data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+								assert( value_ptr );
+								auto val_obj = json_values.get_object( );
+								auto member = val_obj.find( name );
+								if( val_obj.end( ) == member ) {
+									// TODO: determine if correct course of action
+									throw std::runtime_error( "JSON object does not match expected object layout" );
+								} else {
+									if( member->second.is_null( ) ) {
+										*value_ptr = daw::optional_heap<T>{ };
 									} else {
 										assert( member->second.is_array( ) );
 										using namespace parse;
@@ -1085,7 +1254,7 @@ namespace daw {
 						m_data_map[range::create_char_range( name )] = std::move( data_description );
 						return *this;
 					}
-
+					
 					///
 					/// \param name - name of timestamp value(boost ptime) to link.
 					/// \param value - a reference to the linked value
@@ -1117,6 +1286,47 @@ namespace daw {
 							}
 							if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional<boost::posix_time::ptime>{ };
+							} else {
+								assert( member->second.is_string( ) );
+								*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
+							}
+						};
+						m_data_map[range::create_char_range( name )] = std::move( data_description );
+						return *this;
+					}
+
+
+					///
+					/// \param name - name of timestamp value(boost ptime) to link.
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					JsonLink & link_timestamp( boost::string_ref name, daw::optional_heap<boost::posix_time::ptime> & value ) {
+						auto value_ptr = &value;
+						set_name( value, name );
+						data_description_t data_description;
+						using daw::json::schema::get_schema;
+						data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
+						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
+							assert( value_ptr );
+							if( *value_ptr ) {
+								json_text = generate::value_to_json( name.to_string( ),
+										boost::posix_time::to_iso_extended_string(
+											*(*value_ptr) ) +
+										'Z' );
+							} else {
+								json_text = generate::value_to_json( name.to_string( ) );
+							}
+						};
+						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+							assert( value_ptr );
+							auto obj = json_values.get_object( );
+							auto member = obj.find( name );
+							if( obj.end( ) == member ) {
+								// TODO: determine if correct course of action
+								throw std::runtime_error( "JSON object does not match expected object layout" );
+							}
+							if( member->second.is_null( ) ) {
+								*value_ptr = daw::optional_heap<boost::posix_time::ptime>{ };
 							} else {
 								assert( member->second.is_string( ) );
 								*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
