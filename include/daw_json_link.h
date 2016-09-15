@@ -40,7 +40,7 @@
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_bit_queues.h>
 #include <daw/daw_optional.h>
-#include <daw/daw_optional_heap.h>
+#include <daw/daw_optional_poly.h>
 
 #include "daw_json.h"
 #include "daw_json_parser.h"
@@ -97,7 +97,7 @@ namespace daw {
 				auto get_schema( boost::string_ref name, daw::optional<T> const & );
 
 			template<typename T>
-				auto get_schema( boost::string_ref name, daw::optional_heap<T> const & );
+				auto get_schema( boost::string_ref name, daw::optional_poly<T> const & );
 
 			template<typename T, typename std::enable_if_t<
 				daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value &&
@@ -170,7 +170,7 @@ namespace daw {
 					}
 
 				template<typename T>
-					auto get_schema( boost::string_ref name, daw::optional_heap<T> const & ) {
+					auto get_schema( boost::string_ref name, daw::optional_poly<T> const & ) {
 						T t;
 						auto result = get_schema( name, t );
 						auto & obj = result.get_object( );
@@ -552,7 +552,7 @@ namespace daw {
 						}
 
 					template<typename T, typename U = T>
-						static decode_function_t standard_decoder( boost::string_ref name, daw::optional_heap<T> & value ) {
+						static decode_function_t standard_decoder( boost::string_ref name, daw::optional_poly<T> & value ) {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( json_obj json_values ) mutable {
@@ -667,7 +667,7 @@ namespace daw {
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
 					template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-						JsonLink & link_integral( boost::string_ref name, daw::optional_heap<T> & value ) {
+						JsonLink & link_integral( boost::string_ref name, daw::optional_poly<T> & value ) {
 							auto value_ptr = &value;
 							set_name( value, name.to_string( ) );
 							data_description_t data_description;
@@ -726,7 +726,7 @@ namespace daw {
 					/// \param name - name of string value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
-					JsonLink & link_string( boost::string_ref name, daw::optional_heap<std::string> & value ) {
+					JsonLink & link_string( boost::string_ref name, daw::optional_poly<std::string> & value ) {
 						return link_value( name, value );
 					}
 
@@ -774,7 +774,7 @@ namespace daw {
 					/// \param name - name of boolean(true/false) value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
-					JsonLink & link_boolean( boost::string_ref name, daw::optional_heap<bool> & value ) {
+					JsonLink & link_boolean( boost::string_ref name, daw::optional_poly<bool> & value ) {
 						return link_value( name, value );
 					}
 
@@ -867,7 +867,7 @@ namespace daw {
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
 					template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-						JsonLink & link_object( boost::string_ref name, daw::optional_heap<T> & value ) {
+						JsonLink & link_object( boost::string_ref name, daw::optional_poly<T> & value ) {
 							auto value_ptr = &value;
 							set_name( value, name.to_string( ) );
 							data_description_t data_description;
@@ -991,7 +991,7 @@ namespace daw {
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
 					template<typename T>
-						JsonLink & link_array( boost::string_ref name, daw::optional_heap<T> & value ) {
+						JsonLink & link_array( boost::string_ref name, daw::optional_poly<T> & value ) {
 							auto value_ptr = &value;
 							set_name( value, name.to_string( ) );
 							data_description_t data_description;
@@ -1007,7 +1007,7 @@ namespace daw {
 									throw std::runtime_error( "JSON object does not match expected object layout" );
 								}
 								if( member->second.is_null( ) ) {
-									*value_ptr = daw::optional_heap<T>{ };
+									*value_ptr = daw::optional_poly<T>{ };
 								} else {
 									assert( member->second.is_array( ) );
 									using namespace parse;
@@ -1122,7 +1122,7 @@ namespace daw {
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
 					template<typename T>
-						JsonLink & link_map( boost::string_ref name, daw::optional_heap<T> & value ) {
+						JsonLink & link_map( boost::string_ref name, daw::optional_poly<T> & value ) {
 							auto value_ptr = &value;
 							set_name( value, name.to_string( ) );
 							data_description_t data_description;
@@ -1139,7 +1139,7 @@ namespace daw {
 									throw std::runtime_error( "JSON object does not match expected object layout" );
 								} else {
 									if( member->second.is_null( ) ) {
-										*value_ptr = daw::optional_heap<T>{ };
+										*value_ptr = daw::optional_poly<T>{ };
 									} else {
 										assert( member->second.is_array( ) );
 										using namespace parse;
@@ -1300,7 +1300,7 @@ namespace daw {
 					/// \param name - name of timestamp value(boost ptime) to link.
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
-					JsonLink & link_timestamp( boost::string_ref name, daw::optional_heap<boost::posix_time::ptime> & value ) {
+					JsonLink & link_timestamp( boost::string_ref name, daw::optional_poly<boost::posix_time::ptime> & value ) {
 						auto value_ptr = &value;
 						set_name( value, name );
 						data_description_t data_description;
@@ -1326,7 +1326,7 @@ namespace daw {
 								throw std::runtime_error( "JSON object does not match expected object layout" );
 							}
 							if( member->second.is_null( ) ) {
-								*value_ptr = daw::optional_heap<boost::posix_time::ptime>{ };
+								*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
 							} else {
 								assert( member->second.is_string( ) );
 								*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );

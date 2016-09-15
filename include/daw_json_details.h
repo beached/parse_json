@@ -34,7 +34,7 @@
 #include <daw/daw_range.h>
 #include <daw/daw_traits.h>
 #include <daw/daw_optional.h>
-#include <daw/daw_optional_heap.h>
+#include <daw/daw_optional_poly.h>
 
 #include "daw_json_interface.h"
 #include "daw_json_parser.h"
@@ -102,7 +102,7 @@ namespace daw {
 
 
 			template<typename T>
-				std::string value_to_json( boost::string_ref name, daw::optional_heap<T> const & value ) {
+				std::string value_to_json( boost::string_ref name, daw::optional_poly<T> const & value ) {
 					if( value ) {
 						return value_to_json( name, *value );
 					} else {
