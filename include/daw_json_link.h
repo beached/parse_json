@@ -312,11 +312,15 @@ namespace daw {
 
 					void encode_file( boost::string_ref filename, bool overwrite = true ) const {
 						assert( !filename.empty( ) );								
-						if( !overwrite && boost::filesystem::exists( filename.data( ) ) ) {
+						auto fname = filename.to_string( );
+						if( !overwrite && boost::filesystem::exists( fname.c_str( ) ) ) {
 							throw std::runtime_error( "Overwrite not permitted and file exists" );
 						}
-						std::ofstream out_file{ filename.data( ), std::ofstream::trunc };
-						if( !out_file ) {
+						std::ofstream out_file;
+						
+						out_file.open( fname.c_str( ), std::ios::out | std::ios::trunc );
+
+						if( !out_file.is_open( ) ) {
 							throw std::runtime_error( "Could not open file for writing" );
 						}
 						out_file << encode( );
@@ -357,8 +361,14 @@ namespace daw {
 					}
 
 					auto & decode_file( boost::string_ref filename ) {
-						daw::filesystem::MemoryMappedFile<char> const test_data( filename );
-						decode( test_data.begin( ), test_data.end( ) );
+						std::ifstream in_file;
+						in_file.open( filename.data( ) );
+						if( !in_file ) {
+							throw std::runtime_error( "Could not open file" );
+						}
+						std::string data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
+						in_file.close( );
+						decode( data );
 						return derived( );
 					}
 
