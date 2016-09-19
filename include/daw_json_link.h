@@ -311,11 +311,12 @@ namespace daw {
 					}
 
 					void encode_file( boost::string_ref filename, bool overwrite = true ) const {
+						assert( !filename.empty( ) );								
 						if( !overwrite && boost::filesystem::exists( filename.data( ) ) ) {
 							throw std::runtime_error( "Overwrite not permitted and file exists" );
 						}
-						std::ofstream out_file{ filename.data( ) };
-						if( !out_file.is_open( ) ) {
+						std::ofstream out_file{ filename.data( ), std::ofstream::trunc };
+						if( !out_file ) {
 							throw std::runtime_error( "Could not open file for writing" );
 						}
 						out_file << encode( );
