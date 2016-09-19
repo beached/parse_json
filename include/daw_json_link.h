@@ -361,8 +361,14 @@ namespace daw {
 					}
 
 					auto & decode_file( boost::string_ref filename ) {
-						daw::filesystem::MemoryMappedFile<char> const test_data( filename );
-						decode( test_data.begin( ), test_data.end( ) );
+						std::ifstream in_file;
+						in_file.open( filename.data( ) );
+						if( !in_file ) {
+							throw std::runtime_error( "Could not open file" );
+						}
+						std::string data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
+						in_file.close( );
+						decode( data );
 						return derived( );
 					}
 
