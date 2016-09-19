@@ -310,13 +310,20 @@ namespace daw {
 						return encode( );
 					}
 
-					void encode_file( boost::string_ref filename ) const {
+					void encode_file( boost::string_ref filename, bool overwrite = true ) const {
+						if( !overwrite && boost::filesystem::exists( file_name.data( ) ) ) {
+							throw std::runtime_error( "Overwrite not permitted and file exists" );
+						}
 						std::ofstream out_file{ filename.data( ) };
 						if( !out_file.is_open( ) ) {
 							throw std::runtime_error( "Could not open file for writing" );
 						}
 						out_file << encode( );
 						out_file.close( );
+					}
+
+					void to_file( boost::string_ref filename, bool overwrite = true ) const {
+						encode_file( filename, overwrite );
 					}
 
 					private:
@@ -1376,6 +1383,11 @@ namespace daw {
 			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
 			auto from_file( boost::string_ref file_name ) {
 				return from_file<Derived>( file_name, false );
+			}
+			
+			template<typename Derived>
+			void to_file( boost::string_ref file_name, JsonLink<Derived> const & obj, bool overwrite ) {
+				
 			}
 
 			template<typename Derived>
