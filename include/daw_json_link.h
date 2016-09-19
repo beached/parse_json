@@ -311,7 +311,7 @@ namespace daw {
 					}
 
 					void encode_file( boost::string_ref filename, bool overwrite = true ) const {
-						if( !overwrite && boost::filesystem::exists( file_name.data( ) ) ) {
+						if( !overwrite && boost::filesystem::exists( filename.data( ) ) ) {
 							throw std::runtime_error( "Overwrite not permitted and file exists" );
 						}
 						std::ofstream out_file{ filename.data( ) };
