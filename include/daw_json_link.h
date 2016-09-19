@@ -315,7 +315,7 @@ namespace daw {
 						if( !overwrite && boost::filesystem::exists( filename.data( ) ) ) {
 							throw std::runtime_error( "Overwrite not permitted and file exists" );
 						}
-						std::ofstream out_file;
+						std::fstream out_file;
 						out_file.open( filename.data( ), std::ios::out | std::ios::trunc );
 
 						if( !out_file.is_open( ) ) {
