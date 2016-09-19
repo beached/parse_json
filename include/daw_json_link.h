@@ -306,6 +306,10 @@ namespace daw {
 						return details::json_name( m_name ) + details::enbrace( result.str( ) );
 					}
 
+					std::string to_string( ) const {
+						return encode( );
+					}
+
 					void encode_file( boost::string_ref filename ) const {
 						std::ofstream out_file{ filename.data( ) };
 						if( !out_file.is_open( ) ) {
