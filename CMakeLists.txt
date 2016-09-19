@@ -4,7 +4,7 @@ project( parse_json_prj )
 
 include( ExternalProject )
 
-find_package( Boost 1.58.0 COMPONENTS system iostreams REQUIRED )
+find_package( Boost 1.58.0 COMPONENTS filesystem system iostreams REQUIRED )
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 ) 

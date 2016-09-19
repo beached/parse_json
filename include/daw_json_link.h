@@ -23,6 +23,7 @@
 #pragma once
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/string_ref.hpp>
@@ -1356,11 +1357,22 @@ namespace daw {
 				}
 
 			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-				auto from_file( boost::string_ref file_name ) {
-					Derived result;
-					result.decode_file( file_name );
-					return result;
+			auto from_file( boost::string_ref file_name, bool use_default_on_error ) {
+				Derived result;
+				if( !boost::filesystem::exists( file_name.data( ) ) ) {
+					if( use_default_on_error ) {
+						return result;
+					}
+					throw std::runtime_error( "file not found" );
 				}
+				result.decode_file( file_name );
+				return result;
+			}
+
+			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
+			auto from_file( boost::string_ref file_name ) {
+				return from_file<Derived>( file_name, false );
+			}
 
 			template<typename Derived>
 				JsonLink<Derived>::~JsonLink( ) { }

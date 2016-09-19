@@ -174,7 +174,7 @@ int main( int, char ** ) {
 	auto s = a.encode( );
 	std::cout << s << std::endl;
 
-	auto f = from_file<Test>( "file.json" );
+	auto f = from_file<Test>( "file.json", true );
 	Test b;
 	b.decode( s );
 	std::cout << "b.d=>'" << b.d << "'\n";
@@ -185,6 +185,8 @@ int main( int, char ** ) {
 	c.something( );
 	c.decode( s );
 	std::cout << c.encode( ) << std::endl;
+
+	auto g = from_file<Test>( "file.json" );
 	return EXIT_SUCCESS;
 }
 
