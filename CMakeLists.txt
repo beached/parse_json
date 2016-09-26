@@ -53,12 +53,14 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw_json_interface.h
 	${HEADER_FOLDER}/daw_json_link.h
 	${HEADER_FOLDER}/daw_json_parser.h
+	${HEADER_FOLDER}/value_t.h
 )
 
 set( SOURCE_FILES
 	daw_json.cpp
 	daw_json_link.cpp
 	daw_json_parser.cpp
+	value_t.cpp
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )

@@ -27,6 +27,7 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
+
 #include "daw_json.h"
 #include "daw_json_link.h"
 
@@ -67,7 +68,13 @@ struct A: public daw::json::JsonLink<A> {
 	bool e;
 
 	A( ):
-			JsonLink<A>( ), a( 1 ), b( 2 ), c( 1.23456789 ), d( 100, 5 ), e( true ) {
+			JsonLink<A>{ },
+			a{ 1 },
+			b{ 2 },
+			c{ 1.23456789 },
+			d{ 100, 5 },
+			e{ true } {
+
 		link_integral( "a", a );
 		link_integral( "b", b );
 		link_real( "c", c );
@@ -75,12 +82,12 @@ struct A: public daw::json::JsonLink<A> {
 		link_boolean( "e", e );
 	}
 
-	bool operator==( A const & rhs ) const {
-		return a == rhs.a && b == rhs.b && c == rhs.c && std::equal( d.begin( ), d.end( ), rhs.d.begin( ) );
+	friend bool operator==( A const & lhs, A const & rhs ) {
+		return std::tie( lhs.a, lhs.b, lhs.c ) == std::tie( rhs.a, rhs.b, rhs.c ) && std::equal( lhs.d.begin( ), lhs.d.end( ), rhs.d.begin( ), rhs.d.end( ) );
 	}
 
-	bool operator!=( A const & rhs ) const {
-		return a != rhs.a || b != rhs.b || c != rhs.c || !std::equal( d.begin( ), d.end( ), rhs.d.begin( ) );
+	friend bool operator!=( A const & lhs, A const & rhs ) {
+		return std::tie( lhs.a, lhs.b, lhs.c ) != std::tie( rhs.a, rhs.b, rhs.c ) || !std::equal( lhs.d.begin( ), lhs.d.end( ), rhs.d.begin( ), rhs.d.end( ) );
 	}
 };
 
@@ -91,35 +98,40 @@ struct B: public daw::json::JsonLink<B> {
 	double d;
 
 	B( ):
-			JsonLink<B>( ), a( ), b( "hello" ), c( ), d( 1.9233434e-12 ) {
+			JsonLink<B>{ },
+			a{ },
+			b{ "hello" },
+			c{ },
+			d{ 1.9233434e-12 } {
+
 		link_object( "a", a );
 		link_string( "b", b );
 		link_streamable( "c", c );
 		link_real( "d", d );
 	}
 
-	bool operator==( B const & rhs ) const {
-		return a == rhs.a && b == rhs.b && c == rhs.c;
+	friend bool operator==( B const & lhs, B const & rhs ) {
+		return std::tie( lhs.a, lhs.b, lhs.c ) == std::tie( rhs.a, rhs.b, rhs.c );
 	}
 
-	bool operator!=( B const & rhs ) const {
-		return a != rhs.a || b != rhs.b || c != rhs.c;
+	friend bool operator!=( B const & lhs, B const & rhs ) {
+		return std::tie( lhs.a, lhs.b, lhs.c ) != std::tie( rhs.a, rhs.b, rhs.c );
 	}
 };
 
 template<typename K, typename V>
-	bool operator==( std::unordered_map<K, V> const & a, std::unordered_map<K, V> const & b ) {
-		return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ), b.begin( ) );
-	}
+bool operator==( std::unordered_map<K, V> const & a, std::unordered_map<K, V> const & b ) {
+	return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ), b.begin( ), b.end( ) );
+}
 
 template<typename Stream>
-	auto fsize( Stream & stream ) -> decltype( stream.tellg( ) ) {
-		auto cur_pos = stream.tellg( );
-		stream.seekg( 0, std::fstream::end );
-		auto result = stream.tellg( );
-		stream.seekg( cur_pos );
-		return result;
-	}
+auto fsize( Stream & stream ) -> decltype( stream.tellg( ) ) {
+	auto cur_pos = stream.tellg( );
+	stream.seekg( 0, std::fstream::end );
+	auto result = stream.tellg( );
+	stream.seekg( cur_pos );
+	return result;
+}
 
 //BOOST_AUTO_TEST_CASE( SimpleTest ) {
 //	B b;
