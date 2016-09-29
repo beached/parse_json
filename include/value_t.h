@@ -23,6 +23,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <cstdint>
 #include <memory>
@@ -102,7 +103,7 @@ namespace daw {
 					object
 				};
 			private:
-				daw::variant_t<int64_t, double, string_value, bool, array_value, object_value> m_value;
+				boost::variant<int64_t, double, string_value, bool, array_value, object_value> m_value;
 				value_types m_value_type;
 			public:
 				value_t( );

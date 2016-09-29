@@ -45,7 +45,7 @@ namespace daw {
 			template<typename Container, typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long>>
 
 			std::string value_to_json( boost::string_ref name, Container const & values ) {
-				boost::string_ref empty_str( "" );
+				boost::string_ref const empty_str{ "" };
 				std::stringstream result;
 				result << ::daw::json::details::json_name( name ) << "[ ";
 				{
@@ -63,16 +63,14 @@ namespace daw {
 			}
 
 			template<typename First, typename Second>
-				std::string value_to_json( boost::string_ref name, std::pair<First, Second> const & value ) {
-					std::stringstream ss;
-					ss << daw::json::details::json_name( name ) << "{ ";
-					ss << value_to_json( "key", value.first ) + ", ";
-					ss << value_to_json( "value", value.second ) + " }";
-					return ss.str( );
-				}
+			std::string value_to_json( boost::string_ref name, std::pair<First, Second> const & value ) {
+				std::string result = daw::json::details::json_name( name ) + "{ ";
+				result += value_to_json( "key", value.first ) + ", ";
+				result += value_to_json( "value", value.second ) + " }";
+				return result;
+			}
 
 			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
-
 			std::string value_to_json_number( boost::string_ref name, Number const & value ) {
 				std::stringstream ss;
 				ss << ::daw::json::details::json_name( name );

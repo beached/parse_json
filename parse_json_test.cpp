@@ -186,7 +186,7 @@ int main( int, char ** ) {
 	auto s = a.encode( );
 	std::cout << s << std::endl;
 
-	auto f = from_file<Test>( "file.json", true );
+//	auto f = from_file<Test>( "file.json", true );
 	Test b;
 	b.decode( s );
 	std::cout << "b.d=>'" << b.d << "'\n";
