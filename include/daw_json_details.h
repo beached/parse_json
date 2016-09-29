@@ -64,7 +64,11 @@ namespace daw {
 
 			template<typename First, typename Second>
 				std::string value_to_json( boost::string_ref name, std::pair<First, Second> const & value ) {
-					return ::daw::json::details::json_name( name ) + "{ " + value_to_json( "key", value.first ) + ", " + value_to_json( "value", value.second ) + " }";
+					std::stringstream ss;
+					ss << daw::json::details::json_name( name ) << "{ ";
+					ss << value_to_json( "key", value.first ) + ", ";
+					ss << value_to_json( "value", value.second ) + " }";
+					return ss.str( );
 				}
 
 			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
