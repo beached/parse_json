@@ -24,7 +24,7 @@
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
-#include <boost/utility/string_ref.hpp>
+#include <boost/utility/string_view.hpp>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -74,13 +74,13 @@ namespace daw {
 				using key_type = std::string;
 				using mapped_type = value_t;
 
-				iterator find( boost::string_ref const key );
+				iterator find( boost::string_view const key );
 
-				const_iterator find( boost::string_ref const key ) const;
+				const_iterator find( boost::string_view const key ) const;
 
-				mapped_type & operator[]( boost::string_ref key );
+				mapped_type & operator[]( boost::string_view key );
 
-				mapped_type const & operator[]( boost::string_ref key ) const;
+				mapped_type const & operator[]( boost::string_view key ) const;
 
 				inline void shrink_to_fit( ) {
 					members_v.shrink_to_fit( );
@@ -114,7 +114,7 @@ namespace daw {
 
 				explicit value_t( std::string const & value );
 
-				explicit value_t( boost::string_ref value );
+				explicit value_t( boost::string_view value );
 
 				explicit value_t( string_value value );
 

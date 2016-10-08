@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <boost/utility/string_view.hpp>
 #include <cassert>
 #include <iomanip>
 #include <time.h>
@@ -52,7 +53,7 @@ namespace daw {
 		}
 		*/
 		namespace {
-			std::string escape_string( boost::string_ref src ) {
+			std::string escape_string( boost::string_view src ) {
 				std::string result;
 				for( auto c : src ) {
 					static_assert( sizeof( c ) == 1, "Src is assumed to be made of of bytes" );
@@ -91,19 +92,19 @@ namespace daw {
 
 		}    // namespace anonymous
 
-		std::string enquote( boost::string_ref value ) {
+		std::string enquote( boost::string_view value ) {
 			return "\"" + escape_string( value.to_string( ) ) + "\"";
 		}
 
 		namespace details {
-			std::string json_name( boost::string_ref name ) {
+			std::string json_name( boost::string_view name ) {
 				if( !name.empty( )) {
 					return enquote( name ) + ": ";
 				}
 				return std::string( );
 			}
 
-			std::string enbrace( boost::string_ref json_value ) {
+			std::string enbrace( boost::string_view json_value ) {
 				return "{ " + json_value.to_string( ) + " }";
 			}
 		}
@@ -112,74 +113,74 @@ namespace daw {
 			using namespace ::daw::json::details;
 
 			// string
-			std::string value_to_json( boost::string_ref name, std::string const &value ) {
+			std::string value_to_json( boost::string_view name, std::string const &value ) {
 				return json_name( name ) + enquote( value );
 			}
 
 			std::string value_to_json( impl::string_value name, std::string const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
 			// bool
-			std::string value_to_json( boost::string_ref name, bool value ) {
+			std::string value_to_json( boost::string_view name, bool value ) {
 				return json_name( name ) + (value ? "true" : "false");
 			}
 
 			std::string value_to_json( impl::string_value name, bool value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
 
 			// null
-			std::string value_to_json( boost::string_ref name ) {
+			std::string value_to_json( boost::string_view name ) {
 				return json_name( name ) + "null";
 			}
 
 			std::string value_to_json( impl::string_value name ) {
-				return value_to_json( to_string_ref( name ));
+				return value_to_json( to_string_view( name ));
 			}
 
-			std::string value_to_json( boost::string_ref name, int32_t const &value ) {
+			std::string value_to_json( boost::string_view name, int32_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
 			std::string value_to_json( impl::string_value name, int32_t const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
-			std::string value_to_json( boost::string_ref name, uint32_t const &value ) {
+			std::string value_to_json( boost::string_view name, uint32_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
 			std::string value_to_json( impl::string_value name, uint32_t const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
-			std::string value_to_json( boost::string_ref name, int64_t const &value ) {
+			std::string value_to_json( boost::string_view name, int64_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
 			std::string value_to_json( impl::string_value name, int64_t const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
-			std::string value_to_json( boost::string_ref name, uint64_t const &value ) {
+			std::string value_to_json( boost::string_view name, uint64_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
 			std::string value_to_json( impl::string_value name, uint64_t const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
-			std::string value_to_json( boost::string_ref name, double const &value ) {
+			std::string value_to_json( boost::string_view name, double const &value ) {
 				return value_to_json_number( name, value );
 			}
 
 			std::string value_to_json( impl::string_value name, double const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
-			std::string value_to_json( boost::string_ref name, ::daw::json::impl::value_t const &value ) {
+			std::string value_to_json( boost::string_view name, ::daw::json::impl::value_t const &value ) {
 				using ::daw::json::impl::value_t;
 				switch( value.type( )) {
 					case value_t::value_types::array:
@@ -202,10 +203,10 @@ namespace daw {
 			}
 
 			std::string value_to_json( impl::string_value name, ::daw::json::impl::value_t const &value ) {
-				return value_to_json( to_string_ref( name ), value );
+				return value_to_json( to_string_view( name ), value );
 			}
 
-			std::string value_to_json_object( boost::string_ref name, ::daw::json::impl::object_value const &object ) {
+			std::string value_to_json_object( boost::string_view name, ::daw::json::impl::object_value const &object ) {
 				std::stringstream result;
 				result << json_name( name ) << "{";
 				auto range = ::daw::range::make_range( object.members_v.begin( ), object.members_v.end( ));
@@ -222,7 +223,7 @@ namespace daw {
 			}
 
 			std::string value_to_json( impl::string_value name, ::daw::json::impl::object_value const &object ) {
-				return value_to_json( to_string_ref( name ), object );
+				return value_to_json( to_string_view( name ), object );
 			}
 
 		}    // namespace generate

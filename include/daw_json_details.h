@@ -23,7 +23,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/utility/string_ref.hpp>
+#include <boost/utility/string_view.hpp>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -44,8 +44,8 @@ namespace daw {
 		namespace generate {
 			template<typename Container, typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long>>
 
-			std::string value_to_json( boost::string_ref name, Container const & values ) {
-				boost::string_ref const empty_str{ "" };
+			std::string value_to_json( boost::string_view name, Container const & values ) {
+				boost::string_view const empty_str{ "" };
 				std::stringstream result;
 				result << ::daw::json::details::json_name( name ) << "[ ";
 				{
@@ -63,7 +63,7 @@ namespace daw {
 			}
 
 			template<typename First, typename Second>
-			std::string value_to_json( boost::string_ref name, std::pair<First, Second> const & value ) {
+			std::string value_to_json( boost::string_view name, std::pair<First, Second> const & value ) {
 				std::string result = daw::json::details::json_name( name ) + "{ ";
 				result += value_to_json( "key", value.first ) + ", ";
 				result += value_to_json( "value", value.second ) + " }";
@@ -71,7 +71,7 @@ namespace daw {
 			}
 
 			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
-			std::string value_to_json_number( boost::string_ref name, Number const & value ) {
+			std::string value_to_json_number( boost::string_view name, Number const & value ) {
 				std::stringstream ss;
 				ss << ::daw::json::details::json_name( name );
 				ss << std::setprecision( std::numeric_limits<Number>::max_digits10 ) << value;
@@ -80,12 +80,12 @@ namespace daw {
 
 			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int>>
 
-			std::string value_to_json_number( boost::string_ref name, Number const & value ) {
+			std::string value_to_json_number( boost::string_view name, Number const & value ) {
 				return ::daw::json::details::json_name( name ) + std::to_string( value );
 			}
 
 			template<typename T>
-				std::string value_to_json( boost::string_ref name, boost::optional<T> const & value ) {
+				std::string value_to_json( boost::string_view name, boost::optional<T> const & value ) {
 					if( value ) {
 						return value_to_json( name, *value );
 					} else {
@@ -94,7 +94,7 @@ namespace daw {
 				}
 
 			template<typename T>
-				std::string value_to_json( boost::string_ref name, daw::optional<T> const & value ) {
+				std::string value_to_json( boost::string_view name, daw::optional<T> const & value ) {
 					if( value ) {
 						return value_to_json( name, *value );
 					} else {
@@ -104,7 +104,7 @@ namespace daw {
 
 
 			template<typename T>
-				std::string value_to_json( boost::string_ref name, daw::optional_poly<T> const & value ) {
+				std::string value_to_json( boost::string_view name, daw::optional_poly<T> const & value ) {
 					if( value ) {
 						return value_to_json( name, *value );
 					} else {
@@ -113,7 +113,7 @@ namespace daw {
 				}
 
 			template<typename T>
-				void value_to_json( boost::string_ref name, std::shared_ptr<T> const & value ) {
+				void value_to_json( boost::string_view name, std::shared_ptr<T> const & value ) {
 					if( !value ) {
 						value_to_json( name );
 					}
@@ -121,7 +121,7 @@ namespace daw {
 				}
 
 			template<typename T>
-				void value_to_json( boost::string_ref name, std::weak_ptr<T> const & value ) {
+				void value_to_json( boost::string_view name, std::weak_ptr<T> const & value ) {
 					if( !value.expired( ) ) {
 						auto shared_value = value.lock( );
 						if( !shared_value ) {
@@ -218,7 +218,7 @@ namespace daw {
 
 			template<typename T, typename std::enable_if_t<has_decode_member<T>::value, long>>
 
-			T decode_to_new( boost::string_ref json_values ) {
+			T decode_to_new( boost::string_view json_values ) {
 				T result;
 				result.decode( json_values );
 				return result;

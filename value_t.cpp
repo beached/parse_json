@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_ref.hpp>
+#include <boost/utility/string_view.hpp>
 #include <cstdint>
 #include <iterator>
 #include <string>
@@ -54,7 +54,7 @@ namespace daw {
 				m_value{ string_value{ range::create_char_range( value ) } },
 				m_value_type{ value_types::string } { }
 
-			value_t::value_t( boost::string_ref value ):
+			value_t::value_t( boost::string_view value ):
 				m_value{ string_value{ value } },
 				m_value_type{ value_types::string } { }
 
@@ -286,19 +286,19 @@ namespace daw {
 				return std::make_pair<string_value, value_t>( std::move( first ), std::move( second ) );
 			}
 
-			object_value::iterator object_value::find( boost::string_ref const key ) {
+			object_value::iterator object_value::find( boost::string_view const key ) {
 				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
 						return item.first == key;
 						} );
 			}
 
-			object_value::const_iterator object_value::find( boost::string_ref const key ) const {
+			object_value::const_iterator object_value::find( boost::string_view const key ) const {
 				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
 						return item.first == key;
 						} );
 			}
 
-			object_value::mapped_type & object_value::operator[]( boost::string_ref key ) {
+			object_value::mapped_type & object_value::operator[]( boost::string_view key ) {
 				auto pos = find( key );
 				if( end( ) == pos ) {
 					pos = insert( pos, std::make_pair<string_value, value_t>( range::create_char_range( key ), value_t( nullptr ) ) );
@@ -306,7 +306,7 @@ namespace daw {
 				return pos->second;
 			}
 
-			object_value::mapped_type const & object_value::operator[]( boost::string_ref key ) const {
+			object_value::mapped_type const & object_value::operator[]( boost::string_view key ) const {
 				auto pos = find( key );
 				if( end( ) == pos ) {
 					throw std::out_of_range( "Attempt to access an undefined value in a const object" );

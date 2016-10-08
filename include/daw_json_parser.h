@@ -23,7 +23,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/utility/string_ref.hpp>
+#include <boost/utility/string_view.hpp>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -59,7 +59,7 @@ namespace daw {
 
 		json_obj parse_json( char const *Begin, char const *End );
 
-		json_obj parse_json( boost::string_ref const json_text );
+		json_obj parse_json( boost::string_view const json_text );
 
 		template<typename T>
 			T get( impl::value_t const & );/*
