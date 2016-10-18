@@ -45,6 +45,9 @@ include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
 set( HEADER_FOLDER "include" )
+set( SOURCE_FOLDER "src" )
+set( TEST_FOLDER "tests" )
+
 include_directories( ${HEADER_FOLDER} )
 
 set( HEADER_FILES
@@ -57,10 +60,10 @@ set( HEADER_FILES
 )
 
 set( SOURCE_FILES
-	daw_json.cpp
-	daw_json_link.cpp
-	daw_json_parser.cpp
-	value_t.cpp
+	${SOURCE_FOLDER}/daw_json.cpp
+	${SOURCE_FOLDER}/daw_json_link.cpp
+	${SOURCE_FOLDER}/daw_json_parser.cpp
+	${SOURCE_FOLDER}/value_t.cpp
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
@@ -70,10 +73,8 @@ target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRAR
 install( TARGETS parse_json DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
-add_executable( parse_json_test EXCLUDE_FROM_ALL parse_json_test.cpp )
-add_dependencies( parse_json_test header_libraries_prj char_range_prj )
-target_link_libraries( parse_json_test parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
-
-add_custom_target( tests )
-add_dependencies( tests parse_json_test )
+add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test.cpp )
+add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj )
+target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( parse_json_test parse_json_test_bin )
 
