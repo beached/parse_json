@@ -93,6 +93,13 @@ namespace daw {
 
 
 			struct value_t {
+				using integral_t = intmax_t;
+				using real_t = double;
+				using string_t = string_value;
+				using boolean_t = bool;
+				using array_t = array_value;
+				using object_t = object_value;
+
 				enum class value_types {
 					integral,
 					real,
@@ -103,28 +110,28 @@ namespace daw {
 					object
 				};
 			private:
-				boost::variant<int64_t, double, string_value, bool, array_value, object_value> m_value;
+				boost::variant<integral_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
 				value_types m_value_type;
 			public:
 				value_t( );
 
-				explicit value_t( int64_t const & value );
+				explicit value_t( integral_t const & value );
 
-				explicit value_t( double const & value );
+				explicit value_t( real_t const & value );
 
 				explicit value_t( std::string const & value );
 
 				explicit value_t( boost::string_view value );
 
-				explicit value_t( string_value value );
+				explicit value_t( string_t value );
 
-				explicit value_t( bool value );
+				explicit value_t( boolean_t value );
 
 				explicit value_t( std::nullptr_t value );
 
-				explicit value_t( array_value value );
+				explicit value_t( array_t value );
 
-				explicit value_t( object_value value );
+				explicit value_t( object_t value );
 
 				~value_t( );
 
@@ -136,29 +143,29 @@ namespace daw {
 
 				value_t & operator=( value_t && );
 
-				int64_t const & get_integral( ) const;
+				integral_t const & get_integral( ) const;
 
-				int64_t & get_integral( );
+				integral_t & get_integral( );
 
-				double const & get_real( ) const;
+				real_t const & get_real( ) const;
 
-				double & get_real( );
+				real_t & get_real( );
 
 				std::string get_string( ) const;
 
-				string_value get_string_value( ) const;
+				string_t get_string_value( ) const;
 
-				bool const & get_boolean( ) const;
+				boolean_t const & get_boolean( ) const;
 
-				bool & get_boolean( );
+				boolean_t & get_boolean( );
 
-				object_value const & get_object( ) const;
+				object_t const & get_object( ) const;
 
-				object_value & get_object( );
+				object_t & get_object( );
 
-				array_value const & get_array( ) const;
+				array_t const & get_array( ) const;
 
-				array_value & get_array( );
+				array_t & get_array( );
 
 				value_types type( ) const;
 
