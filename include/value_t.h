@@ -71,12 +71,16 @@ namespace daw {
 					return members_v;
 				}
 
+				boost::optional<value_t> operator( )( boost::string_view key ) const;
+
 				using key_type = std::string;
 				using mapped_type = value_t;
 
-				iterator find( boost::string_view const key );
+				iterator find( boost::string_view key );
 
-				const_iterator find( boost::string_view const key ) const;
+				const_iterator find( boost::string_view key ) const;
+
+				bool has_member( boost::string_view key ) const;
 
 				mapped_type & operator[]( boost::string_view key );
 

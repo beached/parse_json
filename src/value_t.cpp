@@ -286,16 +286,28 @@ namespace daw {
 				return std::make_pair<string_value, value_t>( std::move( first ), std::move( second ) );
 			}
 
-			object_value::iterator object_value::find( boost::string_view const key ) {
+			object_value::iterator object_value::find( boost::string_view key ) {
 				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
 						return item.first == key;
 						} );
 			}
 
-			object_value::const_iterator object_value::find( boost::string_view const key ) const {
+			object_value::const_iterator object_value::find( boost::string_view key ) const {
 				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
 						return item.first == key;
 						} );
+			}
+
+			bool object_value::has_member( boost::string_view key ) const {
+				return find( key ) != end( );  
+			}
+
+			boost::optional<value_t> object_value::operator( )( boost::string_view key ) const {
+				auto it = find( key );
+				if( it != end( ) ) {
+					return boost::optional<value_t>{ it->second };
+				}
+				return { };
 			}
 
 			object_value::mapped_type & object_value::operator[]( boost::string_view key ) {
