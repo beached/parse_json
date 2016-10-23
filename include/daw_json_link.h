@@ -252,9 +252,9 @@ namespace daw {
 						m_name( std::move( name ) ),
 						m_data_map( ) { }    // TODO: look into moving set_links call into here
 
-					JsonLink( JsonLink const & ) = default;
+					JsonLink( JsonLink const & ) = delete;
 
-					JsonLink & operator=( JsonLink const & ) = default;
+					JsonLink & operator=( JsonLink const & ) = delete;
 
 					JsonLink( JsonLink && ) = default;
 
