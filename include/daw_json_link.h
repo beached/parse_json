@@ -398,7 +398,9 @@ namespace daw {
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
 								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							}
 							return get<T>( member->second );
 						}
@@ -837,8 +839,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							}
 							assert( member->second.is_object( ) );
 							value_ptr->decode( member->second );
@@ -951,8 +954,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							}
 							assert( member->second.is_array( ) );
 							using namespace parse;
@@ -1076,8 +1080,9 @@ namespace daw {
 							auto val_obj = json_values.get_object( );
 							auto member = val_obj.find( name );
 							if( val_obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							}
 							assert( member->second.is_array( ) );
 							using namespace parse;
@@ -1207,8 +1212,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							}
 							assert( member->second.is_string( ) );
 							std::stringstream ss( member->second.get_string( ) );
@@ -1240,8 +1246,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							}
 							assert( member->second.is_string( ) );
 							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
@@ -1276,8 +1283,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::optional<boost::posix_time::ptime> { };
 							} else {
@@ -1315,8 +1323,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional<boost::posix_time::ptime>{ };
 							} else {
@@ -1355,8 +1364,9 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								throw std::runtime_error( "JSON object does not match expected object layout" );
+								std::stringstream ss;
+								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								throw std::runtime_error( ss.str( ) );
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
 							} else {
