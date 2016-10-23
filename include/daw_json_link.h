@@ -241,7 +241,7 @@ namespace daw {
 						data_description_t data_description;
 						data_description.json_type = ::daw::json::schema::get_schema( name, value );
 						data_description.bind_functions = standard_bind_functions( name, value );
-						m_data_map[range::create_char_range( name )] = std::move( data_description );
+						add_to_data_map( name, std::move( data_description ) );
 						return *this;
 					}
 
@@ -590,7 +590,8 @@ namespace daw {
 					void add_to_data_map( boost::string_view name, data_description_t desc ) {
 						auto key = range::create_char_range( name );
 						assert( m_data_map.count( key ) == 0 ); 
-						m_data_map[std::move( key )] = std::move( desc );
+						auto result = m_data_map.emplace( std::move( key ), std::move( desc ) );
+						assert( result.second );
 					}
 
 					///
