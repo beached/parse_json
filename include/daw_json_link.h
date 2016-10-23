@@ -730,6 +730,33 @@ namespace daw {
 						}
 
 					///
+					/// \param name - name of integral value to link
+					/// \param value - a reference to the linked value
+					/// \return - Returns a reference to self
+					template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long> = 0>
+						JsonLink & link_real( boost::string_view name, boost::optional<T> & value ) {
+							auto value_ptr = &value;
+							set_name( value, name.to_string( ) );
+							data_description_t data_description;
+							using daw::json::schema::get_schema;
+							data_description.json_type = get_schema( name, value );
+							data_description.bind_functions.encode = standard_encoder( name, value );
+
+							data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+								assert( value_ptr );
+								auto result = nullable_decoder_helper<double>( name, json_values );
+								*value_ptr = static_cast<T>(*result);
+							};
+							m_data_map[range::create_char_range( name )] = std::move( data_description );
+							return *this;
+						}
+
+
+
+
+
+
+					///
 					/// \param name - name of string value to link
 					/// \param value - a reference to the linked value
 					/// \return - Returns a reference to self
