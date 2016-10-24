@@ -126,8 +126,8 @@ namespace daw {
 				++range;
 				auto const it_first = range.begin( );
 				move_to_quote( range );
-
-				value_t result( range::create_char_range( it_first, range.begin( ) ) );
+				auto const tmp = range::create_char_range( it_first, range.begin( ) );
+				value_t result{ to_string_view( tmp ) };
 				++range;
 				return result;
 			}

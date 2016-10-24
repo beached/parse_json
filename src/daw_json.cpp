@@ -135,6 +135,10 @@ namespace daw {
 			std::string value_to_json( boost::string_view name ) {
 				return json_name( name ) + "null";
 			}
+			
+			std::string undefined_value_to_json( boost::string_view ) {
+				return { }; 
+			}
 
 			std::string value_to_json( impl::string_value name ) {
 				return value_to_json( to_string_view( name ));

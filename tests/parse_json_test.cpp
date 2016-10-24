@@ -119,6 +119,16 @@ struct B: public daw::json::JsonLink<B> {
 	}
 };
 
+struct C : public daw::json::JsonLink<C> {
+	boost::optional<int> a;
+	C( ):
+			daw::json::JsonLink<C>{ },
+			a{ } {
+		
+		link_integral( "a", a );
+	}
+};
+
 template<typename K, typename V>
 bool operator==( std::unordered_map<K, V> const & a, std::unordered_map<K, V> const & b ) {
 	return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ), b.begin( ), b.end( ) );
@@ -178,18 +188,25 @@ struct Test: public daw::json::JsonLink<Test> {
 
 
 int main( int, char ** ) {
+	C ccls;
+	std::cout << ccls.encode( ) << std::endl;
+	ccls.a = 1;
+	std::cout << ccls.encode( ) << std::endl;
 	Test a;
 	a.b = 1234;
 	a.c = 10.001;
 	a.d = "\"This is a string\nline two";
 	a.e = "15\u00B0C";
-	auto s = a.encode( );
+	std::cout << "encode:" << std::endl;
+	auto const s = a.encode( );
 	std::cout << s << std::endl;
 
 //	auto f = from_file<Test>( "file.json", true );
 	Test b;
+	std::cout << "decode:" << std::endl;
 	b.decode( s );
 	std::cout << "b.d=>'" << b.d << "'\n";
+	std::cout << "encode:" << std::endl;
 	std::cout << b.encode( ) << std::endl;
 	b.something( );
 	std::cout << b.encode( ) << std::endl;

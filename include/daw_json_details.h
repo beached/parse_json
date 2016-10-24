@@ -85,56 +85,51 @@ namespace daw {
 			}
 
 			template<typename T>
-				std::string value_to_json( boost::string_view name, boost::optional<T> const & value ) {
-					if( value ) {
-						return value_to_json( name, *value );
-					} else {
-						return value_to_json( name );
-					}
+			std::string value_to_json( boost::string_view name, boost::optional<T> const & value ) {
+				if( value ) {
+					return value_to_json( name, *value );
 				}
+				return value_to_json( name );
+			}
 
 			template<typename T>
-				std::string value_to_json( boost::string_view name, daw::optional<T> const & value ) {
-					if( value ) {
-						return value_to_json( name, *value );
-					} else {
-						return value_to_json( name );
-					}
+			std::string value_to_json( boost::string_view name, daw::optional<T> const & value ) {
+				if( value ) {
+					return value_to_json( name, *value );
 				}
-
+				return value_to_json( name );
+			}
 
 			template<typename T>
-				std::string value_to_json( boost::string_view name, daw::optional_poly<T> const & value ) {
-					if( value ) {
-						return value_to_json( name, *value );
-					} else {
-						return value_to_json( name );
-					}
+			std::string value_to_json( boost::string_view name, daw::optional_poly<T> const & value ) {
+				if( value ) {
+					return value_to_json( name, *value );
 				}
+				return value_to_json( name );
+			}
 
 			template<typename T>
-				void value_to_json( boost::string_view name, std::shared_ptr<T> const & value ) {
-					if( !value ) {
+			void value_to_json( boost::string_view name, std::shared_ptr<T> const & value ) {
+				if( !value ) {
+					value_to_json( name );
+				}
+				value_to_json( name, *value );
+			}
+
+			template<typename T>
+			void value_to_json( boost::string_view name, std::weak_ptr<T> const & value ) {
+				if( !value.expired( ) ) {
+					auto const shared_value = value.lock( );
+					if( !shared_value ) {
 						value_to_json( name );
 					}
-					value_to_json( name, *value );
+					value_to_json( name, *shared_value );
 				}
-
-			template<typename T>
-				void value_to_json( boost::string_view name, std::weak_ptr<T> const & value ) {
-					if( !value.expired( ) ) {
-						auto shared_value = value.lock( );
-						if( !shared_value ) {
-							value_to_json( name );
-						}
-						value_to_json( name, *shared_value );
-					}
-				}
+			}
 		}    // namespace generate
 
 		namespace parse {
 			template<typename Container, typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long>>
-
 			void json_to_value( Container & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<Container>::value, "To parameter on json_to_value cannot be const" );
 				assert( from.is_array( ) );
@@ -148,24 +143,23 @@ namespace daw {
 			}
 
 			template<typename Key, typename Value>
-				void json_to_value( std::pair<Key, Value> & to, ::daw::json::impl::value_t const & from ) {
-					static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-					assert( from.is_object( ) );
+			void json_to_value( std::pair<Key, Value> & to, ::daw::json::impl::value_t const & from ) {
+				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
+				assert( from.is_object( ) );
 
-					auto const & obj = from.get_object( );
-					assert( obj.members_v.size( ) == 2 );
+				auto const & obj = from.get_object( );
+				assert( obj.members_v.size( ) == 2 );
 
-					Key key;
-					auto const & key_obj = obj["key"];
-					json_to_value( key, key_obj );
-					Value value;
-					auto const & value_obj = obj["value"];
-					json_to_value( value, value_obj );
-					to = std::make_pair<Key, Value>( std::move( key ), std::move( value ) );
-				}
+				Key key;
+				auto const & key_obj = obj["key"];
+				json_to_value( key, key_obj );
+				Value value;
+				auto const & value_obj = obj["value"];
+				json_to_value( value, value_obj );
+				to = std::make_pair<Key, Value>( std::move( key ), std::move( value ) );
+			}
 
 			template<typename MapContainer, typename std::enable_if_t<daw::traits::is_map_like<MapContainer>::value, long>>
-
 			void json_to_value( MapContainer & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<MapContainer>::value, "To parameter on json_to_value cannot be const" );
 				assert( from.is_array( ) );
@@ -181,7 +175,6 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, int64_t>::value, long>>
-
 			void json_to_value( T & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
 				assert( from.is_integral( ) );
@@ -192,32 +185,31 @@ namespace daw {
 			}
 
 			template<typename T>
-				void json_to_value( boost::optional<T> & to, ::daw::json::impl::value_t const & from ) {
-					static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-					if( from.is_null( ) ) {
-						to.reset( );
-					} else {
-						T result;
-						json_to_value( result, from );
-						*to = std::move( result );
-					}
+			void json_to_value( boost::optional<T> & to, ::daw::json::impl::value_t const & from ) {
+				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
+				if( from.is_null( ) ) {
+					to.reset( );
+				} else {
+					T result;
+					json_to_value( result, from );
+					*to = std::move( result );
 				}
+			}
 
 			template<typename T>
-				void json_to_value( std::shared_ptr<T> & to, ::daw::json::impl::value_t const & from ) {
-					static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-					assert( to );
-					if( from.is_null( ) ) {
-						to.reset( );
-					} else {
-						T result;
-						json_to_value( result, from );
-						*to = std::move( result );
-					}
+			void json_to_value( std::shared_ptr<T> & to, ::daw::json::impl::value_t const & from ) {
+				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
+				assert( to );
+				if( from.is_null( ) ) {
+					to.reset( );
+				} else {
+					T result;
+					json_to_value( result, from );
+					*to = std::move( result );
 				}
+			}
 
 			template<typename T, typename std::enable_if_t<has_decode_member<T>::value, long>>
-
 			T decode_to_new( boost::string_view json_values ) {
 				T result;
 				result.decode( json_values );

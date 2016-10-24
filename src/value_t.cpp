@@ -287,15 +287,21 @@ namespace daw {
 			}
 
 			object_value::iterator object_value::find( boost::string_view key ) {
-				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
-						return item.first == key;
-						} );
+				auto const k = key.to_string( );
+				return std::find_if( members_v.begin( ), members_v.end( ), [&]( object_value_item const & item ) {
+						// hack be here
+						auto const a = item.first.to_string( );
+						return a == k;
+					} );
 			}
 
 			object_value::const_iterator object_value::find( boost::string_view key ) const {
-				return std::find_if( members_v.begin( ), members_v.end( ), [key]( object_value_item const & item ) {
-						return item.first == key;
-						} );
+				auto const k = key.to_string( );
+				return std::find_if( members_v.begin( ), members_v.end( ), [&]( object_value_item const & item ) {
+					// hack be here
+					auto const a = item.first.to_string( );
+					return a == k;
+				} );
 			}
 
 			bool object_value::has_member( boost::string_view key ) const {

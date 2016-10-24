@@ -49,19 +49,19 @@
 namespace daw {
 	namespace json {
 		template<typename Derived>
-			class JsonLink;
+		class JsonLink;
 
 		template<typename Derived>
-			std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data );
+		std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data );
 
 		template<typename Derived>
-			void json_to_value( JsonLink<Derived> & to, impl::value_t const & from );
+		void json_to_value( JsonLink<Derived> & to, impl::value_t const & from );
 
 		template<typename Derived>
-			std::string value_to_json( boost::string_view name, JsonLink<Derived> const & obj );
+		std::string value_to_json( boost::string_view name, JsonLink<Derived> const & obj );
 
 		template<typename Derived>
-			::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const & obj );
+		::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const & obj );
 
 		namespace schema {
 			::daw::json::impl::value_t get_schema( boost::string_view name );
@@ -74,8 +74,7 @@ namespace daw {
 
 			::daw::json::impl::value_t get_schema( boost::string_view name, boost::posix_time::ptime const & );
 
-			::daw::json::impl::value_t
-				make_type_obj( boost::string_view name, ::daw::json::impl::value_t selected_type );
+			::daw::json::impl::value_t make_type_obj( boost::string_view name, ::daw::json::impl::value_t selected_type );
 
 			template<typename Key, typename Value>
 			auto get_schema( boost::string_view name, std::pair<Key, Value> const & );
@@ -97,7 +96,7 @@ namespace daw {
 			auto get_schema( boost::string_view name, daw::optional<T> const & );
 
 			template<typename T>
-				auto get_schema( boost::string_view name, daw::optional_poly<T> const & );
+			auto get_schema( boost::string_view name, daw::optional_poly<T> const & );
 
 			template<typename T, typename std::enable_if_t<daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value && !std::is_same<std::string, T>::value, long> = 0>
 			auto get_schema( boost::string_view name, T const & );
@@ -248,6 +247,10 @@ namespace daw {
 					public:
 					virtual ~JsonLink( );
 
+					bool is_linked( boost::string_view name ) const {
+						return m_data_map.count( name.to_string( ) ) != 0;
+					}
+
 					JsonLink( std::string name = "" ):
 						m_name( std::move( name ) ),
 						m_data_map( ) { }    // TODO: look into moving set_links call into here
@@ -397,7 +400,6 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
 								throw std::runtime_error( ss.str( ) );
@@ -410,8 +412,6 @@ namespace daw {
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
-								// TODO: determine if correct course of action
-								//throw std::runtime_error( "JSON object does not match expected object layout" );
 								return boost::none;
 							} else if( member->second.is_null( ) ) {
 								return boost::none;
@@ -867,8 +867,8 @@ namespace daw {
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
 								// TODO: determine if correct course of action
-								// throw std::runtime_error( "JSON object does not match expected object layout" );
-								*value_ptr = boost::none;
+								// do not overwrite value
+								//*value_ptr = boost::none;
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::none;
 							} else {
@@ -985,7 +985,8 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								// TODO: determine if correct course of action
 								// throw std::runtime_error( "JSON object does not match expected object layout" );
-								*value_ptr = boost::none;
+								// do not overwrite value
+								// *value_ptr = boost::none;
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::none;
 							} else {
@@ -1112,7 +1113,8 @@ namespace daw {
 							if( val_obj.end( ) == member ) {
 								// TODO: determine if correct course of action
 								// throw std::runtime_error( "JSON object does not match expected object layout" );
-								*value_ptr = boost::none;
+								// do not overwrite value
+								// *value_ptr = boost::none;
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::none;
 							} else {
