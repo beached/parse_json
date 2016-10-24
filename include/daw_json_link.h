@@ -247,8 +247,8 @@ namespace daw {
 					public:
 					virtual ~JsonLink( );
 
-					bool is_linked( boost::string_view name ) const {
-						return m_data_map.count( name.to_string( ) ) != 0;
+					bool is_linked( impl::string_value name ) const {
+						return m_data_map.count( name ) != 0;
 					}
 
 					JsonLink( std::string name = "" ):
