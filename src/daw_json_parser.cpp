@@ -127,7 +127,8 @@ namespace daw {
 				auto const it_first = range.begin( );
 				move_to_quote( range );
 				auto const tmp = range::create_char_range( it_first, range.begin( ) );
-				value_t result{ to_string_view( tmp ) };
+				auto sv = tmp.to_string_view( );
+				value_t result{ std::move( sv ) };
 				++range;
 				return result;
 			}
@@ -264,7 +265,7 @@ namespace daw {
 				}
 				++range;
 				results.shrink_to_fit( );
-				return value_t( std::move( results ) );
+				return value_t( results );
 			}
 
 			value_t parse_value( range::CharRange & range ) {

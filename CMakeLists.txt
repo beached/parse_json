@@ -4,9 +4,10 @@ project( parse_json_prj )
 
 include( ExternalProject )
 
-find_package( Boost 1.58.0 COMPONENTS filesystem system iostreams REQUIRED )
+find_package( Boost 1.58.0 COMPONENTS system filesystem regex unit_test_framework iostreams REQUIRED )
 
 enable_testing( )
+add_definitions( -DBOOST_TEST_DYN_LINK ) 
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 ) 
@@ -16,7 +17,7 @@ else( )
 		set( COMPILER_SPECifIC_LIBS, "-lpthread" )
 	endif( )
 	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" )
-		add_compile_options(-std=c++14 -Weverything -g -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)		
+		add_compile_options(-std=c++14 -Weverything -g -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
 	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
 		add_compile_options(-std=c++14 -Wall -ggdb -Wno-deprecated-declarations)
 	endif()
@@ -29,7 +30,7 @@ externalproject_add(
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/headlibs"
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
- )
+)
 
 externalproject_add( 
 	char_range_prj
@@ -38,7 +39,18 @@ externalproject_add(
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/chrrng"
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
- )
+)
+
+externalproject_add(
+	JSONTestSuite
+	GIT_REPOSITORY "https://github.com/nst/JSONTestSuite.git"
+	GIT_TAG "master"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/tests"
+	CONFIGURE_COMMAND ""
+	INSTALL_COMMAND ""
+	TEST_COMMAND ""
+	BUILD_COMMAND ""
+)
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
@@ -79,4 +91,9 @@ add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_te
 add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj )
 target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
+
+add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
+add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj JSONTestSuite )
+target_link_libraries( json_file_parser_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( json_file_parser_test json_file_parser_test_bin )
 
