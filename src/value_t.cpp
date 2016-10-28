@@ -147,6 +147,10 @@ namespace daw {
 				return get<double>( m_value );
 			}
 
+			std::string to_string( boost::string_view const & str ) {
+				return str.to_string( );
+			}
+
 			std::string value_t::get_string( ) const {
 				daw::exception::daw_throw_on_false( m_value_type == value_types::string );
 				daw::exception::daw_throw_on_false( !m_value.empty( ) );
