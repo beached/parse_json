@@ -21,9 +21,11 @@
 // SOFTWARE.
 
 #include <boost/utility/string_view.hpp>
-#include <cassert>
 #include <iomanip>
 #include <time.h>
+
+#include <daw/daw_exception.h>
+
 #include "daw_json.h"
 #include "daw_json_parser.h"
 
@@ -44,7 +46,7 @@ namespace daw {
 			std::tm tm = { };
 			::daw::localtime_s( &timestamp, &tm );
 			auto count = std::strftime( buffer, 200, format.c_str( ), &tm );
-			assert( count < 200 );
+			daw::exception::daw_throw_on_false( count < 200 );
 			return std::string( buffer, buffer + count + 1 );
 		}
 

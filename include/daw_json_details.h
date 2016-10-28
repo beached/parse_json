@@ -31,6 +31,7 @@
 #include <type_traits>
 #include <utility>
 
+#include <daw/daw_exception.h>
 #include <daw/daw_range.h>
 #include <daw/daw_traits.h>
 #include <daw/daw_optional.h>
@@ -132,7 +133,7 @@ namespace daw {
 			template<typename Container, typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long>>
 			void json_to_value( Container & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<Container>::value, "To parameter on json_to_value cannot be const" );
-				assert( from.is_array( ) );
+				daw::exception::daw_throw_on_false( from.is_array( ) );
 				auto const & source_array = from.get_array( );
 				to.clear( );
 				std::transform( std::begin( source_array ), std::end( source_array ), std::back_inserter( to ), []( ::daw::json::impl::value_t const & value ) {
@@ -145,10 +146,10 @@ namespace daw {
 			template<typename Key, typename Value>
 			void json_to_value( std::pair<Key, Value> & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-				assert( from.is_object( ) );
+				daw::exception::daw_throw_on_false( from.is_object( ) );
 
 				auto const & obj = from.get_object( );
-				assert( obj.members_v.size( ) == 2 );
+				daw::exception::daw_throw_on_false( obj.members_v.size( ) == 2 );
 
 				Key key;
 				auto const & key_obj = obj["key"];
@@ -162,7 +163,7 @@ namespace daw {
 			template<typename MapContainer, typename std::enable_if_t<daw::traits::is_map_like<MapContainer>::value, long>>
 			void json_to_value( MapContainer & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<MapContainer>::value, "To parameter on json_to_value cannot be const" );
-				assert( from.is_array( ) );
+				daw::exception::daw_throw_on_false( from.is_array( ) );
 				auto const & source_array = from.get_array( );
 				to.clear( );
 				std::transform( std::begin( source_array ), std::end( source_array ), std::inserter( to, std::end( to ) ), []( ::daw::json::impl::value_t const & value ) {
@@ -177,10 +178,10 @@ namespace daw {
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, int64_t>::value, long>>
 			void json_to_value( T & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-				assert( from.is_integral( ) );
+				daw::exception::daw_throw_on_false( from.is_integral( ) );
 				auto result = get<int64_t>( from );
-				assert( static_cast<int64_t>(std::numeric_limits<T>::max( )) >= result );
-				assert( static_cast<int64_t>(std::numeric_limits<T>::min( )) <= result );
+				daw::exception::daw_throw_on_false( static_cast<int64_t>(std::numeric_limits<T>::max( )) >= result );
+				daw::exception::daw_throw_on_false( static_cast<int64_t>(std::numeric_limits<T>::min( )) <= result );
 				to = static_cast<T>(result);
 			}
 
@@ -199,7 +200,7 @@ namespace daw {
 			template<typename T>
 			void json_to_value( std::shared_ptr<T> & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-				assert( to );
+				daw::exception::daw_throw_on_false( to );
 				if( from.is_null( ) ) {
 					to.reset( );
 				} else {

@@ -30,6 +30,7 @@
 #include <fstream>
 #include <unordered_map>
 
+#include <daw/daw_memory_mapped_file.h>
 #include "daw_json.h"
 
 using namespace daw::json;
@@ -48,11 +49,9 @@ BOOST_AUTO_TEST_CASE( test_files ) {
 		std::cout << "Testing: " << path.stem( ) << '\n';
 		bool success = false;
 		try {
-			std::ifstream json_file{ path.native( ), std::ios::binary };
+			daw::filesystem::MemoryMappedFile<char> json_file{ path.native( ) };
 			if( json_file ) {
-				std::string json_string;	
-				std::copy( std::istream_iterator<char>{ json_file }, std::istream_iterator<char>{ }, std::back_inserter( json_string ) );
-				volatile auto const json_obj = daw::json::parse_json( json_string.data( ), std::next( json_string.data( ), json_string.size( ) ) );
+				volatile auto const json_obj = daw::json::parse_json( json_file.cbegin( ), json_file.cend( ) );
 				success = true;
 			}
 		} catch(...) {

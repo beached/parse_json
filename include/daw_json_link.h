@@ -38,6 +38,7 @@
 #include <map>
 
 #include <daw/char_range/daw_char_range.h>
+#include <daw/daw_exception.h>
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_bit_queues.h>
 #include <daw/daw_optional.h>
@@ -304,7 +305,7 @@ namespace daw {
 					}
 
 					void encode_file( boost::string_view filename, bool overwrite = true ) const {
-						assert( !filename.empty( ) );								
+						daw::exception::daw_throw_on_false( !filename.empty( ) );								
 						auto fname = filename.to_string( );
 						if( !overwrite && boost::filesystem::exists( fname.c_str( ) ) ) {
 							throw std::runtime_error( "Overwrite not permitted and file exists" );
@@ -389,7 +390,7 @@ namespace daw {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( std::string & json_text ) {
-								assert( value_ptr );
+								daw::exception::daw_throw_on_false( value_ptr );
 								using namespace generate;
 								json_text = value_to_json( name_copy, *value_ptr );
 							};
@@ -424,7 +425,7 @@ namespace daw {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( json_obj json_values ) mutable {
-								assert( value_ptr );
+								daw::exception::daw_throw_on_false( value_ptr );
 								auto new_val = decoder_helper<U>( name_copy, json_values );
 								*value_ptr = new_val;
 							};
@@ -534,7 +535,7 @@ namespace daw {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( json_obj json_values ) mutable {
-								assert( value_ptr );
+								daw::exception::daw_throw_on_false( value_ptr );
 								auto new_val = decoder_helper<U>( name_copy, json_values );
 								*value_ptr = unescape_string( new_val );
 							};
@@ -545,7 +546,7 @@ namespace daw {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( json_obj json_values ) mutable {
-								assert( value_ptr );
+								daw::exception::daw_throw_on_false( value_ptr );
 								auto new_val = nullable_decoder_helper<U>( name_copy, json_values );
 								*value_ptr = new_val;
 							};
@@ -556,7 +557,7 @@ namespace daw {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( json_obj json_values ) mutable {
-								assert( value_ptr );
+								daw::exception::daw_throw_on_false( value_ptr );
 								auto new_val = nullable_decoder_helper<U>( name_copy, json_values );
 								if( new_val ) {
 									*value_ptr = std::move( new_val );
@@ -571,7 +572,7 @@ namespace daw {
 							auto value_ptr = &value;
 							auto name_copy = name.to_string( );
 							return [value_ptr, name_copy]( json_obj json_values ) mutable {
-								assert( value_ptr );
+								daw::exception::daw_throw_on_false( value_ptr );
 								auto new_val = nullable_decoder_helper<U>( name_copy, json_values );
 								if( new_val ) {
 									*value_ptr = std::move( new_val );
@@ -591,9 +592,9 @@ namespace daw {
 
 					void add_to_data_map( boost::string_view name, data_description_t desc ) {
 						auto key = range::create_char_range( name );
-						assert( m_data_map.count( key ) == 0 ); 
+						daw::exception::daw_throw_on_false( m_data_map.count( key ) == 0 ); 
 						auto result = m_data_map.emplace( std::move( key ), std::move( desc ) );
-						assert( result.second );
+						daw::exception::daw_throw_on_false( result.second );
 					}
 
 					///
@@ -611,10 +612,10 @@ namespace daw {
 						data_description.bind_functions.encode = standard_encoder( name, value );
 
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto result = decoder_helper<int64_t>( name, json_values );
-							assert( result <= std::numeric_limits<T>::max( ) );
-							assert( result >= std::numeric_limits<T>::min( ) );
+							daw::exception::daw_throw_on_false( result <= std::numeric_limits<T>::max( ) );
+							daw::exception::daw_throw_on_false( result >= std::numeric_limits<T>::min( ) );
 							*value_ptr = static_cast<T>(result);
 						};
 						add_to_data_map( name, std::move( data_description ) );
@@ -643,12 +644,12 @@ namespace daw {
 						data_description.bind_functions.encode = standard_encoder( name, value );
 
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto result = nullable_decoder_helper<int64_t>( name, json_values );
 							if( result ) {
-								assert( *result <=
+								daw::exception::daw_throw_on_false( *result <=
 										std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-								assert( *result >= std::numeric_limits<T>::min( ) );
+								daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
 							}
 							*value_ptr = static_cast<T>(*result);
 						};
@@ -670,12 +671,12 @@ namespace daw {
 						data_description.bind_functions.encode = standard_encoder( name, value );
 
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto result = nullable_decoder_helper<int64_t>( name, json_values );
 							if( result ) {
-								assert( *result <=
+								daw::exception::daw_throw_on_false( *result <=
 										std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-								assert( *result >= std::numeric_limits<T>::min( ) );
+								daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
 							}
 							*value_ptr = static_cast<T>(*result);
 						};
@@ -697,11 +698,11 @@ namespace daw {
 						data_description.bind_functions.encode = standard_encoder( name, value );
 
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto result = nullable_decoder_helper<int64_t>( name, json_values );
 							if( result ) {
-								assert( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-								assert( *result >= std::numeric_limits<T>::min( ) );
+								daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
+								daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
 							}
 							*value_ptr = static_cast<T>(*result);
 						};
@@ -739,11 +740,11 @@ namespace daw {
 						data_description.bind_functions.encode = standard_encoder( name, value );
 
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto result = nullable_decoder_helper<double>( name, json_values );
 							if( result ) {
-								assert( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-								assert( *result >= std::numeric_limits<T>::min( ) );
+								daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
+								daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
 							}
 							*value_ptr = static_cast<T>(*result);
 						};
@@ -835,7 +836,7 @@ namespace daw {
 						data_description.json_type = value.get_schema_obj( );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -843,7 +844,7 @@ namespace daw {
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
 								throw std::runtime_error( ss.str( ) );
 							}
-							assert( member->second.is_object( ) );
+							daw::exception::daw_throw_on_false( member->second.is_object( ) );
 							value_ptr->decode( member->second );
 						};
 						add_to_data_map( name, std::move( data_description ) );
@@ -862,7 +863,7 @@ namespace daw {
 						data_description.json_type = (T { }).get_schema_obj( );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -891,7 +892,7 @@ namespace daw {
 						data_description.json_type = (T { }).get_schema_obj( );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -920,7 +921,7 @@ namespace daw {
 						data_description.json_type = (T { }).get_schema_obj( );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -950,7 +951,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -958,7 +959,7 @@ namespace daw {
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
 								throw std::runtime_error( ss.str( ) );
 							}
-							assert( member->second.is_array( ) );
+							daw::exception::daw_throw_on_false( member->second.is_array( ) );
 							using namespace parse;
 							json_to_value( *value_ptr, member->second );
 						};
@@ -979,7 +980,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -990,7 +991,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::none;
 							} else {
-								assert( member->second.is_array( ) );
+								daw::exception::daw_throw_on_false( member->second.is_array( ) );
 								using namespace parse;
 								json_to_value( *value_ptr, member->second );
 							}
@@ -1012,7 +1013,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1022,7 +1023,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								value_ptr->reset( );
 							} else {
-								assert( member->second.is_array( ) );
+								daw::exception::daw_throw_on_false( member->second.is_array( ) );
 								using namespace parse;
 								json_to_value( *value_ptr, member->second );
 							}
@@ -1045,7 +1046,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1055,7 +1056,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional_poly<T>{ };
 							} else {
-								assert( member->second.is_array( ) );
+								daw::exception::daw_throw_on_false( member->second.is_array( ) );
 								using namespace parse;
 								json_to_value( *value_ptr, member->second );
 							}
@@ -1077,7 +1078,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto val_obj = json_values.get_object( );
 							auto member = val_obj.find( name );
 							if( val_obj.end( ) == member ) {
@@ -1085,7 +1086,7 @@ namespace daw {
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
 								throw std::runtime_error( ss.str( ) );
 							}
-							assert( member->second.is_array( ) );
+							daw::exception::daw_throw_on_false( member->second.is_array( ) );
 							using namespace parse;
 							json_to_value( *value_ptr, member->second );
 						};
@@ -1107,7 +1108,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto val_obj = json_values.get_object( );
 							auto member = val_obj.find( name );
 							if( val_obj.end( ) == member ) {
@@ -1118,7 +1119,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::none;
 							} else {
-								assert( member->second.is_array( ) );
+								daw::exception::daw_throw_on_false( member->second.is_array( ) );
 								using namespace parse;
 								json_to_value( *value_ptr, member->second );
 							}
@@ -1141,7 +1142,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto val_obj = json_values.get_object( );
 							auto member = val_obj.find( name );
 							if( val_obj.end( ) == member ) {
@@ -1151,7 +1152,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								value_ptr->reset( );
 							} else {
-								assert( member->second.is_array( ) );
+								daw::exception::daw_throw_on_false( member->second.is_array( ) );
 								using namespace parse;
 								json_to_value( *value_ptr, member->second );
 							}
@@ -1175,7 +1176,7 @@ namespace daw {
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = standard_encoder( name, value );
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto val_obj = json_values.get_object( );
 							auto member = val_obj.find( name );
 							if( val_obj.end( ) == member ) {
@@ -1185,7 +1186,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional_poly<T>{ };
 							} else {
-								assert( member->second.is_array( ) );
+								daw::exception::daw_throw_on_false( member->second.is_array( ) );
 								using namespace parse;
 								json_to_value( *value_ptr, member->second );
 							}
@@ -1206,11 +1207,11 @@ namespace daw {
 						using daw::json::schema::get_schema;
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							json_text = generate::value_to_json( name.to_string( ), boost::lexical_cast<std::string>( *value_ptr ) );
 						};
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1218,7 +1219,7 @@ namespace daw {
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
 								throw std::runtime_error( ss.str( ) );
 							}
-							assert( member->second.is_string( ) );
+							daw::exception::daw_throw_on_false( member->second.is_string( ) );
 							std::stringstream ss( member->second.get_string( ) );
 							auto str = ss.str( );
 							ss >> *value_ptr;
@@ -1238,13 +1239,13 @@ namespace daw {
 						using daw::json::schema::get_schema;
 						data_description.json_type = get_schema( name, value );
 						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							json_text = generate::value_to_json( name.to_string( ),
 									boost::posix_time::to_iso_extended_string( *value_ptr ) +
 									'Z' );
 						};
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1252,7 +1253,7 @@ namespace daw {
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
 								throw std::runtime_error( ss.str( ) );
 							}
-							assert( member->second.is_string( ) );
+							daw::exception::daw_throw_on_false( member->second.is_string( ) );
 							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 						};
 						add_to_data_map( name, std::move( data_description ) );
@@ -1270,7 +1271,7 @@ namespace daw {
 						using daw::json::schema::get_schema;
 						data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
 						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							if( *value_ptr ) {
 								json_text = generate::value_to_json( name.to_string( ),
 										boost::posix_time::to_iso_extended_string(
@@ -1281,7 +1282,7 @@ namespace daw {
 							}
 						};
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1291,7 +1292,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::optional<boost::posix_time::ptime> { };
 							} else {
-								assert( member->second.is_string( ) );
+								daw::exception::daw_throw_on_false( member->second.is_string( ) );
 								*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 							}
 						};
@@ -1310,7 +1311,7 @@ namespace daw {
 						using daw::json::schema::get_schema;
 						data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
 						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							if( *value_ptr ) {
 								json_text = generate::value_to_json( name.to_string( ),
 										boost::posix_time::to_iso_extended_string(
@@ -1321,7 +1322,7 @@ namespace daw {
 							}
 						};
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1331,7 +1332,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional<boost::posix_time::ptime>{ };
 							} else {
-								assert( member->second.is_string( ) );
+								daw::exception::daw_throw_on_false( member->second.is_string( ) );
 								*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 							}
 						};
@@ -1351,7 +1352,7 @@ namespace daw {
 						using daw::json::schema::get_schema;
 						data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
 						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							if( *value_ptr ) {
 								json_text = generate::value_to_json( name.to_string( ),
 										boost::posix_time::to_iso_extended_string(
@@ -1362,7 +1363,7 @@ namespace daw {
 							}
 						};
 						data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-							assert( value_ptr );
+							daw::exception::daw_throw_on_false( value_ptr );
 							auto obj = json_values.get_object( );
 							auto member = obj.find( name );
 							if( obj.end( ) == member ) {
@@ -1372,7 +1373,7 @@ namespace daw {
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
 							} else {
-								assert( member->second.is_string( ) );
+								daw::exception::daw_throw_on_false( member->second.is_string( ) );
 								*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 							}
 						};

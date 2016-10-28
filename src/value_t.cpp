@@ -30,6 +30,7 @@
 
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_range.h>
+#include <daw/daw_exception.h>
 #include <daw/daw_operators.h>
 
 #include "value_t.h"
@@ -105,56 +106,56 @@ namespace daw {
 			value_t::~value_t( ) { }
 
 			bool const & value_t::get_boolean( ) const {
-				assert( m_value_type == value_types::boolean );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::boolean );
 				using namespace boost; 
 				using namespace daw; 
 				return get<bool>( m_value );
 			}
 
 			bool & value_t::get_boolean( ) {
-				assert( m_value_type == value_types::boolean );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::boolean );
 				using namespace boost; 
 				using namespace daw; 
 				return get<bool>( m_value );
 			}
 
 			int64_t const & value_t::get_integral( ) const {
-				assert( m_value_type == value_types::integral );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::integral );
 				using namespace boost; 
 				using namespace daw; 
 				return get<int64_t>( m_value );
 			}
 
 			int64_t & value_t::get_integral( ) {
-				assert( m_value_type == value_types::integral );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::integral );
 				using namespace boost; 
 				using namespace daw; 
 				return get<int64_t>( m_value );
 			}
 
 			double const & value_t::get_real( ) const {
-				assert( m_value_type == value_types::real );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::real );
 				using namespace boost; 
 				using namespace daw; 
 				return get<double>( m_value );
 			}
 
 			double & value_t::get_real( ) {
-				assert( m_value_type == value_types::real );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::real );
 				using namespace boost; 
 				using namespace daw; 
 				return get<double>( m_value );
 			}
 
 			std::string value_t::get_string( ) const {
-				assert( m_value_type == value_types::string );
-				assert( !m_value.empty( ) );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::string );
+				daw::exception::daw_throw_on_false( !m_value.empty( ) );
 				return to_string( *this );
 			}
 
 			string_value value_t::get_string_value( ) const {
-				assert( m_value_type == value_types::string );
-				assert( !m_value.empty( ) );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::string );
+				daw::exception::daw_throw_on_false( !m_value.empty( ) );
 				using namespace boost; 
 				using namespace daw; 
 				return get<string_value>( m_value );
@@ -189,28 +190,28 @@ namespace daw {
 			}
 
 			object_value const & value_t::get_object( ) const {
-				assert( m_value_type == value_types::object );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::object );
 				using namespace boost; 
 				using namespace daw; 
 				return get<object_value>( m_value );
 			}
 
 			object_value & value_t::get_object( ) {
-				assert( m_value_type == value_types::object );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::object );
 				using namespace boost; 
 				using namespace daw; 
 				return get<object_value>( m_value );
 			}
 
 			array_value const & value_t::get_array( ) const {
-				assert( m_value_type == value_types::array );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::array );
 				using namespace boost; 
 				using namespace daw; 
 				return get<array_value>( m_value );
 			}
 
 			array_value & value_t::get_array( ) {
-				assert( m_value_type == value_types::array );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::array );
 				using namespace boost; 
 				using namespace daw; 
 				return get<array_value>( m_value );
