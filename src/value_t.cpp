@@ -150,7 +150,8 @@ namespace daw {
 			std::string value_t::get_string( ) const {
 				daw::exception::daw_throw_on_false( m_value_type == value_types::string );
 				daw::exception::daw_throw_on_false( !m_value.empty( ) );
-				return to_string( *this );
+				//return to_string( *this );
+				return get<string_value>( m_value ).to_string( );
 			}
 
 			string_value value_t::get_string_value( ) const {
