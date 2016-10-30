@@ -41,16 +41,16 @@ externalproject_add(
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
-externalproject_add(
-	JSONTestSuite
-	GIT_REPOSITORY "https://github.com/nst/JSONTestSuite.git"
-	GIT_TAG "master"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/tests"
-	CONFIGURE_COMMAND ""
-	INSTALL_COMMAND ""
-	TEST_COMMAND ""
-	BUILD_COMMAND ""
-)
+#externalproject_add(
+#	JSONTestSuite
+#	GIT_REPOSITORY "https://github.com/nst/JSONTestSuite.git"
+#	GIT_TAG "master"
+#	SOURCE_DIR "${CMAKE_BINARY_DIR}/tests"
+#	CONFIGURE_COMMAND ""
+#	INSTALL_COMMAND ""
+#	TEST_COMMAND ""
+#	BUILD_COMMAND ""
+#)
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
@@ -93,7 +93,7 @@ target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARI
 add_test( parse_json_test parse_json_test_bin )
 
 add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
-add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj JSONTestSuite )
+add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj ) #JSONTestSuite )
 target_link_libraries( json_file_parser_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( json_file_parser_test json_file_parser_test_bin )
 
