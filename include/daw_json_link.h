@@ -31,7 +31,7 @@
 #include <functional>
 #include <limits>
 #include <memory>
-#include <ostream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -54,6 +54,9 @@ namespace daw {
 
 		template<typename Derived>
 		std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data );
+
+		template<typename Derived>
+		std::istream & operator>>( std::istream & is, JsonLink<Derived> & data );
 
 		template<typename Derived>
 		void json_to_value( JsonLink<Derived> & to, impl::value_t const & from );
@@ -1526,6 +1529,13 @@ namespace daw {
 			std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data ) {
 				os << data.to_string( );
 				return os;
+			}
+
+			template<typename Derived>
+			std::istream & operator>>( std::istream & is, JsonLink<Derived> & data ) {
+				std::string str{ std::istreambuf_iterator<char>{ is }, std::istreambuf_iterator<char>{ } };
+				data.from_string( str );
+				return is;
 			}
 
 		}    // namespace json
