@@ -145,10 +145,10 @@ auto fsize( Stream & stream ) -> decltype( stream.tellg( ) ) {
 
 //BOOST_AUTO_TEST_CASE( SimpleTest ) {
 //	B b;
-//	auto enc = b.encode( );
+//	auto enc = b.to_string( );
 //	auto parsed = daw::json::parse_json( enc );
 //	B c;
-//	c.decode( parsed );
+//	c.from_json_obj( parsed );
 //	BOOST_CHECK_EQUAL( b, c );
 //}
 //
@@ -189,31 +189,31 @@ struct Test: public daw::json::JsonLink<Test> {
 
 int main( int, char ** ) {
 	C ccls;
-	std::cout << ccls.encode( ) << std::endl;
+	std::cout << ccls.to_string( ) << std::endl;
 	ccls.a = 1;
-	std::cout << ccls.encode( ) << std::endl;
+	std::cout << ccls.to_string( ) << std::endl;
 	Test a;
 	a.b = 1234;
 	a.c = 10.001;
 	a.d = "\"This is a string\nline two";
 	a.e = "15\u00B0C";
-	std::cout << "encode:" << std::endl;
-	auto const s = a.encode( );
-	std::cout << s << std::endl;
+	std::cout << "to_string:" << std::endl;
+	auto const json_str = a.to_string( );
+	std::cout << json_str << std::endl;
 
 //	auto f = from_file<Test>( "file.json", true );
 	Test b;
-	std::cout << "decode:" << std::endl;
-	b.decode( s );
+	std::cout << "from_string:" << std::endl;
+	b.from_string( json_str );
 	std::cout << "b.d=>'" << b.d << "'\n";
-	std::cout << "encode:" << std::endl;
-	std::cout << b.encode( ) << std::endl;
+	std::cout << "to_string:" << std::endl;
+	std::cout << b.to_string( ) << std::endl;
 	b.something( );
-	std::cout << b.encode( ) << std::endl;
+	std::cout << b.to_string( ) << std::endl;
 	Test c;
 	c.something( );
-	c.decode( s );
-	std::cout << c.encode( ) << std::endl;
+	c.from_string( json_str );
+	std::cout << c.to_string( ) << std::endl;
 
 	auto g = from_file<Test>( "file.json" );
 	return EXIT_SUCCESS;
