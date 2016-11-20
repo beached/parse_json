@@ -652,11 +652,10 @@ namespace daw {
 							daw::exception::daw_throw_on_false( value_ptr );
 							auto result = nullable_decoder_helper<int64_t>( name, json_values );
 							if( result ) {
-								daw::exception::daw_throw_on_false( *result <=
-										std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
+								daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
 								daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
+								*value_ptr = static_cast<T>(*result);
 							}
-							*value_ptr = static_cast<T>(*result);
 						};
 						add_to_data_map( name, std::move( data_description ) );
 						return *this;
@@ -750,8 +749,8 @@ namespace daw {
 							if( result ) {
 								daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
 								daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
+								*value_ptr = static_cast<T>(*result);
 							}
-							*value_ptr = static_cast<T>(*result);
 						};
 						add_to_data_map( name, std::move( data_description ) );
 						return *this;
@@ -1303,10 +1302,7 @@ namespace daw {
 						data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
 							daw::exception::daw_throw_on_false( value_ptr );
 							if( *value_ptr ) {
-								json_text = generate::value_to_json( name.to_string( ),
-										boost::posix_time::to_iso_extended_string(
-											*(*value_ptr) ) +
-										'Z' );
+								json_text = generate::value_to_json( name.to_string( ),	boost::posix_time::to_iso_extended_string( *(*value_ptr) ) + 'Z' );
 							} else {
 								json_text = generate::value_to_json( name.to_string( ) );
 							}
