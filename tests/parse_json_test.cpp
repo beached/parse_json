@@ -168,6 +168,15 @@ struct Test: public daw::json::JsonLink<Test> {
 	std::string d;
 	std::string e;
 
+private:
+	void link_values( ) {
+		link_integral( "b", b );
+		link_real( "c", c );
+		link_string( "d", d );
+		link_string( "e", e );
+	}
+
+public:
 	Test( ):
 			daw::json::JsonLink<Test>{ },    // Root objects must be nameless or it isn't valid json
 			b{ 0 },
@@ -175,15 +184,52 @@ struct Test: public daw::json::JsonLink<Test> {
 			d{ },
 			e{ } {
 
-		link_integral( "b", b );
-		link_real( "c", c );
-		link_string( "d", d );
-		link_string( "e", e );
+		link_values( );
+	}
+
+	Test( Test const & other ):
+			daw::json::JsonLink<Test>{ },    // Root objects must be nameless or it isn't valid json
+			b{ other.b },
+			c{ other.c },
+			d{ other.d },
+			e{ other.e } {
+
+		link_values( );
+	}
+
+	Test( Test && other ):
+			daw::json::JsonLink<Test>{ },    // Root objects must be nameless or it isn't valid json
+			b{ std::move( other.b ) },
+			c{ std::move( other.c ) },
+			d{ std::move( other.d ) },
+			e{ std::move( other.e ) } {
+
+		link_values( );
+	}
+
+	Test & operator=( Test const & rhs ) {
+		if( this != &rhs ) {
+			Test tmp{ rhs };
+			using std::swap;
+			swap( *this, tmp );
+		}
+		return *this;
+	}
+
+	Test & operator=( Test && rhs ) {
+		if( this != &rhs ) {
+			Test tmp{ std::move( rhs ) };
+			using std::swap;
+			swap( *this, tmp );
+		}
+		return *this;
 	}
 
 	void something( ) {
 		unlink( "e" );
 	}
+
+
 };
 
 
