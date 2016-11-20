@@ -383,11 +383,22 @@ namespace daw {
 
 				template<typename T>
 				static encode_function_t standard_encoder( boost::string_view name, T const & value ) {
-					return [value_ptr = &value, name_copy = name.to_string( )]( std::string & json_text ) {
-						daw::exception::daw_throw_on_false( value_ptr );
-						using namespace generate;
-						json_text = value_to_json( name_copy, *value_ptr );
-					};
+					struct standard_encoder_t {
+						std::string name_copy;
+						T const * value_ptr;
+
+						standard_encoder_t( boost::string_view n, T const & v ):
+								name_copy{ n.to_string( ) },
+								value_ptr{ &v } { }
+
+						void operator( )( std::string & json_text ) const {
+							daw::exception::daw_throw_on_false( value_ptr );
+							using namespace generate;
+							json_text = value_to_json( name_copy, *value_ptr );
+						}
+					};	// standard_encoder_t
+					encode_function_t result = standard_encoder_t{ name, value };
+					return result;
 				}
 
 				template<typename T>
