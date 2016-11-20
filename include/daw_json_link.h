@@ -288,17 +288,16 @@ namespace daw {
 
 				std::string to_string( ) const {
 					std::stringstream result;
-					std::string tmp;
 					auto range = daw::range::make_range( m_data_map );
-					if( !range.empty( ) ) {
-						auto const & enc = range.front( ).second.bind_functions.encode;
-						enc( tmp );
-						result << tmp;
-						range.move_next( );
-						for( auto const & value : range ) {
-							value.second.bind_functions.encode( tmp );
-							result << ", " << tmp;
-						}
+					std::string tmp;
+
+					range.front( ).second.bind_functions.encode( tmp );
+					result << tmp;
+					range.move_next( );
+
+					for( auto const & value : range ) {
+						value.second.bind_functions.encode( tmp );
+						result << ", " << tmp;
 					}
 					return details::json_name( m_name ) + details::enbrace( result.str( ) );
 				}
