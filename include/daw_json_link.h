@@ -1414,8 +1414,41 @@ namespace daw {
 			}
 
 			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
+			auto array_from_file( boost::string_view file_name, bool use_default_on_error ) {
+				std::vector<Derived> result;
+				if( !boost::filesystem::exists( file_name.data( ) ) ) {
+					if( use_default_on_error ) {
+						return result;
+					}
+					throw std::runtime_error( "file not found" );
+				}
+				std::ifstream in_file;
+				in_file.open( file_name.data( ) );
+				if( !in_file ) {
+					throw std::runtime_error( "Could not open file" );
+				}
+				std::string data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
+				in_file.close( );
+				auto json = parse_json( data );
+				if( !json.is_array( ) ) {
+					throw std::runtime_error( "File is not an array" );
+				}
+				for( auto const & d: json.get_array( ) ) {
+					Derived tmp;
+					tmp.decode( d );
+					result.push_back( std::move( tmp ) );
+				}
+				return result;
+			}
+
+			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
 			auto from_file( boost::string_view file_name ) {
 				return from_file<Derived>( file_name, false );
+			}
+	
+			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
+			auto array_from_file( boost::string_view file_name ) {
+				return array_from_file<Derived>( file_name, false );
 			}
 			
 			template<typename Derived>
