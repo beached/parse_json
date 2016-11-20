@@ -403,6 +403,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							}
 							return get<T>( member->second );
@@ -842,6 +847,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							}
 							daw::exception::daw_throw_on_false( member->second.is_object( ) );
@@ -957,6 +967,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							}
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
@@ -1084,6 +1099,11 @@ namespace daw {
 							if( val_obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: val_obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							}
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
@@ -1217,6 +1237,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							}
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
@@ -1251,6 +1276,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							}
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
@@ -1288,6 +1318,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = boost::optional<boost::posix_time::ptime> { };
@@ -1328,6 +1363,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional<boost::posix_time::ptime>{ };
@@ -1369,6 +1409,11 @@ namespace daw {
 							if( obj.end( ) == member ) {
 								std::stringstream ss;
 								ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
+								ss << " available members { ";
+								for( auto const & m: obj.container( ) ) {
+									ss << "'" << m.first << "' ";
+								}
+								ss << "}";
 								throw std::runtime_error( ss.str( ) );
 							} else if( member->second.is_null( ) ) {
 								*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
