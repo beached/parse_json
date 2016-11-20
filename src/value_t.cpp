@@ -119,31 +119,26 @@ namespace daw {
 				return get<bool>( m_value );
 			}
 
-			int64_t const & value_t::get_integral( ) const {
+			value_t::integral_t value_t::get_integral( ) const {
 				daw::exception::daw_throw_on_false( m_value_type == value_types::integral );
 				using namespace boost; 
 				using namespace daw; 
-				return get<int64_t>( m_value );
+				return get<integral_t>( m_value );
 			}
 
-			int64_t & value_t::get_integral( ) {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::integral );
-				using namespace boost; 
-				using namespace daw; 
-				return get<int64_t>( m_value );
-			}
+			namespace {
+				constexpr bool is_numeric( value_t::value_types const t ) noexcept {
+					return t == value_t::value_types::real || t == value_t::value_types::integral;
+				}
+			}	// namespace anonymous
 
-			double const & value_t::get_real( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::real );
-				using namespace boost; 
-				using namespace daw; 
-				return get<double>( m_value );
-			}
-
-			double & value_t::get_real( ) {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::real );
-				using namespace boost; 
-				using namespace daw; 
+			value_t::real_t value_t::get_real( ) const {
+				daw::exception::daw_throw_on_false( is_numeric( m_value_type )  );
+				using namespace boost;
+				using namespace daw;
+				if( m_value_type == value_types::integral ) {
+					return static_cast<double>( get_integral( ) );
+				}
 				return get<double>( m_value );
 			}
 

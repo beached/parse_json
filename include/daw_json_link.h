@@ -368,7 +368,7 @@ namespace daw {
 				static void call_decode( T &, json_obj ) { }
 
 				static void call_decode( JsonLink & obj, json_obj json_values ) {
-					obj.decode( std::move( json_values ) );
+					obj.from_json_obj( std::move( json_values ) );
 				}
 
 				template<typename T>
@@ -875,7 +875,7 @@ namespace daw {
 						} else if( member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
-							(*value_ptr)->decode( member->second );
+							(*value_ptr)->from_json_obj( member->second );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -904,7 +904,7 @@ namespace daw {
 						} else if( member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
-							(*value_ptr)->decode( member->second );
+							(*value_ptr)->from_json_obj( member->second );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -933,7 +933,7 @@ namespace daw {
 						} else if( member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
-							(*value_ptr)->decode( member->second );
+							(*value_ptr)->from_json_obj( member->second );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1245,6 +1245,40 @@ namespace daw {
 					return *this;
 				}
 
+				template<typename T>
+				JsonLink & link_streamable( boost::string_view name, boost::optional<T> & value ) {
+					auto value_ptr = &value;
+					set_name( value, name );
+					data_description_t data_description;
+					using daw::json::schema::get_schema;
+					data_description.json_type = get_schema( name, value );
+					data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
+						daw::exception::daw_throw_on_false( value_ptr );
+						if( *value_ptr ) {
+							json_text = generate::value_to_json( name.to_string( ), boost::lexical_cast<std::string>( **value_ptr ) );
+						} else {
+							json_text = generate::value_to_json( name.to_string( ) );
+						}
+					};
+					data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
+						daw::exception::daw_throw_on_false( value_ptr );
+						auto obj = json_values.get_object( );
+						auto member = obj.find( name );
+						if( obj.end( ) == member ) {
+							*value_ptr = boost::optional<T>{ };
+						} else if( member->second.is_null( ) ) {
+							*value_ptr = boost::optional<T>{ };
+						} else {
+							daw::exception::daw_throw_on_false( member->second.is_string( ) );
+							std::stringstream ss( member->second.get_string( ) );
+							auto str = ss.str( );
+							ss >> **value_ptr;
+						}
+					};
+					add_to_data_map( name, std::move( data_description ) );
+					return *this;
+				}
+
 				///
 				/// \param name - name of timestamp value(boost ptime) to link.
 				/// \param value - a reference to the linked value
@@ -1419,7 +1453,7 @@ namespace daw {
 			template<typename Derived>
 			void json_to_value( JsonLink<Derived> & to, impl::value_t const & from ) {
 				auto val = from;
-				to.decode( val );
+				to.from_json_obj( val );
 			}
 
 			template<typename Derived>
@@ -1467,7 +1501,7 @@ namespace daw {
 				}
 				for( auto const & d: json.get_array( ) ) {
 					Derived tmp;
-					tmp.decode( d );
+					tmp.from_json_obj( d );
 					result.push_back( std::move( tmp ) );
 				}
 				return result;

@@ -51,7 +51,6 @@ namespace daw {
 				std::vector<object_value_item> members_v;
 
 				object_value( ) = default;
-
 				~object_value( );
 
 				object_value( object_value const & ) = default;
@@ -147,13 +146,9 @@ namespace daw {
 
 				value_t & operator=( value_t && );
 
-				integral_t const & get_integral( ) const;
+				integral_t get_integral( ) const;
 
-				integral_t & get_integral( );
-
-				real_t const & get_real( ) const;
-
-				real_t & get_real( );
+				real_t get_real( ) const;
 
 				std::string get_string( ) const;
 

@@ -97,3 +97,8 @@ add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj 
 target_link_libraries( json_file_parser_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( json_file_parser_test json_file_parser_test_bin )
 
+add_executable( json_link_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_link_test.cpp )
+add_dependencies( json_link_test_bin header_libraries_prj char_range_prj ) #JSONTestSuite )
+target_link_libraries( json_link_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( json_link_test json_link_test_bin )
+
