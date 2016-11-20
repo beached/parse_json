@@ -95,6 +95,9 @@ namespace daw {
 		}    // namespace anonymous
 
 		std::string enquote( boost::string_view value ) {
+			if( value.empty( ) ) {
+				return "\"\"";
+			}
 			return "\"" + escape_string( value.to_string( ) ) + "\"";
 		}
 
