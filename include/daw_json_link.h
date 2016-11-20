@@ -380,9 +380,7 @@ namespace daw {
 
 				template<typename T>
 				static encode_function_t standard_encoder( boost::string_view name, T const & value ) {
-					auto value_ptr = &value;
-					auto name_copy = name.to_string( );
-					return [value_ptr, name_copy]( std::string & json_text ) {
+					return [value_ptr = &value, name_copy = name.to_string( )]( std::string & json_text ) {
 						daw::exception::daw_throw_on_false( value_ptr );
 						using namespace generate;
 						json_text = value_to_json( name_copy, *value_ptr );
@@ -420,9 +418,7 @@ namespace daw {
 
 				template<typename T, typename U = T>
 				static decode_function_t standard_decoder( boost::string_view name, T & value ) {
-					auto value_ptr = &value;
-					auto name_copy = name.to_string( );
-					return [value_ptr, name_copy]( json_obj json_values ) mutable {
+					return [value_ptr = &value, name_copy = name.to_string( )]( json_obj json_values ) mutable {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto new_val = decoder_helper<U>( name_copy, json_values );
 						*value_ptr = new_val;
@@ -1524,5 +1520,13 @@ namespace daw {
 
 			template<typename Derived>
 			JsonLink<Derived>::~JsonLink( ) { }
+
+
+			template<typename Derived>
+			std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data ) {
+				os << data.to_string( );
+				return os;
+			}
+
 		}    // namespace json
 	}    // namespace daw

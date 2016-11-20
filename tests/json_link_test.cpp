@@ -126,7 +126,7 @@ int main( int, char ** ) {
 	std::cout << "obj_b_01->\n" << obj_b_01_str << '\n';
 	B obj_b_02;
 	obj_b_02.from_string( obj_b_01_str );
-		
+	std::cout << "obj_b_02->\n" << obj_b_02 << '\n';		
 	return EXIT_SUCCESS;
 }
 
