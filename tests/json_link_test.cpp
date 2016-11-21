@@ -76,6 +76,7 @@ struct A: public daw::json::JsonLink<A> {
 	std::string string_01;
 	boost::optional<std::string> string_02;
 	std::vector<int> custom_01;
+	std::chrono::system_clock::time_point timestamp_01;
 
 	A( ):
 			JsonLink<A>{ },
@@ -91,7 +92,9 @@ struct A: public daw::json::JsonLink<A> {
 			streamable_02{ },
 			string_01{ },
 			string_02{ },
-			custom_01{ { 2, 4, 6 } } {
+			custom_01{ { 2, 4, 6 } },
+//			timestamp_01{ std::chrono::system_clock::now( ) } {
+			timestamp_01{ } {
 
 
 		link_integral( "integral_01", integral_01 );
@@ -116,6 +119,8 @@ struct A: public daw::json::JsonLink<A> {
 				std::copy( std::istream_iterator<int>{ iss }, std::istream_iterator<int>{ }, std::back_inserter( result ) );
 				return result;
 			} );
+
+		link_iso8601_timestamp( "timestamp_01", timestamp_01 );
 	}
 };	// A
 
