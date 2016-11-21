@@ -1336,7 +1336,7 @@ namespace daw {
 
 			private:
 				template<typename T>
-				date::sys_time<T> parse8601( std::string const & str ) { 
+				static date::sys_time<T> parse8601( std::string const & str ) { 
 					using namespace date;
 					std::istringstream in{ str };
 
@@ -1352,7 +1352,7 @@ namespace daw {
 				}   
 
 				template<typename T>
-				std::string to8601( date::sys_time<T> const & tp ) { 
+				static std::string to8601( date::sys_time<T> const & tp ) { 
 					using namespace std::chrono;
 					using namespace date;
 					return format( "%FT%TZ", tp );
