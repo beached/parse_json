@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <unordered_map>
 
 #include "daw_json.h"
@@ -74,6 +75,7 @@ struct A: public daw::json::JsonLink<A> {
 	boost::optional<Streamable> streamable_02;
 	std::string string_01;
 	boost::optional<std::string> string_02;
+	std::vector<int> custom_01;
 
 	A( ):
 			JsonLink<A>{ },
@@ -88,7 +90,9 @@ struct A: public daw::json::JsonLink<A> {
 			streamable_01{ },
 			streamable_02{ },
 			string_01{ },
-			string_02{ } {
+			string_02{ },
+			custom_01{ { 2, 4, 6 } } {
+
 
 		link_integral( "integral_01", integral_01 );
 		link_integral( "integral_02", integral_02 );
@@ -102,6 +106,16 @@ struct A: public daw::json::JsonLink<A> {
 		link_streamable( "streamable_02", streamable_02 );
 		link_string( "string_01", string_01 );
 		link_string( "string_02", string_02 );
+		link_custom( "custom_01", custom_01, []( std::vector<int> const & v ) -> std::string {
+				std::stringstream result;
+				std::copy( v.begin( ), v.end( ), std::ostream_iterator<int>{ result, " " } );
+				return result.str( );
+			}, []( std::string const & str ) -> std::vector<int> {
+				std::vector<int> result;
+				std::istringstream iss{ str };
+				std::copy( std::istream_iterator<int>{ iss }, std::istream_iterator<int>{ }, std::back_inserter( result ) );
+				return result;
+			} );
 	}
 };	// A
 
