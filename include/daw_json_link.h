@@ -385,11 +385,12 @@ namespace daw {
 					return derived( );
 				}
 
+			private:
 				void reset_jsonlink( ) {
 					m_data_map.clear( );
 					m_name.clear( );
 				}
-
+			public:
 				template<typename T>
 				static void call_decode( T &, json_obj ) { }
 
