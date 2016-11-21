@@ -91,7 +91,7 @@ set( SOURCE_FILES
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json header_libraries_prj char_range_prj date_prj )
-target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( parse_json char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
