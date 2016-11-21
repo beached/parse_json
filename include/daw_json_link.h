@@ -1361,7 +1361,7 @@ namespace daw {
 			public:
 				template<typename T>
 				JsonLink & link_8601timestamp( boost::string_view name, date::sys_time<T> & ts ) {
-					link_custom( name, ts, &to8601<T>, &from8601<T> );
+					link_custom( name, ts, []( auto const & v ) { return to8601<T>( v ); }, []( auto const & s ) { return from8601<T>( s ); } );
 				}
 
 				///
