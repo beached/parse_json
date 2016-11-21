@@ -277,11 +277,11 @@ namespace daw {
 
 				JsonLink( JsonLink const & ) = delete;
 
-				JsonLink & operator=( JsonLink const & ) = delete;
+				JsonLink & operator=( JsonLink const & ) = default;
 
 				JsonLink( JsonLink && ) = delete;
 
-				JsonLink & operator=( JsonLink && ) = delete;
+				JsonLink & operator=( JsonLink && ) = default;
 
 				std::string & json_object_name( ) {
 					return m_name;
