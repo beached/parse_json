@@ -27,6 +27,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/string_view.hpp>
+#include <chrono>
+#include <date/date.h>
+#include <date/tz.h>
 #include <fstream>
 #include <functional>
 #include <limits>
@@ -1330,6 +1333,37 @@ namespace daw {
 					add_to_data_map( name, std::move( data_description ) );
 					return *this;
 				}
+
+			private:
+				template<typename T>
+				date::sys_time<T> parse8601( std::string const & str ) { 
+					using namespace date;
+					std::istringstream in{ str };
+
+					date::sys_time<T> tp; 
+					date::parse( in, "%FT%TZ", tp );
+					if( in.fail( ) ) { 
+						in.clear();
+						in.exceptions( std::ios::failbit );
+						in.str( str );
+						date::parse( in, "%FT%T%Ez", tp );
+					}   
+					return tp; 
+				}   
+
+				template<typename T>
+				std::string to8601( date::sys_time<T> const & tp ) { 
+					using namespace std::chrono;
+					using namespace date;
+					return format( "%FT%TZ", tp );
+				} 
+
+			public:
+				template<typename T>
+				JsonLink & link_8601timestamp( boost::string_view name, date::sys_time<T> & ts ) {
+					link_custom( name, ts, &parse8601<T>, &to8601<T> );
+				}
+
 				///
 				/// \param name - name of timestamp value(boost ptime) to link.
 				/// \param value - a reference to the linked value

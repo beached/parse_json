@@ -41,6 +41,15 @@ externalproject_add(
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
+externalproject_add(
+	date_prj
+	GIT_REPOSITORY "https://github.com/beached/date.git"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/date"
+	GIT_TAG "master"
+	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
+)
+
 #externalproject_add(
 #	JSONTestSuite
 #	GIT_REPOSITORY "https://github.com/nst/JSONTestSuite.git"
@@ -81,7 +90,7 @@ set( SOURCE_FILES
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( parse_json header_libraries_prj char_range_prj )
+add_dependencies( parse_json header_libraries_prj char_range_prj date_prj )
 target_link_libraries( parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
