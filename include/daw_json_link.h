@@ -377,6 +377,14 @@ namespace daw {
 					return derived( );
 				}
 
+				auto & to_file( boost::string_view file_name, bool overwrite = true ) {
+					daw::exception::daw_throw_on_true( !overwrite && boost::filesystem::exists( file_name.data( ) ), "File exists but overwrite not permitted" );
+					std::ofstream out_file;
+					out_file.open( file_name.data( ), std::ios::out | std::ios::trunc );
+					out_file << to_string( ); 
+					return derived( );
+				}
+
 				void reset_jsonlink( ) {
 					m_data_map.clear( );
 					m_name.clear( );
@@ -1530,7 +1538,7 @@ namespace daw {
 			
 			template<typename Derived>
 			void to_file( boost::string_view file_name, JsonLink<Derived> const & obj, bool overwrite ) {
-				throw std::runtime_error( "to_file is unimplemented" );		
+				obj.to_file( file_name, overwrite );
 			}
 
 			template<typename Derived>
