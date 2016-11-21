@@ -1336,7 +1336,7 @@ namespace daw {
 
 			private:
 				template<typename T>
-				static date::sys_time<T> parse8601( std::string const & str ) { 
+				static date::sys_time<T> from8601( std::string const & str ) { 
 					using namespace date;
 					std::istringstream in{ str };
 
@@ -1361,7 +1361,7 @@ namespace daw {
 			public:
 				template<typename T>
 				JsonLink & link_8601timestamp( boost::string_view name, date::sys_time<T> & ts ) {
-					link_custom( name, ts, &parse8601<T>, &to8601<T> );
+					link_custom( name, ts, &to8601<T>, &from8601<T> );
 				}
 
 				///
