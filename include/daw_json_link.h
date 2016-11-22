@@ -1407,15 +1407,14 @@ namespace daw {
 					static auto const to_ts = []( impl::value_t::integral_t const & i ) -> std::chrono::time_point<std::chrono::system_clock, Duration> {
 						using namespace date;
 						using namespace std::chrono;
-						static system_clock::time_point const epoch = sys_days{ jan/1/1970 } + 0h;
-						std::cerr << "Converting " << i << "seconds\n";
+						static std::chrono::system_clock::time_point const epoch{ };
 						return epoch + seconds{ i };
 					};
 
 					static auto const from_ts = []( std::chrono::time_point<std::chrono::system_clock, Duration> const & t ) -> impl::value_t::integral_t {
 						using namespace date;
 						using namespace std::chrono;
-						static system_clock::time_point const epoch = sys_days{ jan/1/1970 } + 0h;
+						static std::chrono::system_clock::time_point const epoch{ };
 						return std::chrono::duration_cast<std::chrono::seconds>( t - epoch ).count( );
 					};
 					return link_jsonintegral( name, ts, from_ts, to_ts );
