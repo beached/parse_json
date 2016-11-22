@@ -125,7 +125,7 @@ struct A: public daw::json::JsonLink<A> {
 			} );
 
 		link_iso8601_timestamp( "timestamp_01", timestamp_01 );
-		link_epoch_seconds_timestamp( "timestamp_02", timestamp_02 );
+		link_epoch_milliseconds_timestamp( "timestamp_02", timestamp_02 );
 	}
 };	// A
 

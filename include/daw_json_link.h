@@ -1403,13 +1403,12 @@ namespace daw {
 				}
 
 				template<typename Duration>
-				auto & link_epoch_seconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
+				auto & link_epoch_milliseconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
 					static auto const to_ts = []( impl::value_t::integral_t const & i ) {
 						using namespace date;
 						using namespace std::chrono;
 						static std::chrono::system_clock::time_point const epoch{ };
-						auto result = epoch + seconds{ i };
-						std::cerr << "to_ts: " << i << " -> " << date::format( "%FT%TZ", result ) << '\n';
+						auto result = epoch + milliseconds{ i };
 						return result;
 					};
 
@@ -1417,8 +1416,7 @@ namespace daw {
 						using namespace date;
 						using namespace std::chrono;
 						static std::chrono::system_clock::time_point const epoch{ };
-						auto result = std::chrono::duration_cast<std::chrono::seconds>( t - epoch ).count( );
-						std::cerr << "from_ts: " << date::format( "%FT%TZ", t ) << " -> " << result << '\n';
+						auto result = std::chrono::duration_cast<std::chrono::milliseconds>( t - epoch ).count( );
 						return result;
 					};
 					return link_jsonintegral( name, ts, from_ts, to_ts );
