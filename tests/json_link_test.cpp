@@ -99,7 +99,7 @@ struct A: public daw::json::JsonLink<A> {
 			string_02{ },
 			custom_01{ { 2, 4, 6 } },
 			timestamp_01{ },
-			timestamp_02{ sys_days{ jan/1/1970 } + 1000s } {
+			timestamp_02{ std::chrono::system_clock::now( ) } {
 
 		link_integral( "integral_01", integral_01 );
 		link_integral( "integral_02", integral_02 );

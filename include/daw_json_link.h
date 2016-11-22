@@ -1408,6 +1408,7 @@ namespace daw {
 						using namespace date;
 						using namespace std::chrono;
 						static system_clock::time_point const epoch = sys_days{ jan/1/1970 } + 0h;
+						std::cerr << "Converting " << i << "seconds\n";
 						return epoch + seconds{ i };
 					};
 
