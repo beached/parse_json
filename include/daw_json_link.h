@@ -1412,7 +1412,10 @@ namespace daw {
 					};
 
 					static auto const from_ts = []( std::chrono::time_point<std::chrono::system_clock, Duration> const & t ) -> impl::value_t::integral_t {
-						return std::chrono::duration_cast<std::chrono::seconds>( t.time_since_epoch( ) ).count( );
+						using namespace date;
+						using namespace std::chrono;
+						static system_clock::time_point const epoch = sys_days{ jan/1/1970 } + 0h;
+						return std::chrono::duration_cast<std::chrono::seconds>( t - epoch ).count( );
 					};
 					return link_jsonintegral( name, ts, from_ts, to_ts );
 				}
