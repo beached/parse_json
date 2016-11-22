@@ -1304,7 +1304,7 @@ namespace daw {
 
 				/// Summary: Encoder Function has signature std::string( T const & ) and Decoder function has signature T( std::string const & )
 				template<typename T, typename EncoderFunction, typename DecoderFunction>
-				auto & link_custom( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+				auto & link_jsonstring( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
 					set_name( value, name );
 					data_description_t data_description;
 					using daw::json::schema::get_schema;
@@ -1334,7 +1334,37 @@ namespace daw {
 					return derived( );
 				}
 
-
+				template<typename T, typename EncoderFunction, typename DecoderFunction>
+				auto & link_jsonintegral( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+					set_name( value, name ); 
+					data_description_t data_description;
+					using daw::json::schema::get_schema;
+					data_description.json_type = get_schema( name, impl::value_t::integral_t{ } );
+					data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
+						daw::exception::daw_throw_on_false( value_ptr );
+						json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
+					};
+					data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
+						daw::exception::daw_throw_on_false( value_ptr );
+						auto const & obj = json_values.get_object( );
+						auto member = obj.find( name_copy );
+						if( obj.end( ) == member ) {
+							std::stringstream ss;
+							ss << "JSON object does not match expected object layout.  Missing member '" << name_copy << "'";
+							ss << " available members { ";
+							for( auto const & m: obj.container( ) ) {
+								ss << "'" << m.first << "' ";
+							}
+							ss << "}";
+							throw std::runtime_error( ss.str( ) );
+						}
+						daw::exception::daw_throw_on_false( member->second.is_integral( ) );
+						*value_ptr = decode_function( member->second.get_integral( ) );
+					};
+					add_to_data_map( name, std::move( data_description ) );
+				
+					return derived( );
+				}
 			public:
 				template<typename Duration>
 				auto & link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
@@ -1362,7 +1392,7 @@ namespace daw {
 						return date::format( fmt, tp );
 					};
 
-					return link_custom( name, ts, to_ts, from_ts );
+					return link_jsonstring( name, ts, to_ts, from_ts );
 				}
 
 
@@ -1370,6 +1400,21 @@ namespace daw {
 				auto & link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
 					static std::vector<std::string> const fmts = { "%FT%TZ", "%FT%T%Ez" };
 					return link_timestamp( name, ts, fmts  );
+				}
+
+				template<typename Duration>
+				auto & link_epoch_seconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
+					static auto const to_ts = []( impl::value_t::integral_t const & i ) -> std::chrono::time_point<std::chrono::system_clock, Duration> {
+						using namespace date;
+						using namespace std::chrono;
+						static system_clock::time_point const epoch = sys_days{ jan/1/1970 } + 0h;
+						return epoch + seconds{ i };
+					};
+
+					static auto const from_ts = []( std::chrono::time_point<std::chrono::system_clock, Duration> const & t ) -> impl::value_t::integral_t {
+						return std::chrono::duration_cast<std::chrono::seconds>( t.time_since_epoch( ) ).count( );
+					};
+					return link_jsonintegral( name, ts, from_ts, to_ts );
 				}
 
 				///

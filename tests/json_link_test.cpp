@@ -23,7 +23,9 @@
 //#define BOOST_TEST_MODULE parse_json_test
 //#include <boost/test/unit_test.hpp>
 
+#include <date/date.h>
 #include <boost/optional.hpp>
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -34,6 +36,8 @@
 #include "daw_json_link.h"
 
 using namespace daw::json;
+using namespace date;
+using namespace std::chrono;
 
 struct Streamable {
 	std::string a;
@@ -77,6 +81,7 @@ struct A: public daw::json::JsonLink<A> {
 	boost::optional<std::string> string_02;
 	std::vector<int> custom_01;
 	std::chrono::system_clock::time_point timestamp_01;
+	std::chrono::system_clock::time_point timestamp_02;
 
 	A( ):
 			JsonLink<A>{ },
@@ -93,9 +98,8 @@ struct A: public daw::json::JsonLink<A> {
 			string_01{ },
 			string_02{ },
 			custom_01{ { 2, 4, 6 } },
-//			timestamp_01{ std::chrono::system_clock::now( ) } {
-			timestamp_01{ } {
-
+			timestamp_01{ },
+			timestamp_02{ sys_days{ jan/1/1970 } + 1000s } {
 
 		link_integral( "integral_01", integral_01 );
 		link_integral( "integral_02", integral_02 );
@@ -109,7 +113,7 @@ struct A: public daw::json::JsonLink<A> {
 		link_streamable( "streamable_02", streamable_02 );
 		link_string( "string_01", string_01 );
 		link_string( "string_02", string_02 );
-		link_custom( "custom_01", custom_01, []( std::vector<int> const & v ) -> std::string {
+		link_jsonstring( "custom_01", custom_01, []( std::vector<int> const & v ) -> std::string {
 				std::stringstream result;
 				std::copy( v.begin( ), v.end( ), std::ostream_iterator<int>{ result, " " } );
 				return result.str( );
@@ -121,6 +125,7 @@ struct A: public daw::json::JsonLink<A> {
 			} );
 
 		link_iso8601_timestamp( "timestamp_01", timestamp_01 );
+		link_epoch_seconds_timestamp( "timestamp_02", timestamp_02 );
 	}
 };	// A
 
