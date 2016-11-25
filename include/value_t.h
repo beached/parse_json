@@ -187,6 +187,20 @@ namespace daw {
 				int compare( value_t const & rhs ) const;
 			};    // value_t
 
+			
+			std::string to_string( value_t::value_types type ) noexcept {
+				switch( type ) {
+					case integral: return "integral";
+					case real: return "real";
+					case string: return "string";
+					case boolean: return "boolean";
+					case null: return "null";
+					case array: return "array";
+					case object: return "object";
+				}
+				std::abort( );
+			}
+
 			using value_opt_t = boost::optional<value_t>;
 
 			std::string to_string( value_t const & value );
