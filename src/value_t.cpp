@@ -338,6 +338,21 @@ namespace daw {
 			}
 
 			create_comparison_operators( value_t );
+
+			std::string to_string( value_t::value_types type ) noexcept {
+				switch( type ) {
+					case value_t::value_types::integral: return "integral";
+					case value_t::value_types::real: return "real";
+					case value_t::value_types::string: return "string";
+					case value_t::value_types::boolean: return "boolean";
+					case value_t::value_types::null: return "null";
+					case value_t::value_types::array: return "array";
+					case value_t::value_types::object: return "object";
+				}
+				std::abort( );
+			}
+
+
 		}    // namespace impl
 	}    // namespace json
 }    // namespace daw
