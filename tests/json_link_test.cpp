@@ -57,7 +57,7 @@ struct Streamable {
 std::istream & operator>>( std::istream & is, Streamable & value ) {
 	auto const data_size = static_cast<size_t>(is.rdbuf( )->in_avail( ));
 	value.a.reserve( data_size );
-	is.read( &value.a[0], data_size );
+	is.read( &value.a[0], static_cast<long>(data_size) );
 	return is;
 }
 
@@ -100,7 +100,13 @@ struct A: public daw::json::JsonLink<A> {
 			custom_01{ { 2, 4, 6 } },
 			timestamp_01{ },
 			timestamp_02{ std::chrono::system_clock::now( ) } {
+			
+		set_jsonlinks( );		
+	}
 
+	~A( );
+
+	void set_jsonlinks( ) {
 		link_integral( "integral_01", integral_01 );
 		link_integral( "integral_02", integral_02 );
 		link_real( "real_01", real_01 );
@@ -129,6 +135,8 @@ struct A: public daw::json::JsonLink<A> {
 	}
 };	// A
 
+A::~A( ) { }
+
 struct B: public daw::json::JsonLink<B> {
 	A object_01;
 	boost::optional<A> object_02;
@@ -137,11 +145,19 @@ struct B: public daw::json::JsonLink<B> {
 			daw::json::JsonLink<B>{ },
 			object_01{ },
 			object_02{ } {
+	
+		set_jsonlinks( );
+	}
+	
+	~B( );
 
+	void set_jsonlinks( ) {
 		link_object( "object_01", object_01 );
 		link_object( "object_02", object_02 );
 	}
 };	// B
+
+B::~B( ) { }
 
 int main( int, char ** ) {
 	B obj_b_01;
