@@ -46,6 +46,7 @@ _ReSharper*/
 x64/
 x86/
 build/
+cmake-build-*/
 bld/
 [Bb]in/
 [Oo]bj/
