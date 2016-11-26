@@ -257,14 +257,13 @@ namespace daw {
 				///
 				/// \param name - name of integral value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				template<typename T> auto & link_value( boost::string_view name, T & value ) {
+				template<typename T> 
+				void link_value( boost::string_view name, T & value ) {
 					set_name( value, name );
 					data_description_t data_description;
 					data_description.json_type = ::daw::json::schema::get_schema( name, value );
 					data_description.bind_functions = standard_bind_functions( name, value );
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 			public:
@@ -275,15 +274,12 @@ namespace daw {
 				}
 
 				JsonLink( std::string name = "" ):
-					m_name( std::move( name ) ),
-					m_data_map( ) { }    // TODO: look into moving set_links call into here
+					m_name{ std::move( name ) },
+					m_data_map{ } { }
 
 				JsonLink( JsonLink const & ) = delete;
-
-				JsonLink & operator=( JsonLink const & ) = default;
-
 				JsonLink( JsonLink && ) = delete;
-
+				JsonLink & operator=( JsonLink const & ) = default;
 				JsonLink & operator=( JsonLink && ) = default;
 
 				std::string & json_object_name( ) {
@@ -338,37 +334,25 @@ namespace daw {
 					out_file.close( );
 				}
 
-			private:
-				Derived & derived( ) {
-					return *static_cast<Derived *>(this);
-				}
-
-				Derived const & derived( ) const {
-					return *static_cast<Derived *>(this);
-				}
-
 			public:
 
-				auto & from_json_obj( json_obj const & json_values ) {
+				void from_json_obj( json_obj const & json_values ) {
 					for( auto & value : m_data_map ) {
 						value.second.bind_functions.decode( json_values );
 					}
-					return derived( );
 				}
 
-				auto & from_string( boost::string_view const json_text ) {
+				void from_string( boost::string_view const json_text ) {
 					auto tmp = parse_json( json_text );
 					from_json_obj( std::move( tmp ) );
-					return derived( );
 				}
 
-				auto & from_string( char const *json_text_begin, char const *json_text_end ) {
+				void from_string( char const *json_text_begin, char const *json_text_end ) {
 					auto tmp = parse_json( json_text_begin, json_text_end );
 					from_json_obj( std::move( tmp ) );
-					return derived( );
 				}
 
-				auto & from_file( boost::string_view filename ) {
+				void from_file( boost::string_view filename ) {
 					std::ifstream in_file;
 					in_file.open( filename.data( ) );
 					if( !in_file ) {
@@ -377,22 +361,15 @@ namespace daw {
 					std::string data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
 					in_file.close( );
 					parse_json( data );
-					return derived( );
 				}
 
-				auto & to_file( boost::string_view file_name, bool overwrite = true ) {
+				void to_file( boost::string_view file_name, bool overwrite = true ) {
 					daw::exception::daw_throw_on_true( !overwrite && boost::filesystem::exists( file_name.data( ) ), "File exists but overwrite not permitted" );
 					std::ofstream out_file;
 					out_file.open( file_name.data( ), std::ios::out | std::ios::trunc );
 					out_file << to_string( ); 
-					return derived( );
 				}
 
-			private:
-				void reset_jsonlink( ) {
-					m_data_map.clear( );
-					m_name.clear( );
-				}
 			public:
 				template<typename T>
 				static void call_decode( T &, json_obj ) { }
@@ -610,7 +587,7 @@ namespace daw {
 					bind_functions.decode = standard_decoder( name, value );
 					return bind_functions;
 				}
-
+			
 				void add_to_data_map( boost::string_view name, data_description_t desc ) {
 					auto key = range::create_char_range( name );
 					daw::exception::daw_throw_on_false( m_data_map.count( key ) == 0 ); 
@@ -621,9 +598,8 @@ namespace daw {
 				///
 				/// \param name - name of integral value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				auto & link_integral( boost::string_view name, T & value ) {
+				void link_integral( boost::string_view name, T & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -640,7 +616,6 @@ namespace daw {
 						*value_ptr = static_cast<T>(result);
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
@@ -654,9 +629,8 @@ namespace daw {
 				///
 				/// \param name - name of integral value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				auto & link_integral( boost::string_view name, boost::optional<T> & value ) {
+				void link_integral( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -674,15 +648,13 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of integral value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				auto & link_integral( boost::string_view name, daw::optional<T> & value ) {
+				void link_integral( boost::string_view name, daw::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -701,15 +673,13 @@ namespace daw {
 						*value_ptr = static_cast<T>(*result);
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of integral value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				auto & link_integral( boost::string_view name, daw::optional_poly<T> & value ) {
+				void link_integral( boost::string_view name, daw::optional_poly<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -727,15 +697,13 @@ namespace daw {
 						*value_ptr = static_cast<T>(*result);
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of real(float/double...) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_real( boost::string_view name, T & value ) {
+				void link_real( boost::string_view name, T & value ) {
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
 					using daw::json::schema::get_schema;
@@ -743,15 +711,13 @@ namespace daw {
 					data_description.bind_functions.encode = standard_encoder( name, value );
 					data_description.bind_functions.decode = standard_decoder<double>( name, value );
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of real value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long> = 0>
-				auto & link_real( boost::string_view name, boost::optional<T> & value ) {
+				void link_real( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -769,38 +735,33 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of string value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_string( boost::string_view name, boost::optional<std::string> & value ) {
+				void link_string( boost::string_view name, boost::optional<std::string> & value ) {
 					return link_value( name, value );
 				}
 
 				///
 				/// \param name - name of string value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_string( boost::string_view name, daw::optional<std::string> & value ) {
+				void link_string( boost::string_view name, daw::optional<std::string> & value ) {
 					return link_value( name, value );
 				}
 
 				///
 				/// \param name - name of string value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_string( boost::string_view name, daw::optional_poly<std::string> & value ) {
+				void link_string( boost::string_view name, daw::optional_poly<std::string> & value ) {
 					return link_value( name, value );
 				}
 
 				///
 				/// \param name - name of string value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_string( boost::string_view name, std::string & value ) {
+				void link_string( boost::string_view name, std::string & value ) {
 					//return link_value( name, value );
 					// Need to parse escaped values
 					set_name( value, name );
@@ -809,47 +770,41 @@ namespace daw {
 					data_description.bind_functions.encode = standard_encoder( name, value );
 					data_description.bind_functions.decode = string_decoder( name, value );
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of boolean(true/false) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_boolean( boost::string_view name, bool & value ) {
+				void link_boolean( boost::string_view name, bool & value ) {
 					return link_value( name, value );
 				}
 
 				///
 				/// \param name - name of boolean(true/false) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_boolean( boost::string_view name, boost::optional<bool> & value ) {
+				void link_boolean( boost::string_view name, boost::optional<bool> & value ) {
 					return link_value( name, value );
 				}
 	
 				///
 				/// \param name - name of boolean(true/false) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_boolean( boost::string_view name, daw::optional<bool> & value ) {
+				void link_boolean( boost::string_view name, daw::optional<bool> & value ) {
 					return link_value( name, value );
 				}
 
 				///
 				/// \param name - name of boolean(true/false) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_boolean( boost::string_view name, daw::optional_poly<bool> & value ) {
+				void link_boolean( boost::string_view name, daw::optional_poly<bool> & value ) {
 					return link_value( name, value );
 				}
 
 				///
 				/// \param name - name of JsonLink<type> obect value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_object( boost::string_view name, JsonLink<T> & value ) {
+				void link_object( boost::string_view name, JsonLink<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -873,15 +828,13 @@ namespace daw {
 						value_ptr->from_json_obj( member->second );
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of JsonLink<type> obect value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-				auto & link_object( boost::string_view name, boost::optional<T> & value ) {
+				void link_object( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -902,15 +855,13 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of JsonLink<type> obect value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-				auto & link_object( boost::string_view name, daw::optional<T> & value ) {
+				void link_object( boost::string_view name, daw::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -931,15 +882,13 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of JsonLink<type> obect value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-				auto & link_object( boost::string_view name, daw::optional_poly<T> & value ) {
+				void link_object( boost::string_view name, daw::optional_poly<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -960,15 +909,13 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
 				}
 
 				///
 				/// \param name - name of array(vector) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_array( boost::string_view name, T & value ) {
+				void link_array( boost::string_view name, T & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -994,15 +941,14 @@ namespace daw {
 						json_to_value( *value_ptr, member->second );
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				///
 				/// \param name - name of array(vector) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_array( boost::string_view name, boost::optional<T> & value ) {
+				void link_array( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1027,15 +973,14 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 				
 				///
 				/// \param name - name of array(vector) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_array( boost::string_view name, daw::optional<T> & value ) {
+				void link_array( boost::string_view name, daw::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1059,16 +1004,15 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 
 				///
 				/// \param name - name of array(vector) value to link
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_array( boost::string_view name, daw::optional_poly<T> & value ) {
+				void link_array( boost::string_view name, daw::optional_poly<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1092,15 +1036,14 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				///
 				/// \param name - name of map(unorderd_map/map) value to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_map( boost::string_view name, T & value ) {
+				void link_map( boost::string_view name, T & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1126,15 +1069,14 @@ namespace daw {
 						json_to_value( *value_ptr, member->second );
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				///
 				/// \param name - name of map(unorderd_map/map) value to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_map( boost::string_view name, boost::optional<T> & value ) {
+				void link_map( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1160,15 +1102,14 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				///
 				/// \param name - name of map(unorderd_map/map) value to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_map( boost::string_view name, daw::optional<T> & value ) {
+				void link_map( boost::string_view name, daw::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1193,16 +1134,15 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 
 				///
 				/// \param name - name of map(unorderd_map/map) value to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_map( boost::string_view name, daw::optional_poly<T> & value ) {
+				void link_map( boost::string_view name, daw::optional_poly<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1227,15 +1167,14 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				///
 				/// \param name - name of streamable value(operator<<, operator>>) to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
 				template<typename T>
-				auto & link_streamable( boost::string_view name, T & value ) {
+				void link_streamable( boost::string_view name, T & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
 					data_description_t data_description;
@@ -1265,11 +1204,11 @@ namespace daw {
 						ss >> *value_ptr;
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				template<typename T>
-				auto & link_streamable( boost::string_view name, boost::optional<T> & value ) {
+				void link_streamable( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
 					data_description_t data_description;
@@ -1299,12 +1238,12 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				/// Summary: Encoder Function has signature std::string( T const & ) and Decoder function has signature T( std::string const & )
 				template<typename T, typename EncoderFunction, typename DecoderFunction>
-				auto & link_jsonstring( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+				void link_jsonstring( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
 					set_name( value, name );
 					data_description_t data_description;
 					using daw::json::schema::get_schema;
@@ -1331,11 +1270,11 @@ namespace daw {
 						*value_ptr = decode_function( member->second.get_string( ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				template<typename T, typename EncoderFunction, typename DecoderFunction>
-				auto & link_jsonintegral( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+				void link_jsonintegral( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
 					set_name( value, name ); 
 					data_description_t data_description;
 					using daw::json::schema::get_schema;
@@ -1363,11 +1302,11 @@ namespace daw {
 					};
 					add_to_data_map( name, std::move( data_description ) );
 				
-					return derived( );
+					
 				}
 			public:
 				template<typename Duration>
-				auto & link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
+				void link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
 					using tp_t = std::chrono::time_point<std::chrono::system_clock, Duration>;
 					auto const from_ts = [fmts]( std::string const & str ) {
 						std::istringstream in;
@@ -1397,13 +1336,13 @@ namespace daw {
 
 
 				template<typename Duration>
-				auto & link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
+				void link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
 					static std::vector<std::string> const fmts = { "%FT%TZ", "%FT%T%Ez" };
 					return link_timestamp( name, ts, fmts  );
 				}
 
 				template<typename Duration>
-				auto & link_epoch_milliseconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
+				void link_epoch_milliseconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
 					static auto const to_ts = []( impl::value_t::integral_t const & i ) {
 						using namespace date;
 						using namespace std::chrono;
@@ -1425,8 +1364,7 @@ namespace daw {
 				///
 				/// \param name - name of timestamp value(boost ptime) to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_timestamp( boost::string_view name, boost::posix_time::ptime & value ) {
+				void link_timestamp( boost::string_view name, boost::posix_time::ptime & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
 					data_description_t data_description;
@@ -1454,14 +1392,13 @@ namespace daw {
 						*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 				///
 				/// \param name - name of timestamp value(boost ptime) to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_timestamp( boost::string_view name, boost::optional<boost::posix_time::ptime> & value ) {
+				void link_timestamp( boost::string_view name, boost::optional<boost::posix_time::ptime> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
 					data_description_t data_description;
@@ -1496,14 +1433,13 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 				
 				///
 				/// \param name - name of timestamp value(boost ptime) to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_timestamp( boost::string_view name, daw::optional<boost::posix_time::ptime> & value ) {
+				void link_timestamp( boost::string_view name, daw::optional<boost::posix_time::ptime> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
 					data_description_t data_description;
@@ -1541,15 +1477,14 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 
 
 				///
 				/// \param name - name of timestamp value(boost ptime) to link.
 				/// \param value - a reference to the linked value
-				/// \return - Returns a reference to self
-				auto & link_timestamp( boost::string_view name, daw::optional_poly<boost::posix_time::ptime> & value ) {
+				void link_timestamp( boost::string_view name, daw::optional_poly<boost::posix_time::ptime> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name );
 					data_description_t data_description;
@@ -1587,7 +1522,7 @@ namespace daw {
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
-					return derived( );
+					
 				}
 			};    // JsonLink
 

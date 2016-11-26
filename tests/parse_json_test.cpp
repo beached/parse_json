@@ -51,7 +51,7 @@ struct Streamable {
 std::istream & operator>>( std::istream & is, Streamable & value ) {
 	auto const data_size = static_cast<size_t>(is.rdbuf( )->in_avail( ));
 	value.a.reserve( data_size );
-	is.read( &value.a[0], data_size );
+	is.read( &value.a[0], static_cast<long>(data_size) );
 	return is;
 }
 
@@ -74,7 +74,13 @@ struct A: public daw::json::JsonLink<A> {
 			c{ 1.23456789 },
 			d{ 100, 5 },
 			e{ true } {
+			
+		set_jsonlinks( );			
+	}
 
+	~A( );
+
+	void set_jsonlinks( ) {
 		link_integral( "a", a );
 		link_integral( "b", b );
 		link_real( "c", c );
@@ -91,6 +97,8 @@ struct A: public daw::json::JsonLink<A> {
 	}
 };
 
+A::~A( ) { }
+
 struct B: public daw::json::JsonLink<B> {
 	A a;
 	std::string b;
@@ -104,6 +112,12 @@ struct B: public daw::json::JsonLink<B> {
 			c{ },
 			d{ 1.9233434e-12 } {
 
+		set_jsonlinks( );
+	}
+
+	~B( );
+
+	void set_jsonlinks( ) {
 		link_object( "a", a );
 		link_string( "b", b );
 		link_streamable( "c", c );
@@ -119,15 +133,26 @@ struct B: public daw::json::JsonLink<B> {
 	}
 };
 
+B::~B( ) { }
+
 struct C : public daw::json::JsonLink<C> {
 	boost::optional<int> a;
 	C( ):
 			daw::json::JsonLink<C>{ },
 			a{ } {
 		
+		set_jsonlinks( );
+	}
+
+	~C( );
+
+	void set_jsonlinks( ) {	
 		link_integral( "a", a );
 	}
 };
+
+C::~C( ) { }
+
 
 template<typename K, typename V>
 bool operator==( std::unordered_map<K, V> const & a, std::unordered_map<K, V> const & b ) {
@@ -187,6 +212,8 @@ public:
 		link_values( );
 	}
 
+	~Test( );
+
 	Test( Test const & other ):
 			daw::json::JsonLink<Test>{ },    // Root objects must be nameless or it isn't valid json
 			b{ other.b },
@@ -232,6 +259,7 @@ public:
 
 };
 
+Test::~Test( ) { }
 
 int main( int, char ** ) {
 	C ccls;
@@ -260,8 +288,12 @@ int main( int, char ** ) {
 	c.something( );
 	c.from_string( json_str );
 	std::cout << c.to_string( ) << std::endl;
-
-	auto g = from_file<Test>( "file.json" );
+	boost::filesystem::path f{ "file.json" };
+	if( !exists( f ) ) {
+		std::cout << "Could not test from_file '" << f << "' does not exist\n";
+	} else {
+		auto g = from_file<Test>( "file.json" );
+	}
 	return EXIT_SUCCESS;
 }
 
