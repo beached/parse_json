@@ -159,6 +159,21 @@ struct B: public daw::json::JsonLink<B> {
 
 B::~B( ) { }
 
+struct empty: public daw::json::JsonLink<empty> {
+	empty( ):
+		daw::json::JsonLink<empty>{ } { }
+
+	empty( empty const & ):
+		daw::json::JsonLink<empty>{ } { }
+
+	empty( empty && ):
+		daw::json::JsonLink<empty>{ } { }
+
+	~empty( );
+};
+
+empty::~empty( ) { }
+
 int main( int, char ** ) {
 	B obj_b_01;
 	obj_b_01.object_01.integral_01 = 12345;
@@ -172,6 +187,9 @@ int main( int, char ** ) {
 	B obj_b_03;
 	ss >> obj_b_03;
 	std::cout << "obj_b_03->\n" << obj_b_03 << '\n';		
+
+	std::cout << "sizeof( empty )->" << sizeof( empty ) << '\n';
+	std::cout << "sizeof( B )->" << sizeof( B ) << '\n';
 	return EXIT_SUCCESS;
 }
 

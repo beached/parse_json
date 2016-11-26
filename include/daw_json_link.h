@@ -42,6 +42,7 @@
 
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_exception.h>
+#include <daw/daw_heap_value.h>
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_bit_queues.h>
 #include <daw/daw_optional.h>
@@ -251,8 +252,23 @@ namespace daw {
 				};    // data_description
 
 
-				std::string m_name;
-				std::map<impl::string_value, data_description_t> m_data_map;
+				struct data_t {
+					std::string m_name;
+					std::map<impl::string_value, data_description_t> m_data_map;
+
+					data_t( ) = default;
+					data_t( data_t const & ) = default;
+					data_t( data_t & ) = default;
+					data_t & operator=( data_t const & ) = default;
+					data_t & operator=( data_t & ) = default;
+					~data_t( ) = default;
+
+					template<typename T>
+					data_t( T && name ):
+						m_name{ std::forward<T>( name ) },
+						m_data_map{ } { }
+				};
+				daw::heap_value<data_t> m_data;
 
 				///
 				/// \param name - name of integral value to link
@@ -270,12 +286,11 @@ namespace daw {
 				virtual ~JsonLink( );
 
 				bool is_linked( impl::string_value name ) const {
-					return m_data_map.count( name ) != 0;
+					return m_data->m_data_map.count( name ) != 0;
 				}
 
 				JsonLink( std::string name = "" ):
-					m_name{ std::move( name ) },
-					m_data_map{ } { }
+					m_data{ std::move( name ) } { }
 
 				JsonLink( JsonLink const & ) = delete;
 				JsonLink( JsonLink && ) = delete;
@@ -283,17 +298,17 @@ namespace daw {
 				JsonLink & operator=( JsonLink && ) = default;
 
 				std::string & json_object_name( ) {
-					return m_name;
+					return m_data->m_name;
 				}
 
 				std::string const & json_object_name( ) const {
-					return m_name;
+					return m_data->m_name;
 				}
 
 				auto get_schema_obj( ) const {
 					::daw::json::impl::object_value result;
-					using mapped_value_t = typename decltype( m_data_map )::value_type;
-					std::transform( std::begin( m_data_map ), std::end( m_data_map ), std::back_inserter( result ),
+					using mapped_value_t = typename decltype( m_data->m_data_map )::value_type;
+					std::transform( std::begin( m_data->m_data_map ), std::end( m_data->m_data_map ), std::back_inserter( result ),
 							[]( mapped_value_t const & value ) {
 							return ::daw::json::impl::make_object_value_item( value.first,
 									value.second.json_type );
@@ -303,7 +318,7 @@ namespace daw {
 
 				std::string to_string( ) const {
 					std::stringstream result;
-					auto range = daw::range::make_range( m_data_map );
+					auto range = daw::range::make_range( m_data->m_data_map );
 					std::string tmp;
 
 					range.front( ).second.bind_functions.encode( tmp );
@@ -314,7 +329,7 @@ namespace daw {
 						value.second.bind_functions.encode( tmp );
 						result << ", " << tmp;
 					}
-					return details::json_name( m_name ) + details::enbrace( result.str( ) );
+					return details::json_name( m_data->m_name ) + details::enbrace( result.str( ) );
 				}
 
 				void write_to_file( boost::string_view filename, bool overwrite = true ) const {
@@ -337,7 +352,7 @@ namespace daw {
 			public:
 
 				void from_json_obj( json_obj const & json_values ) {
-					for( auto & value : m_data_map ) {
+					for( auto & value : m_data->m_data_map ) {
 						value.second.bind_functions.decode( json_values );
 					}
 				}
@@ -590,8 +605,8 @@ namespace daw {
 			
 				void add_to_data_map( boost::string_view name, data_description_t desc ) {
 					auto key = range::create_char_range( name );
-					daw::exception::daw_throw_on_false( m_data_map.count( key ) == 0 ); 
-					auto result = m_data_map.emplace( std::move( key ), std::move( desc ) );
+					daw::exception::daw_throw_on_false( m_data->m_data_map.count( key ) == 0 ); 
+					auto result = m_data->m_data_map.emplace( std::move( key ), std::move( desc ) );
 					daw::exception::daw_throw_on_false( result.second );
 				}
 
@@ -622,7 +637,7 @@ namespace daw {
 				/// \param name - name of value to remove link from
 				/// \return - whether the linked name was found
 				bool unlink( boost::string_view name ) {
-					return m_data_map.erase( range::create_char_range( name ) ) > 0;
+					return m_data->m_data_map.erase( range::create_char_range( name ) ) > 0;
 				}
 
 
