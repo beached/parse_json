@@ -15,6 +15,28 @@ struct config_t : public daw::json::JsonLink<config_t> {
 			port{ 8080 },
 			url_path{ "/" } {
 
+		set_jsonlinks( );
+	}
+	config_t( config_t const & other ):
+			daw::json::JsonLink<config_t>{ },
+			port{ other.port },
+			url_path{ other.url_path } {
+
+		set_jsonlinks( );
+	}
+	
+	config_t( config_t && other ):
+			daw::json::JsonLink<config_t>{ },
+			port{ std::move( other.port ) },
+			url_path{ std::move( other.url_path ) } {
+
+		set_jsonlinks( );
+	}
+	config_t & operator=( config_t const & ) = default
+	config_t & operator=( config_t && ) = default
+	~config_t( ) = default;
+	
+	void set_jsonlinks( ) {
 		link_int( "port", port );
 		link_string( "url_path", url_path );
 	}
