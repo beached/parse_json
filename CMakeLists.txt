@@ -17,9 +17,9 @@ else( )
 		set( COMPILER_SPECifIC_LIBS, "-lpthread" )
 	endif( )
 	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" )
-		add_compile_options(-std=c++14 -Weverything -g -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
+		add_compile_options(-std=c++14 -Weverything -O3 -g -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
 	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
-		add_compile_options(-std=c++14 -Wall -ggdb -Wno-deprecated-declarations)
+		add_compile_options(-std=c++14 -Wall -O3 -ggdb -Wno-deprecated-declarations)
 	endif()
 endif( )
 
@@ -79,6 +79,7 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw_json_interface.h
 	${HEADER_FOLDER}/daw_json_link.h
 	${HEADER_FOLDER}/daw_json_parser.h
+	${HEADER_FOLDER}/daw_json_parser_v2.h
 	${HEADER_FOLDER}/value_t.h
 )
 
@@ -100,6 +101,11 @@ add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_te
 add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj )
 target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
+
+add_executable( parse_json_test_v2_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test_v2.cpp )
+add_dependencies( parse_json_test_v2_bin header_libraries_prj char_range_prj )
+target_link_libraries( parse_json_test_v2_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( parse_json_test_v2 parse_json_test_v2_bin )
 
 add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
 add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj ) #JSONTestSuite )
