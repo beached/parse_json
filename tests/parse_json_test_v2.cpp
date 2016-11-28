@@ -97,7 +97,7 @@ daw::json::impl::value_t & current_value( ) {
 	return *value_stack( ).back( );
 }
 
-void push_value( daw::json::value_t * val ) {
+void push_value( daw::json::impl::value_t * val ) {
 	value_stack( ).push_back( val );
 }
 

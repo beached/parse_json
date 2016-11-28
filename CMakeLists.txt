@@ -102,9 +102,9 @@ add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj date_p
 target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
 
-add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${TEST_FOLDER}/parse_json_test_v2.cpp )
+add_executable( parse_json_test_v2_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test_v2.cpp )
 add_dependencies( parse_json_test_v2_bin header_libraries_prj char_range_prj date_prj )
-target_link_libraries( parse_json_test_v2_bin char_range ${Boost_LIBRARIES} )
+target_link_libraries( parse_json_test_v2_bin parse_json char_range ${Boost_LIBRARIES} )
 add_test( parse_json_test_v2 parse_json_test_v2_bin )
 
 add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
