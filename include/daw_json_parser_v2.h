@@ -77,15 +77,7 @@ namespace daw {
 
 			template<typename CHR>
 			constexpr bool is_insignificant_ws( CHR const c ) noexcept {
-				switch( c ) {
-					case 0x20:
-					case 0x09:
-					case 0x0A:
-					case 0x0D:
-						return true;
-					default:
-						return false;
-				}
+				return c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D;
 			}
 
 			template<typename InputIterator>

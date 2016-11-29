@@ -37,11 +37,11 @@
 
 #include "daw_json_parser_v2.h"
 
-#include "value_t.h"
+
 
 using namespace daw::json;
 
-using daw::json::impl::value_t;
+//using daw::json::impl::value_t;
 
 enum class current_state_t { none = 0, in_object_name, in_object_value, in_array, current_state_t_size };
 
@@ -92,8 +92,7 @@ struct state_in_object_value_t: public state_t {
 	void on_object_begin( ) override;
 	void on_array_begin( ) override;
 	void on_null( ) override;
-	static value_t::integral_t to_integral( boost::string_view value );
-	static value_t::real_t to_real( boost::string_view value );
+	
 	void on_integral( boost::string_view value ) override;
 	void on_real( boost::string_view value ) override;
 	void on_string( boost::string_view value ) override;
@@ -145,10 +144,10 @@ state_t & current_state( );
 void push_and_set_next_state( current_state_t s );
 void set_next_state( current_state_t s );
 void pop_state( );
-std::vector<daw::json::impl::value_t*> & value_stack( );
-daw::json::impl::value_t & current_value( );
-void push_and_set_next_value( daw::json::impl::value_t value );
-void push_value( daw::json::impl::value_t * val );
+//std::vector<daw::json::impl::value_t*> & value_stack( );
+//daw::json::impl::value_t & current_value( );
+//void push_and_set_next_value( daw::json::impl::value_t value );
+//void push_value( daw::json::impl::value_t * val );
 void pop_value( ); 
 state_t * get_state_fn( current_state_t s ) noexcept;
 
@@ -211,38 +210,37 @@ void pop_state( ) {
 	state_stack( ).pop_back( );
 }
 
-std::vector<daw::json::impl::value_t*> & value_stack( ) {
-	static std::unique_ptr<daw::json::impl::value_t> root_value;
-	static std::vector<daw::json::impl::value_t *> result = { root_value.get( ) };
-	return result;
-}
+//std::vector<daw::json::impl::value_t*> & value_stack( ) {
+//	static std::unique_ptr<daw::json::impl::value_t> root_value;
+//	static std::vector<daw::json::impl::value_t *> result = { root_value.get( ) };
+//	return result;
+//}
 
-daw::json::impl::value_t & current_value( ) {
-	return *value_stack( ).back( );
-}
+//daw::json::impl::value_t & current_value( ) {
+//	return *value_stack( ).back( );
+//}
 
-void push_and_set_next_value( daw::json::impl::value_t value ) {
+//void push_and_set_next_value( daw::json::impl::value_t value ) {
 	//value_stack( ).push_back( std::move( value ) );
-}
+//}
 
-void push_value( daw::json::impl::value_t * val ) {
+//void push_value( daw::json::impl::value_t * val ) {
 	//value_stack( ).push_back( val );
-}
+//}
 
 void pop_value( ) {
 	//value_stack( ).pop_back( );
 }
 
-using daw::json::impl::value_t;
+//using daw::json::impl::value_t;
 
-value_t::integral_t to_integral( boost::string_view value ) {
+//value_t::integral_t to_integral( boost::string_view value ) {
+//	return 0;
+//}
 
-	return 0;
-}
-
-value_t::real_t to_real( boost::string_view value ) {
-	return 0.0;
-}
+//value_t::real_t to_real( boost::string_view value ) {
+//	return 0.0;
+//}
 
 //
 // state_in_object_name
@@ -255,7 +253,7 @@ std::string state_in_object_name_t::to_string( ) const {
 }
 
 void state_in_object_name_t::on_string( boost::string_view value ) {
-	value_t name{ value };		
+	//value_t name{ value };		
 
 	// Set current object name value_t
 	set_next_state( current_state_t::in_object_value );
@@ -275,13 +273,13 @@ std::string state_in_object_value_t::to_string( ) const {
 
 void state_in_object_value_t::on_object_begin( ) {
 	// Save data
-	push_and_set_next_value( value_t{ } );
+	//push_and_set_next_value( value_t{ } );
 	set_next_state( current_state_t::in_object_name );
 	push_and_set_next_state( current_state_t::in_object_name );
 }
 
 void state_in_object_value_t::on_array_begin( ) {
-	push_and_set_next_value( value_t{ } );
+	//push_and_set_next_value( value_t{ } );
 	set_next_state( current_state_t::in_object_name );
 	push_and_set_next_state( current_state_t::in_array );
 }
