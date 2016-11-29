@@ -75,9 +75,22 @@ namespace daw {
 				}
 			}
 
+			template<typename CHR>
+			constexpr bool is_insignificant_ws( CHR const c ) noexcept {
+				switch( c ) {
+					case 0x20:
+					case 0x09:
+					case 0x0A:
+					case 0x0D:
+						return true;
+					default:
+						return false;
+				}
+			}
+
 			template<typename InputIterator>
 			auto skip_whitespace( InputIterator & first, InputIterator const & last ) noexcept {
-				while( first != last && daw::parser::is_unicode_whitespace( *first ) ) {
+				while( first != last && is_insignificant_ws( *first ) ) {
 					++first;
 				}
 				return first;
@@ -281,6 +294,7 @@ namespace daw {
 
 		template<typename InputIterator, typename State>
 		void json_parser( InputIterator first, InputIterator last, State & state ) {
+			//impl::parse_value( first, last, state );
 			using namespace impl;
 			first = skip_whitespace( first, last );
 			while( first != last ) {

@@ -24,6 +24,7 @@
 //#include <boost/test/unit_test.hpp>
 
 #include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/utility/string_view.hpp>
 #include <boost/lexical_cast.hpp>
 #include <chrono>
 #include <cstdlib>
@@ -46,25 +47,148 @@ enum class current_state_t { none = 0, in_object_name, in_object_value, in_array
 
 struct state_t {
 	state_t( ) = default;
-	virtual ~state_t( ) = default;
 	state_t( state_t const & ) = default;
 	state_t( state_t && ) = default;
 	state_t & operator=( state_t const & ) = default;
 	state_t & operator=( state_t && ) = default;
 
-	virtual void on_object_begin( ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_begin" ); }
-	virtual void on_object_end( ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_end" ); }
-	virtual void on_array_begin( ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_begin" ); }
-	virtual void on_array_end( ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_end" ); }
-	virtual void on_string( std::string const & ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_string" ); }
-	virtual void on_integral( std::string const & ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integral" ); }
-	virtual void on_real( std::string const & ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_real" ); }
-	virtual void on_boolean( bool ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_boolean" ); }
-	virtual void on_null( ) { throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_null" ); }
+	virtual ~state_t( );
+
+	virtual void on_object_begin( );
+	virtual void on_object_end( );
+	virtual void on_array_begin( );
+	virtual void on_array_end( );
+	virtual void on_string( boost::string_view );
+	virtual void on_integral( boost::string_view );
+	virtual void on_real( boost::string_view );
+	virtual void on_boolean( bool ); 
+	virtual void on_null( );
 	virtual std::string to_string( ) const = 0;
 };	// state_t
 
+struct state_in_object_name_t: public state_t {
+	state_in_object_name_t( ) = default;
+	state_in_object_name_t( state_in_object_name_t const & ) = default;
+	state_in_object_name_t( state_in_object_name_t && ) = default;
+	state_in_object_name_t & operator=( state_in_object_name_t const & ) = default;
+	state_in_object_name_t & operator=( state_in_object_name_t && ) = default;
+
+	~state_in_object_name_t( );
+	std::string to_string( ) const override;
+	void on_string( boost::string_view value ) override;
+	void on_object_end( ) override;
+};	// state_in_object_name
+
+struct state_in_object_value_t: public state_t {
+	state_in_object_value_t( ) = default;
+	state_in_object_value_t( state_in_object_value_t const & ) = default;
+	state_in_object_value_t( state_in_object_value_t && ) = default;
+	state_in_object_value_t & operator=( state_in_object_value_t const & ) = default;
+	state_in_object_value_t & operator=( state_in_object_value_t && ) = default;
+
+	~state_in_object_value_t( );
+
+	std::string to_string( ) const override;
+	void on_object_begin( ) override;
+	void on_array_begin( ) override;
+	void on_null( ) override;
+	static value_t::integral_t to_integral( boost::string_view value );
+	static value_t::real_t to_real( boost::string_view value );
+	void on_integral( boost::string_view value ) override;
+	void on_real( boost::string_view value ) override;
+	void on_string( boost::string_view value ) override;
+	void on_boolean( bool value ) override;
+};	// state_in_object_value_t
+
+struct state_in_array_t: public state_t {
+	state_in_array_t( ) = default;
+	state_in_array_t( state_in_array_t const & ) = default;
+	state_in_array_t( state_in_array_t && ) = default;
+	state_in_array_t & operator=( state_in_array_t const & ) = default;
+	state_in_array_t & operator=( state_in_array_t && ) = default;
+
+	~state_in_array_t( );
+
+	std::string to_string( ) const override;
+	void on_object_begin( ) override;
+	void on_array_begin( ) override;
+	void on_array_end( ) override;
+	void on_null( ) override;
+	void on_integral( boost::string_view value ) override;
+	void on_real( boost::string_view value ) override;
+	void on_string( boost::string_view value ) override;
+	void on_boolean( bool value ) override;
+};	// state_in_array_t
+
+struct state_none_t: public state_t {
+	state_none_t( ) = default;
+	state_none_t( state_none_t const & ) = default;
+	state_none_t( state_none_t && ) = default;
+	state_none_t & operator=( state_none_t const & ) = default;
+	state_none_t & operator=( state_none_t && ) = default;
+
+	~state_none_t( );
+
+	std::string to_string( ) const override;
+	void on_object_begin( ) override;
+	void on_array_begin( ) override;
+	void on_null( ) override;
+	void on_integral( boost::string_view value ) override;
+	void on_real( boost::string_view value ) override;
+	void on_string( boost::string_view value ) override;
+	void on_boolean( bool value ) override;
+};	// state_none_t
+
 state_t * get_state_fn( current_state_t s ) noexcept;
+std::vector<state_t*> & state_stack( );
+state_t & current_state( );
+void push_and_set_next_state( current_state_t s );
+void set_next_state( current_state_t s );
+void pop_state( );
+std::vector<daw::json::impl::value_t*> & value_stack( );
+daw::json::impl::value_t & current_value( );
+void push_and_set_next_value( daw::json::impl::value_t value );
+void push_value( daw::json::impl::value_t * val );
+void pop_value( ); 
+state_t * get_state_fn( current_state_t s ) noexcept;
+
+state_t::~state_t( ) { }
+
+void state_t::on_object_begin( ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_begin" ); 
+}
+
+void state_t::on_object_end( ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_end" ); 
+}
+
+void state_t::on_array_begin( ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_begin" );
+}
+
+void state_t::on_array_end( ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_end" );
+}
+
+void state_t::on_string( boost::string_view ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_string" );
+}
+
+void state_t::on_integral( boost::string_view ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integral" );
+}
+
+void state_t::on_real( boost::string_view ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_real" );
+}
+
+void state_t::on_boolean( bool ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_boolean" );
+}
+
+void state_t::on_null( ) { 
+	throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_null" );
+}
 
 std::vector<state_t*> & state_stack( ) {
 	static std::vector<state_t*> result = { get_state_fn( current_state_t::none ) };
@@ -97,131 +221,187 @@ daw::json::impl::value_t & current_value( ) {
 	return *value_stack( ).back( );
 }
 
+void push_and_set_next_value( daw::json::impl::value_t value ) {
+	//value_stack( ).push_back( std::move( value ) );
+}
+
 void push_value( daw::json::impl::value_t * val ) {
-	value_stack( ).push_back( val );
+	//value_stack( ).push_back( val );
 }
 
 void pop_value( ) {
-	value_stack( ).pop_back( );
+	//value_stack( ).pop_back( );
 }
 
+using daw::json::impl::value_t;
 
-struct state_in_object_name_t: public state_t {
-	std::string to_string( ) const override {
-		return "state_in_object_name";
-	}
+value_t::integral_t to_integral( boost::string_view value ) {
 
-	void on_string( std::string const & value ) override {
+	return 0;
+}
 
-		// Set current object name value_t
-		set_next_state( current_state_t::in_object_value );
-	}
+value_t::real_t to_real( boost::string_view value ) {
+	return 0.0;
+}
 
-	void on_object_end( ) override {
-		// Save value_t
-		// Assumes state is not empty	
-		pop_state( );
-	}
-};	// state_in_object_name
+//
+// state_in_object_name
+//
 
-struct state_in_object_value_t: public state_t {
-	std::string to_string( ) const override {
-		return "state_in_object_value";
-	}
+state_in_object_name_t::~state_in_object_name_t( ) { }
 
-	void on_object_begin( ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-		push_and_set_next_state( current_state_t::in_object_name );
-	}
+std::string state_in_object_name_t::to_string( ) const {
+	return "state_in_object_name";
+}
 
-	void on_array_begin( ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-		push_and_set_next_state( current_state_t::in_array );
-	}
+void state_in_object_name_t::on_string( boost::string_view value ) {
+	value_t name{ value };		
 
-	void on_null( ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-	}
+	// Set current object name value_t
+	set_next_state( current_state_t::in_object_value );
+}
 
-	void on_integral( std::string const & value ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-	}
+void state_in_object_name_t::on_object_end( ) {
+	// Save value_t
+	// Assumes state is not empty	
+	pop_state( );
+}
 
-	void on_real( std::string const & value ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-	}
+state_in_object_value_t::~state_in_object_value_t( ) { }
 
-	void on_string( std::string const & value ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-	}
+std::string state_in_object_value_t::to_string( ) const {
+	return "state_in_object_value";
+}
 
-	void on_boolean( bool value ) override {
-		// Save data
-		set_next_state( current_state_t::in_object_name );
-	}
-};	// state_in_object_value_t
+void state_in_object_value_t::on_object_begin( ) {
+	// Save data
+	push_and_set_next_value( value_t{ } );
+	set_next_state( current_state_t::in_object_name );
+	push_and_set_next_state( current_state_t::in_object_name );
+}
 
-struct state_in_array_t: public state_t {
-	std::string to_string( ) const override {
-		return "state_in_array";
-	}
+void state_in_object_value_t::on_array_begin( ) {
+	push_and_set_next_value( value_t{ } );
+	set_next_state( current_state_t::in_object_name );
+	push_and_set_next_state( current_state_t::in_array );
+}
 
-	void on_object_begin( ) override {
-		// Save data
-		push_and_set_next_state( current_state_t::in_object_name );
-	}
+void state_in_object_value_t::on_null( ) {
+	// Value is already null
+	set_next_state( current_state_t::in_object_name );
+}
 
-	void on_array_begin( ) override {
-		// Save data
-		push_and_set_next_state( current_state_t::in_array );
-	}
+//
+// state_in_object_value
+//
 
-	void on_array_end( ) override {
-		// Save data
-		pop_state( );
-	}
-	void on_null( ) override {
-		// Save data
-	}
+void state_in_object_value_t::on_integral( boost::string_view value ) {
+	// Save data
+	//current_value( ) = value_t{ to_integral( value ) };
+	set_next_state( current_state_t::in_object_name );
+}
 
-	void on_integral( std::string const & value ) override {
-		// Save data
-	}
+void state_in_object_value_t::on_real( boost::string_view value ) {
+	// Save data
+	//current_value( ) = value_t{ to_real( value ) };
+	set_next_state( current_state_t::in_object_name );
+}
 
-	void on_real( std::string const & value ) override {
-		// Save data
-	}
+void state_in_object_value_t::on_string( boost::string_view value ) {
+	// Save data
+	//current_value( ) = value_t{ value.to_string( ) };
+	set_next_state( current_state_t::in_object_name );
+}
 
-	void on_string( std::string const & value ) override {
-		// Save data
-	}
+void state_in_object_value_t::on_boolean( bool value ) {
+	// Save data
+	//current_value( ) = value_t{ value };
+	set_next_state( current_state_t::in_object_name );
+}
 
-	void on_boolean( bool value ) override {
-		// Save data
-	}
-};	// state_in_array_t
+//
+// state_in_array_t
+//
 
-struct state_none_t: public state_t {
-	std::string to_string( ) const override {
-		return "state_none";
-	}
+state_in_array_t::~state_in_array_t( ) { }
 
-	void on_object_begin( ) override {
-		// Save data
-		push_and_set_next_state( current_state_t::in_object_name );
-	}
+std::string state_in_array_t::to_string( ) const {
+	return "state_in_array";
+}
 
-	void on_array_begin( ) override {
-		// Save data
-		push_and_set_next_state( current_state_t::in_array );
-	}
-};	// state_none_t
+void state_in_array_t::on_object_begin( )  {
+	// Save data
+	push_and_set_next_state( current_state_t::in_object_name );
+}
+
+void state_in_array_t::on_array_begin( )  {
+	// Save data
+	push_and_set_next_state( current_state_t::in_array );
+}
+
+void state_in_array_t::on_array_end( )  {
+	// Save data
+	pop_state( );
+}
+void state_in_array_t::on_null( )  {
+	// Save data
+}
+
+void state_in_array_t::on_integral( boost::string_view value )  {
+	// Save data
+}
+
+void state_in_array_t::on_real( boost::string_view value )  {
+	// Save data
+}
+
+void state_in_array_t::on_string( boost::string_view value )  {
+	// Save data
+}
+
+void state_in_array_t::on_boolean( bool value )  {
+	// Save data
+}
+
+//
+// state_none_t
+//
+
+state_none_t::~state_none_t( ) { }
+
+std::string state_none_t::to_string( ) const {
+	return "state_none";
+}
+
+void state_none_t::on_object_begin( ) {
+	// Save data
+	push_and_set_next_state( current_state_t::in_object_name );
+}
+
+void state_none_t::on_array_begin( ) {
+	// Save data
+	push_and_set_next_state( current_state_t::in_array );
+}
+
+void state_none_t::on_null( ) {
+	// Save data
+}
+
+void state_none_t::on_integral( boost::string_view value ) {
+	// Save data
+}
+
+void state_none_t::on_real( boost::string_view value ) {
+	// Save data
+}
+
+void state_none_t::on_string( boost::string_view value ) {
+	// Save data
+}
+
+void state_none_t::on_boolean( bool value ) {
+	// Save data
+}
 
 state_t * get_state_fn( current_state_t s ) noexcept {
 	static state_none_t s_none{ };
@@ -229,18 +409,18 @@ state_t * get_state_fn( current_state_t s ) noexcept {
 	static state_in_object_value_t s_in_object_value{ };
 	static state_in_array_t s_in_array{ };
 	switch( s ) {
-	case current_state_t::none:  
-		return &s_none;
-	case current_state_t::in_object_name:
-		return &s_in_object_name;
-	case current_state_t::in_object_value:
-		return &s_in_object_value;
-	case current_state_t::in_array:
-		return &s_in_array;
-	case current_state_t::current_state_t_size:
-	default:
-		std::cerr << "Unknown state" << std::endl;
-		std::abort( );
+		case current_state_t::none:  
+			return &s_none;
+		case current_state_t::in_object_name:
+			return &s_in_object_name;
+		case current_state_t::in_object_value:
+			return &s_in_object_value;
+		case current_state_t::in_array:
+			return &s_in_array;
+		case current_state_t::current_state_t_size:
+		default:
+			std::cerr << "Unknown state" << std::endl;
+			std::abort( );
 	}
 }
 
@@ -253,9 +433,9 @@ struct state_contol_t {
 	void on_object_end( ) { current_state( ).on_object_end( ); }
 	void on_array_begin( ) { current_state( ).on_array_begin( ); }
 	void on_array_end( ) { current_state( ).on_array_end( ); }
-	void on_string( std::string const & value ) { current_state( ).on_string( value ); }
-	void on_integral( std::string const & value ) { current_state( ).on_integral( value ); }
-	void on_real( std::string const & value ) { current_state( ).on_real( value ); }
+	void on_string( boost::string_view value ) { current_state( ).on_string( value ); }
+	void on_integral( boost::string_view value ) { current_state( ).on_integral( value ); }
+	void on_real( boost::string_view value ) { current_state( ).on_real( value ); }
 	void on_boolean( bool value ) { current_state( ).on_boolean( value ); }
 	void on_null( ) { current_state( ).on_null( ); }
 } state_proxy;	
@@ -268,7 +448,11 @@ int main( int argc, char** argv ) {
 		json_parser( mmap.const_data( ), mmap.const_data( ) + mmap.size( ), state_proxy );
 		auto const ts_end = std::chrono::system_clock::now( );
 
-		std::cout << std::chrono::duration<double>(ts_end-ts_start).count( ) << "s duration. " << current_state( ).to_string( ) << std::endl;
+		auto const duration = std::chrono::duration<double>(ts_end-ts_start).count( );
+		double const sz = mmap.size( );
+		std::cout << duration << "s duration. " << current_state( ).to_string( ) << std::endl;
+		double const sp = sz/duration;
+		std::cout << "speed " << sp << "bytes/sec " << ((sp/1024.0)/1024.0) << "MB/s\n";
 	} catch( std::runtime_error const & ex ) {
 		std::cerr << "Exception '" << ex.what( ) << "'\n";
 		exit( EXIT_FAILURE );
