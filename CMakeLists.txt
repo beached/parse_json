@@ -4,10 +4,10 @@ project( parse_json_prj )
 
 include( ExternalProject )
 
-find_package( Boost 1.60.0 COMPONENTS system filesystem regex iostreams REQUIRED ) # unit_test_framework 
+find_package( Boost 1.60.0 COMPONENTS system filesystem regex iostreams unit_test_framework REQUIRED ) 
 
-#enable_testing( )
-#add_definitions( -DBOOST_TEST_DYN_LINK ) 
+enable_testing( )
+add_definitions( -DBOOST_TEST_DYN_LINK ) 
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 ) 
@@ -17,9 +17,9 @@ else( )
 		set( COMPILER_SPECifIC_LIBS, "-lpthread" )
 	endif( )
 	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" )
-		add_compile_options(-std=c++14 -Weverything -O3 -march=native -g -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
+		add_compile_options(-std=c++14 -Weverything -march=native -g -Wno-c++98-compat -Wfatal-errors -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
 	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
-		add_compile_options(-std=c++14 -Wall -O3 -march=native -ggdb -Wno-deprecated-declarations)
+		add_compile_options(-std=c++14 -Wall -march=native -ggdb -Wno-deprecated-declarations)
 	endif()
 endif( )
 
@@ -102,7 +102,7 @@ add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj date_p
 target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
 
-add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${TEST_FOLDER}/parse_json_test_v2.cpp )
+add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${HEADER_FOLDER}/daw_json_parser_v2_state.h ${SOURCE_FOLDER}/daw_json_parser_v2_state.cpp ${TEST_FOLDER}/parse_json_test_v2.cpp )
 add_dependencies( parse_json_test_v2_bin header_libraries_prj  )
 target_link_libraries( parse_json_test_v2_bin ${Boost_LIBRARIES} )
 add_test( parse_json_test_v2 parse_json_test_v2_bin )

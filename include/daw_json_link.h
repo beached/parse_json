@@ -40,6 +40,7 @@
 #include <string>
 #include <map>
 
+#include <daw/daw_bit_queues.h>
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_exception.h>
 #include <daw/daw_heap_value.h>
@@ -1316,9 +1317,8 @@ namespace daw {
 						*value_ptr = decode_function( member->second.get_integral( ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
-				
-					
 				}
+
 			public:
 				template<typename Duration>
 				void link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
@@ -1349,7 +1349,83 @@ namespace daw {
 					return link_jsonstring( name, ts, to_ts, from_ts );
 				}
 
+			private:
+				static uint8_t to_nibble( uint8_t c ) noexcept {
+					// Assumes that '0' <= c <= '9' or 'a'|'A' <= c <= 'z'|'Z'
+					uint8_t result = 0;
+					if( c <= '9' ) {
+						result = c - '0';
+					} else {
+						c = c | ' ';	// ensure lowercase
+						result = 10 + (c - 'a');
+					}
+					assert( result < 16 );
+					return result;
+				}
+			
+				template<typename T>
+				static std::string value_to_hex( T const & value ) {
+					std::string result;
+					daw::nibble_queue_gen<T, char> nq{ value };
 
+					while( nq.can_pop( 1 ) ) {
+						auto const nibble = nq.pop_front( 1 );
+						assert( nibble < 16 );
+						if( nibble < 10 ) {
+							result += static_cast<char>('0' + nibble);
+						} else {
+							result += static_cast<char>('a' + (nibble-10));
+						}
+					}
+					return result;
+				}
+
+			public:
+				template<typename T>
+				void link_hex_value( boost::string_view name, T & value ) {
+					auto const from_hexstring = []( std::string const & str ) {
+						daw::exception::daw_throw_on_false( (str.size( )/2)/sizeof( T ) == 1 );
+						daw::nibble_queue_gen<T> nq;
+						for( auto c: str ) {
+							nq.push_back( to_nibble( c ) );
+						}
+						return nq.value( );
+					};
+
+					auto const to_hexstring = []( T const & v ) {
+						return value_to_hex( v );
+					};
+
+					return link_jsonstring( name, value, to_hexstring, from_hexstring );
+				}
+
+				template<typename T>
+				void link_hex_array( boost::string_view name, std::vector<T> & values ) {
+					auto const from_hexstring = []( std::string const & str ) {
+						daw::exception::daw_throw_on_false( str.size( )%(sizeof( T )*2) == 0 );
+						std::vector<T> result;
+						daw::nibble_queue_gen<T> nq;
+						for( auto c: str ) {
+							nq.push_back( to_nibble( c ), 1 );
+							if( nq.full( ) ) {
+								auto const v = nq.value( );
+								result.push_back( v );
+								nq.clear( );
+							}
+						}
+						return result;
+					};
+
+					auto const to_hexstring = []( std::vector<T> const & arry ) {
+						std::string result;
+						for( auto const & v: arry ) {
+							result += value_to_hex( v );	
+						}
+						return result;
+					};
+					return link_jsonstring( name, values, to_hexstring, from_hexstring );
+				}
+			
 				template<typename Duration>
 				void link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
 					static std::vector<std::string> const fmts = { "%FT%TZ", "%FT%T%Ez" };
