@@ -867,7 +867,7 @@ namespace daw {
 						} else if( member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
-							(*value_ptr)->from_json_obj( member->second );
+							(*value_ptr) = T{ }->from_json_obj( member->second );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -894,7 +894,7 @@ namespace daw {
 						} else if( member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
-							(*value_ptr)->from_json_obj( member->second );
+							(*value_ptr) = T{ }->from_json_obj( member->second );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -921,7 +921,7 @@ namespace daw {
 						} else if( member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
-							(*value_ptr)->from_json_obj( member->second );
+							(*value_ptr) = T{ }->from_json_obj( member->second );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1584,10 +1584,7 @@ namespace daw {
 					data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
 						daw::exception::daw_throw_on_false( value_ptr );
 						if( *value_ptr ) {
-							json_text = generate::value_to_json( name.to_string( ),
-									boost::posix_time::to_iso_extended_string(
-										*(*value_ptr) ) +
-									'Z' );
+							json_text = generate::value_to_json( name.to_string( ),	boost::posix_time::to_iso_extended_string( *(*value_ptr) ) + 'Z' );
 						} else {
 							json_text = generate::value_to_json( name.to_string( ) );
 						}
