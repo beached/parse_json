@@ -1460,6 +1460,26 @@ namespace daw {
 					return link_jsonstring( name, i, to_str, from_str );
 				}
 
+				template<typename Integral>
+				void link_json_string_to_integral( boost::string_view name, boost::optional<Integral> & i ) {
+					static auto const from_str = []( boost::string_view str ) -> boost::optional<Integral> {
+						if( str.empty( ) ) {
+							return boost::none;
+						}
+						return impl::str_to_int( str, Integral{ } );
+					};
+					static auto const to_str = []( boost::optional<Integral> const & integral ) -> std::string {
+						if( !integral ) {
+							return "";
+						}
+						using std::to_string;
+						return to_string( integral );
+					};
+					return link_jsonstring( name, i, to_str, from_str );
+				}
+
+
+
 				template<typename Real>
 				void link_json_string_to_real( boost::string_view name, Real & r ) {
 					static auto const from_str = []( boost::string_view str ) {
@@ -1471,7 +1491,25 @@ namespace daw {
 					};
 					return link_jsonstring( name, r, to_str, from_str );
 				}
-			
+
+				template<typename Real>
+				void link_json_string_to_real( boost::string_view name, boost::optional<Real> & r ) {
+					static auto const from_str = []( boost::string_view str ) -> boost::optional<Real> {
+						if( str.empty( ) ) {
+							return boost::none;
+						} 
+						return atof( str.begin( ) );
+					};
+					static auto const to_str = []( boost::optional<Real> const & real ) -> std::string {
+						if( !real ) {
+							return "";
+						}
+						using std::to_string;
+						return to_string( real );
+					};
+					return link_jsonstring( name, r, to_str, from_str );
+				}
+				
 				template<typename Duration>
 				void link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
 					static std::vector<std::string> const fmts = { "%FT%TZ", "%FT%T%Ez" };
