@@ -169,7 +169,7 @@ namespace daw {
 					while( !at_end( range ) && is_digit( range.begin( ) ) ) { ++range; };
 					if( is_equal_nc( range.begin( ), 'e' ) ) {
 						++range;
-						if( '-' == *range.begin( ) ) {
+						if( '-' == *range.begin( ) || '+' == *range.begin( ) ) {
 							++range;
 						}
 						while( !at_end( range ) && is_digit( range.begin( ) ) ) { ++range; };

@@ -82,6 +82,10 @@ struct A: public daw::json::JsonLink<A> {
 	std::vector<int> custom_01;
 	std::chrono::system_clock::time_point timestamp_01;
 	std::chrono::system_clock::time_point timestamp_02;
+	std::vector<int> hexstring_01;
+	std::vector<int> hexstring_02;
+	std::vector<uint8_t> hexstring_03;
+	uint32_t hexvalue_01;
 
 	A( ):
 			JsonLink<A>{ },
@@ -99,7 +103,11 @@ struct A: public daw::json::JsonLink<A> {
 			string_02{ },
 			custom_01{ { 2, 4, 6 } },
 			timestamp_01{ },
-			timestamp_02{ std::chrono::system_clock::now( ) } {
+			timestamp_02{ std::chrono::system_clock::now( ) },
+			hexstring_01{ { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 } },
+			hexstring_02{ { 0xFF, 0x1111, 0xABCDEF, 0x12345 } },
+			hexstring_03{ { 0x11, 0xAA, 0xAB, 0xFF, 0x00, 0x01 } },
+			hexvalue_01{ 0x12345678 } {
 			
 		set_jsonlinks( );		
 	}
@@ -132,6 +140,10 @@ struct A: public daw::json::JsonLink<A> {
 
 		link_iso8601_timestamp( "timestamp_01", timestamp_01 );
 		link_epoch_milliseconds_timestamp( "timestamp_02", timestamp_02 );
+		link_hex_array( "hex_string_01", hexstring_01 );
+		link_hex_array( "hex_string_02", hexstring_02 );
+		link_hex_array( "hex_string_03", hexstring_03 );
+		link_hex_value( "hex_value_01", hexvalue_01 );
 	}
 };	// A
 

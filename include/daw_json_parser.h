@@ -62,7 +62,7 @@ namespace daw {
 		json_obj parse_json( boost::string_view const json_text );
 
 		template<typename T>
-			T get( impl::value_t const & );/*
+		T get( impl::value_t const & );/*
 											   static_assert(false, "Unsupported get type called");
 											   }*/
 
