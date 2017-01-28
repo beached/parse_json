@@ -1647,7 +1647,7 @@ namespace daw {
 			}
 
 			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-			auto json_array_from_string( boost::string_view data, bool use_default_on_error ) {
+			auto array_from_string( boost::string_view data, bool use_default_on_error ) {
 				std::vector<Derived> result;
 				auto json = parse_json( data );
 				if( !json.is_array( ) ) {
