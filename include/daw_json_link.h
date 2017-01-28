@@ -1473,12 +1473,10 @@ namespace daw {
 							return "";
 						}
 						using std::to_string;
-						return to_string( integral );
+						return to_string( *integral );
 					};
 					return link_jsonstring( name, i, to_str, from_str );
 				}
-
-
 
 				template<typename Real>
 				void link_json_string_to_real( boost::string_view name, Real & r ) {
@@ -1505,7 +1503,7 @@ namespace daw {
 							return "";
 						}
 						using std::to_string;
-						return to_string( real );
+						return to_string( *real );
 					};
 					return link_jsonstring( name, r, to_str, from_str );
 				}
