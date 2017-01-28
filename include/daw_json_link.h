@@ -1271,7 +1271,7 @@ namespace daw {
 					data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto const & obj = json_values.get_object( );
-						auto member = obj.find( name_copy );
+						auto const & member = obj.find( name_copy );
 						if( obj.end( ) == member ) {
 							std::stringstream ss;
 							ss << "JSON object does not match expected object layout.  Missing member '" << name_copy << "'";
@@ -1283,7 +1283,8 @@ namespace daw {
 							throw std::runtime_error( ss.str( ) );
 						}
 						daw::exception::daw_throw_on_false( member->second.is_string( ) );
-						*value_ptr = decode_function( member->second.get_string( ) );
+						auto coded_str = member->second.get_string( );
+						*value_ptr = decode_function( std::move( coded_str ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
 					
@@ -1323,12 +1324,12 @@ namespace daw {
 				template<typename Duration>
 				void link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
 					using tp_t = std::chrono::time_point<std::chrono::system_clock, Duration>;
-					auto const from_ts = [fmts]( std::string const & str ) {
+					auto const from_ts = [fmts]( boost::string_view str ) {
 						std::istringstream in;
 						tp_t tp;
 
 						for( auto const & fmt: fmts ) {
-							in.str( str );
+							in.str( str.to_string( ) );
 							date::parse( in, fmt, tp );
 							if( !in.fail( ) ) {
 								break;
@@ -1350,27 +1351,30 @@ namespace daw {
 				}
 
 			private:
-				static uint8_t to_nibble( uint8_t c ) noexcept {
-					// Assumes that '0' <= c <= '9' or 'a'|'A' <= c <= 'z'|'Z'
+				constexpr static uint8_t to_nibble( uint8_t c ) noexcept {
+					// Assumes that '0' <= c <= '9' or 'a'|'A' <= c <= 'f'|'F'
 					uint8_t result = 0;
+					auto const ensure_lower_case = []( uint8_t v ) {
+						return v | static_cast<uint8_t>(' ');
+					};
 					if( c <= '9' ) {
 						result = c - '0';
 					} else {
-						c = c | ' ';	// ensure lowercase
+						c = ensure_lower_case( c );
 						result = 10 + (c - 'a');
 					}
-					assert( result < 16 );
+					daw::exception::dbg_throw_on_false( result < 16, "Error in hex_char to nible calculation" );
 					return result;
 				}
 			
 				template<typename T>
 				static std::string value_to_hex( T const & value ) {
 					std::string result;
-					daw::nibble_queue_gen<T, char> nq{ value };
+					daw::nibble_queue_gen<T> nq{ value };
 
 					while( nq.can_pop( 1 ) ) {
 						auto const nibble = nq.pop_front( 1 );
-						assert( nibble < 16 );
+						daw::exception::dbg_throw_on_false( nibble < 16, "Invalid nibble value" );
 						if( nibble < 10 ) {
 							result += static_cast<char>('0' + nibble);
 						} else {
@@ -1383,7 +1387,7 @@ namespace daw {
 			public:
 				template<typename T>
 				void link_hex_value( boost::string_view name, T & value ) {
-					auto const from_hexstring = []( std::string const & str ) {
+					auto const from_hexstring = []( boost::string_view str ) {
 						daw::exception::daw_throw_on_false( (str.size( )/2)/sizeof( T ) == 1 );
 						daw::nibble_queue_gen<T> nq;
 						for( auto c: str ) {
@@ -1399,9 +1403,13 @@ namespace daw {
 					return link_jsonstring( name, value, to_hexstring, from_hexstring );
 				}
 
+				/// @brief Link an vector of Values that will be encoded as a hex string( e.g. 5 -> 0x05 )
+				/// @tparam T data element type in vector
+				/// @param name Name of class member
+				/// @param values vector of values to encode/decode
 				template<typename T>
 				void link_hex_array( boost::string_view name, std::vector<T> & values ) {
-					auto const from_hexstring = []( std::string const & str ) {
+					auto const from_hexstring = []( boost::string_view str ) {
 						daw::exception::daw_throw_on_false( str.size( )%(sizeof( T )*2) == 0 );
 						std::vector<T> result;
 						daw::nibble_queue_gen<T> nq;

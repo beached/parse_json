@@ -82,8 +82,8 @@ struct A: public daw::json::JsonLink<A> {
 	std::vector<int> custom_01;
 	std::chrono::system_clock::time_point timestamp_01;
 	std::chrono::system_clock::time_point timestamp_02;
-	std::vector<int> hexstring_01;
-	std::vector<int> hexstring_02;
+	std::vector<unsigned int> hexstring_01;
+	std::vector<unsigned int> hexstring_02;
 	std::vector<uint8_t> hexstring_03;
 	uint32_t hexvalue_01;
 
