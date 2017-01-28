@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2016 Darrell Wright
+// Copyright (c) 2014-2017 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -190,6 +190,7 @@ int main( int, char ** ) {
 	B obj_b_01;
 	obj_b_01.object_01.integral_01 = 12345;
 	auto const obj_b_01_str = obj_b_01.to_string( );
+
 	std::cout << "obj_b_01->\n" << obj_b_01_str << '\n';
 	B obj_b_02;
 	obj_b_02.from_string( obj_b_01_str );
