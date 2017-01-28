@@ -54,6 +54,17 @@
 
 namespace daw {
 	namespace json {
+		namespace impl {
+			int64_t str_to_int( boost::string_view str, int64_t );
+			uint64_t str_to_int( boost::string_view str, uint64_t );
+			int32_t str_to_int( boost::string_view str, int32_t );
+			uint32_t str_to_int( boost::string_view str, uint32_t );
+			int16_t str_to_int( boost::string_view str, int16_t );
+			uint16_t str_to_int( boost::string_view str, uint16_t );
+			int8_t str_to_int( boost::string_view str, int8_t );
+			uint8_t str_to_int( boost::string_view str, uint8_t );
+		}	// namespace impl
+
 		template<typename Derived>
 		class JsonLink;
 
@@ -1436,6 +1447,30 @@ namespace daw {
 					};
 					return link_jsonstring( name, values, to_hexstring, from_hexstring );
 				}
+
+				template<typename Integral>
+				void link_json_string_to_integral( boost::string_view name, Integral & i ) {
+					static auto const from_str = []( boost::string_view str ) {
+						return impl::str_to_int( str, Integral{ } );
+					};
+					static auto const to_str = []( Integral const & integral ) {
+						using std::to_string;
+						return to_string( integral );
+					};
+					return link_jsonstring( name, i, to_str, from_str );
+				}
+
+				template<typename Real>
+				void link_json_string_to_real( boost::string_view name, Real & r ) {
+					static auto const from_str = []( boost::string_view str ) {
+						return atof( str.begin( ) );
+					};
+					static auto const to_str = []( Real const & real ) {
+						using std::to_string;
+						return to_string( real );
+					};
+					return link_jsonstring( name, r, to_str, from_str );
+				}
 			
 				template<typename Duration>
 				void link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
@@ -1717,6 +1752,5 @@ namespace daw {
 				data.from_string( str );
 				return is;
 			}
-
 		}    // namespace json
 	}    // namespace daw
