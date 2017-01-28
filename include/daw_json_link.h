@@ -1571,6 +1571,21 @@ namespace daw {
 			}
 
 			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
+			auto array_from_string( boost::string_view data, bool use_default_on_error ) {
+				std::vector<Derived> result;
+				auto json = parse_json( data );
+				if( !json.is_array( ) ) {
+					throw std::runtime_error( "File is not an array" );
+				}
+				for( auto const & d: json.get_array( ) ) {
+					Derived tmp;
+					tmp.from_json_obj( d );
+					result.push_back( std::move( tmp ) );
+				}
+				return result;
+			}
+
+			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
 			auto array_from_file( boost::string_view file_name, bool use_default_on_error ) {
 				std::vector<Derived> result;
 				if( !boost::filesystem::exists( file_name.data( ) ) ) {
@@ -1584,18 +1599,7 @@ namespace daw {
 				if( !in_file ) {
 					throw std::runtime_error( "Could not open file" );
 				}
-				std::string data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
-				in_file.close( );
-				auto json = parse_json( data );
-				if( !json.is_array( ) ) {
-					throw std::runtime_error( "File is not an array" );
-				}
-				for( auto const & d: json.get_array( ) ) {
-					Derived tmp;
-					tmp.from_json_obj( d );
-					result.push_back( std::move( tmp ) );
-				}
-				return result;
+				return array_from_string<Derived>( std::string{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } }, use_default_on_error );
 			}
 
 			template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
