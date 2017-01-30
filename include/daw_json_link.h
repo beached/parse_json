@@ -1281,7 +1281,7 @@ namespace daw {
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
 							auto coded_str = member->second.get_string( );
-							value_ptr->emplace( decode_function( std::move( coded_str ) ) );
+							*value_ptr = decode_function( std::move( coded_str ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1336,7 +1336,7 @@ namespace daw {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_integral( ) );
-							value_ptr->emplace( decode_function( member->second.get_integral( ) ) );
+							*value_ptr = decode_function( member->second.get_integral( ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1390,7 +1390,7 @@ namespace daw {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_numeric( ) );
-							value_ptr->emplace( decode_function( member->second.get_real( ) ) );
+							*value_ptr = decode_function( member->second.get_real( ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1657,7 +1657,7 @@ namespace daw {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
-							value_ptr->emplace( boost::posix_time::from_iso_string( member->second.get_string( ) ) );
+							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1692,7 +1692,7 @@ namespace daw {
 							*value_ptr = daw::optional<boost::posix_time::ptime>{ };
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
-							value_ptr->emplace( boost::posix_time::from_iso_string( member->second.get_string( ) ) );
+							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1725,7 +1725,7 @@ namespace daw {
 							*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
-							value_ptr->emplace( boost::posix_time::from_iso_string( member->second.get_string( ) ) );
+							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
