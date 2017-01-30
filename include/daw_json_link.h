@@ -1318,7 +1318,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto const & obj = json_values.get_object( );
 						auto const & member = obj.find( name_copy );
-						if( obj.end( ) == member ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 							return;
 						}
@@ -1374,7 +1374,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto const & obj = json_values.get_object( );
 						auto member = obj.find( name_copy );
-						if( obj.end( ) == member ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_integral( ) );
@@ -1428,7 +1428,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto const & obj = json_values.get_object( );
 						auto member = obj.find( name_copy );
-						if( obj.end( ) == member ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_real( ) );
