@@ -1360,6 +1360,32 @@ namespace daw {
 					add_to_data_map( name, std::move( data_description ) );
 				}
 
+				template<typename T, typename EncoderFunction, typename DecoderFunction>
+				void link_jsonintegral( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+					set_name( value, name ); 
+					data_description_t data_description;
+					using daw::json::schema::get_schema;
+					data_description.json_type = get_schema( name, impl::value_t::integral_t{ } );
+					data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
+						daw::exception::daw_throw_on_false( value_ptr );
+						json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
+					};
+					data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
+						daw::exception::daw_throw_on_false( value_ptr );
+						auto const & obj = json_values.get_object( );
+						auto member = obj.find( name_copy );
+						if( obj.end( ) == member ) {
+							*value_ptr = boost::none;
+						} else {
+							daw::exception::daw_throw_on_false( member->second.is_integral( ) );
+							*value_ptr = decode_function( member->second.get_integral( ) );
+						}
+					};
+					add_to_data_map( name, std::move( data_description ) );
+				}
+
+
+
 			public:
 				template<typename Duration>
 				void link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
