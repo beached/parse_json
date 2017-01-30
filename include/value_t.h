@@ -174,6 +174,8 @@ namespace daw {
 
 				bool is_real( ) const;
 
+				bool is_numeric( ) const;
+
 				bool is_string( ) const;
 
 				bool is_boolean( ) const;
