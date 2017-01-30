@@ -1191,7 +1191,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( member->second.is_string( ) );
 						std::stringstream ss( member->second.get_string( ) );
 						auto str = ss.str( );
-						ss >> *value_ptr;
+						ss >> std::noskipws >> *value_ptr;
 					};
 					add_to_data_map( name, std::move( data_description ) );
 					
@@ -1223,7 +1223,7 @@ namespace daw {
 							std::stringstream ss( member->second.get_string( ) );
 							auto str = ss.str( );
 							value_ptr->emplace( );
-							ss >> **value_ptr;
+							ss >> std::noskipws >> **value_ptr;
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
