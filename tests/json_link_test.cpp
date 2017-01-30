@@ -202,6 +202,7 @@ int main( int, char ** ) {
 
 	std::cout << "sizeof( empty )->" << sizeof( empty ) << '\n';
 	std::cout << "sizeof( B )->" << sizeof( B ) << '\n';
+	std::cout << obj_b_03.object_01.streamable_01.a << std::endl;
 	return EXIT_SUCCESS;
 }
 
