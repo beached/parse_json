@@ -1408,7 +1408,7 @@ namespace daw {
 							ss << "}";
 							throw std::runtime_error( ss.str( ) );
 						}
-						daw::exception::daw_throw_on_false( member->second.is_real( ) );
+						daw::exception::daw_throw_on_false( member->second.is_numeric( ) );
 						*value_ptr = decode_function( member->second.get_real( ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1431,7 +1431,7 @@ namespace daw {
 						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
-							daw::exception::daw_throw_on_false( member->second.is_real( ) );
+							daw::exception::daw_throw_on_false( member->second.is_numeric( ) );
 							*value_ptr = decode_function( member->second.get_real( ) );
 						}
 					};
