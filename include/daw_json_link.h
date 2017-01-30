@@ -439,12 +439,10 @@ namespace daw {
 				static boost::optional<T> nullable_decoder_helper( boost::string_view name, json_obj const & json_values ) {
 					auto obj = json_values.get_object( );
 					auto member = obj.find( name );
-					if( obj.end( ) == member ) {
-						return boost::none;
-					} else if( member->second.is_null( ) ) {
+					if( obj.end( ) == member || member->second.is_null( ) ) {
 						return boost::none;
 					}
-					return boost::optional<T>{ get<T>( member->second ) };
+					return get<T>( member->second );
 				}
 
 				template<typename T, typename U = T>
@@ -871,11 +869,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// do not overwrite value
-							//*value_ptr = boost::none;
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
 							value_ptr->emplace( );	// Ensure a T type is default constructed
@@ -899,11 +893,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							value_ptr->reset( );
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
 							value_ptr->emplace( );	// Ensure a T type is default constructed
@@ -927,11 +917,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							value_ptr->reset( );
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
 							value_ptr->emplace( );	// Ensure a T type is default constructed
@@ -989,12 +975,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							// do not overwrite value
-							// *value_ptr = boost::none;
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
@@ -1021,11 +1002,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							value_ptr->reset( );
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
@@ -1053,12 +1030,8 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							*value_ptr = daw::optional_poly<T>{ };
-						} else if( member->second.is_null( ) ) {
-							*value_ptr = daw::optional_poly<T>{ };
+						if( obj.end( ) == member || member->second.is_null( ) ) {
+							value_ptr->reset( );
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
 							using namespace parse;
@@ -1118,12 +1091,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto val_obj = json_values.get_object( );
 						auto member = val_obj.find( name );
-						if( val_obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							// do not overwrite value
-							// *value_ptr = boost::none;
-						} else if( member->second.is_null( ) ) {
+						if( val_obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
@@ -1151,11 +1119,7 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto val_obj = json_values.get_object( );
 						auto member = val_obj.find( name );
-						if( val_obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							value_ptr->reset( );
-						} else if( member->second.is_null( ) ) {
+						if( val_obj.end( ) == member || member->second.is_null( ) ) {
 							value_ptr->reset( );
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
@@ -1184,12 +1148,8 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto val_obj = json_values.get_object( );
 						auto member = val_obj.find( name );
-						if( val_obj.end( ) == member ) {
-							// TODO: determine if correct course of action
-							// throw std::runtime_error( "JSON object does not match expected object layout" );
-							*value_ptr = daw::optional_poly<T>{ };
-						} else if( member->second.is_null( ) ) {
-							*value_ptr = daw::optional_poly<T>{ };
+						if( val_obj.end( ) == member || member->second.is_null( ) ) {
+							value_ptr->reset( );
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_array( ) );
 							using namespace parse;
@@ -1256,10 +1216,8 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto const & obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							*value_ptr = boost::optional<T>{ };
-						} else if( member->second.is_null( ) ) {
-							*value_ptr = boost::optional<T>{ };
+						if( obj.end( ) == member || member->second.is_null( ) ) {
+							value_ptr->reset( );
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
 							std::stringstream ss( member->second.get_string( ) );
@@ -1320,11 +1278,11 @@ namespace daw {
 						auto const & member = obj.find( name_copy );
 						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
-							return;
+						} else {
+							daw::exception::daw_throw_on_false( member->second.is_string( ) );
+							auto coded_str = member->second.get_string( );
+							value_ptr->emplace( decode_function( std::move( coded_str ) ) );
 						}
-						daw::exception::daw_throw_on_false( member->second.is_string( ) );
-						auto coded_str = member->second.get_string( );
-						*value_ptr = decode_function( std::move( coded_str ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
 					
@@ -1378,7 +1336,7 @@ namespace daw {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_integral( ) );
-							*value_ptr = decode_function( member->second.get_integral( ) );
+							value_ptr->emplace( decode_function( member->second.get_integral( ) ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1432,7 +1390,7 @@ namespace daw {
 							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_numeric( ) );
-							*value_ptr = decode_function( member->second.get_real( ) );
+							value_ptr->emplace( decode_function( member->second.get_real( ) ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1695,20 +1653,11 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							std::stringstream ss;
-							ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
-							ss << " available members { ";
-							for( auto const & m: obj.container( ) ) {
-								ss << "'" << m.first << "' ";
-							}
-							ss << "}";
-							throw std::runtime_error( ss.str( ) );
-						} else if( member->second.is_null( ) ) {
-							*value_ptr = boost::optional<boost::posix_time::ptime> { };
+						if( obj.end( ) == member || member->second.is_null( ) ) {
+							*value_ptr = boost::none;
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
-							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
+							value_ptr->emplace( boost::posix_time::from_iso_string( member->second.get_string( ) ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1739,20 +1688,11 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							std::stringstream ss;
-							ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
-							ss << " available members { ";
-							for( auto const & m: obj.container( ) ) {
-								ss << "'" << m.first << "' ";
-							}
-							ss << "}";
-							throw std::runtime_error( ss.str( ) );
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = daw::optional<boost::posix_time::ptime>{ };
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
-							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
+							value_ptr->emplace( boost::posix_time::from_iso_string( member->second.get_string( ) ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1781,20 +1721,11 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto obj = json_values.get_object( );
 						auto member = obj.find( name );
-						if( obj.end( ) == member ) {
-							std::stringstream ss;
-							ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
-							ss << " available members { ";
-							for( auto const & m: obj.container( ) ) {
-								ss << "'" << m.first << "' ";
-							}
-							ss << "}";
-							throw std::runtime_error( ss.str( ) );
-						} else if( member->second.is_null( ) ) {
+						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
 						} else {
 							daw::exception::daw_throw_on_false( member->second.is_string( ) );
-							*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
+							value_ptr->emplace( boost::posix_time::from_iso_string( member->second.get_string( ) ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
