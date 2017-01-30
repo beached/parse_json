@@ -756,9 +756,9 @@ namespace daw {
 						daw::exception::daw_throw_on_false( value_ptr );
 						auto result = nullable_decoder_helper<double>( name, json_values );
 						if( result ) {
-							daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-							daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
 							*value_ptr = static_cast<T>(*result);
+						} else {
+							*value_ptr = boost::none;
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
