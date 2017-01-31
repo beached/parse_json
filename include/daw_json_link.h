@@ -1554,23 +1554,58 @@ namespace daw {
 					return link_jsonstring( name, r, to_str, from_str );
 				}
 
-				template<typename Real>
-				void link_json_string_to_real( boost::string_view name, boost::optional<Real> & r ) {
-					static auto const from_str = []( boost::string_view str ) -> boost::optional<Real> {
+				template<typename T, typename ToReal, typename FromReal>
+				void link_json_string_to_real( boost::string_view name, T & value, ToReal to_real, FromReal from_real ) {
+					static auto const from_str = [from_real]( boost::string_view str ) {
+						auto real_val = atof( str.begin( ) );
+						return from_real( std::move( real_val ) );
+					};
+					static auto const to_str = [to_real]( T const & t ) {
+						auto tmp = to_real( t );
+						using std::to_string;
+						return to_string( tmp );
+					};
+					return link_jsonstring( name, value, to_str, from_str );
+				}
+
+				template<typename T>
+				void link_json_string_to_real( boost::string_view name, boost::optional<T> & r ) {
+					static auto const from_str = []( boost::string_view str ) -> boost::optional<T> {
 						if( str.empty( ) ) {
 							return boost::none;
 						} 
 						return atof( str.begin( ) );
 					};
-					static auto const to_str = []( boost::optional<Real> const & real ) -> std::string {
+					static auto const to_str = []( boost::optional<T> const & real ) -> boost::optional<std::string> {
 						if( !real ) {
-							return "";
+							return boost::none;
 						}
 						using std::to_string;
 						return to_string( *real );
 					};
 					return link_jsonstring( name, r, to_str, from_str );
 				}
+
+				template<typename T, typename ToReal, typename FromReal>
+				void link_json_string_to_real( boost::string_view name, boost::optional<T> & value, ToReal to_real, FromReal from_real ) {
+					static auto const from_str = [from_real]( boost::string_view str ) -> boost::optional<T> {
+						if( str.empty( ) ) {
+							return boost::none;
+						}
+						auto real_val = atof( str.begin( ) );
+						return from_real( std::move( real_val ) );
+					};
+					static auto const to_str = [to_real]( boost::optional<T> const & t ) -> boost::optional<std::string> {
+						if( !t ) {
+							return boost::none;
+						}
+						auto tmp = to_real( *t );
+						using std::to_string;
+						return to_string( tmp );
+					};
+					return link_jsonstring( name, value, to_str, from_str );
+				}
+
 				
 				template<typename Duration>
 				void link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
