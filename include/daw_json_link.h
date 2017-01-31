@@ -1548,8 +1548,7 @@ namespace daw {
 						return atof( str.begin( ) );
 					};
 					static auto const to_str = []( Real const & real ) {
-						using std::to_string;
-						return to_string( real );
+						return std::to_string( real );
 					};
 					return link_jsonstring( name, r, to_str, from_str );
 				}
@@ -1562,8 +1561,7 @@ namespace daw {
 					};
 					static auto const to_str = [to_real]( T const & t ) {
 						auto tmp = to_real( t );
-						using std::to_string;
-						return to_string( tmp );
+						return std::to_string( tmp );
 					};
 					return link_jsonstring( name, value, to_str, from_str );
 				}
@@ -1580,8 +1578,7 @@ namespace daw {
 						if( !real ) {
 							return boost::none;
 						}
-						using std::to_string;
-						return to_string( *real );
+						return std::to_string( *real );
 					};
 					return link_jsonstring( name, r, to_str, from_str );
 				}
@@ -1600,8 +1597,7 @@ namespace daw {
 							return boost::none;
 						}
 						auto tmp = to_real( *t );
-						using std::to_string;
-						return to_string( tmp );
+						return std::to_string( tmp );
 					};
 					return link_jsonstring( name, value, to_str, from_str );
 				}
