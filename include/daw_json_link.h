@@ -385,9 +385,9 @@ namespace daw {
 					if( !in_file ) {
 						throw std::runtime_error( "Could not open file" );
 					}
-					std::string data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
+					std::string const data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
 					in_file.close( );
-					parse_json( data );
+					from_string( data );	
 				}
 
 				void to_file( boost::string_view file_name, bool overwrite = true ) {
