@@ -65,7 +65,7 @@ namespace daw {
 
 			template<typename First, typename Second>
 			std::string value_to_json( boost::string_view name, std::pair<First, Second> const & value ) {
-				std::string result = daw::json::details::json_name( name ) + "{ ";
+				auto result = daw::json::details::json_name( name ) + "{ ";
 				result += value_to_json( "key", value.first ) + ", ";
 				result += value_to_json( "value", value.second ) + " }";
 				return result;

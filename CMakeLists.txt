@@ -79,7 +79,6 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw_json_interface.h
 	${HEADER_FOLDER}/daw_json_link.h
 	${HEADER_FOLDER}/daw_json_parser.h
-	${HEADER_FOLDER}/daw_json_parser_v2.h
 	${HEADER_FOLDER}/value_t.h
 )
 
@@ -90,11 +89,26 @@ set( SOURCE_FILES
 	${SOURCE_FOLDER}/value_t.cpp
 )
 
+set( HEADER_FILES_v2
+	${HEADER_FOLDER}/daw_json_link_v2.h
+	${HEADER_FOLDER}/daw_json_parser_v2.h	
+)
+
+set( SOURCE_FILES_v2
+	${SOURCE_FOLDER}/daw_json_parser_v2.cpp
+	${SOURCE_FOLDER}/daw_json_parser_v2_state.cpp
+)
+
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json header_libraries_prj char_range_prj date_prj )
 target_link_libraries( parse_json char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
+add_library ( parse_json_v2 STATIC ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
+add_dependencies( parse_json_v2 header_libraries_prj char_range_prj date_prj )
+target_link_libraries( parse_json_v2 char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+
 install( TARGETS parse_json DESTINATION lib )
+install( TARGETS parse_json_v2 DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
 add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test.cpp )
@@ -102,9 +116,9 @@ add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj date_p
 target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
 
-add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${HEADER_FOLDER}/daw_json_parser_v2_state.h ${SOURCE_FOLDER}/daw_json_parser_v2_state.cpp ${TEST_FOLDER}/parse_json_test_v2.cpp )
+add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${HEADER_FILES_v2} ${TEST_FOLDER}/parse_json_test_v2.cpp )
 add_dependencies( parse_json_test_v2_bin header_libraries_prj  )
-target_link_libraries( parse_json_test_v2_bin ${Boost_LIBRARIES} )
+target_link_libraries( parse_json_test_v2_bin parse_json_v2 ${Boost_LIBRARIES} )
 add_test( parse_json_test_v2 parse_json_test_v2_bin )
 
 add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
