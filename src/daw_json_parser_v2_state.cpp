@@ -33,6 +33,9 @@
 namespace daw {
 	namespace json {
 		namespace state {
+			state_t::state_t( ):
+				expected_state{ } { }
+
 			state_t::~state_t( ) { }
 
 			void state_t::on_object_begin( ) { 

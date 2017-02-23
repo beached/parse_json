@@ -25,6 +25,8 @@
 
 #include <boost/utility/string_view.hpp>
 #include <boost/lexical_cast.hpp>
+#include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -33,16 +35,66 @@
 namespace daw {
 	namespace json {
 		namespace state {
-			enum class current_state_t { none = 0, in_object_name, in_object_value, in_array, current_state_t_size };
+			enum class current_state_t: uint8_t { none = 0, in_object_name, in_object_value, in_array, current_state_t_size };
+			struct expected_state_t {
+				uint8_t value;
+				const uint8_t es_optional = 1;
+				enum flags: uint8_t { es_any = 255, es_null = 0, es_number = 2, es_string = 4, es_boolean = 8, es_object = 16, es_array = 32 };
+				constexpr expected_state_t( ) noexcept:
+					value{ 0 } { }
+
+				constexpr expected_state_t( flags flag, bool is_optional = false ):
+						value{ is_optional ? es_optional : es_any } {
+
+					switch( flag ) {
+					case es_any:
+					case es_number:
+					case es_string:
+					case es_boolean:
+					case es_object:
+					case es_array:
+						value |= flag;
+					default:
+						throw std::invalid_argument{ "flag" };
+					}
+				}
+
+				constexpr operator flags( ) const noexcept {
+					return value;
+				}
+
+				~expected_state_t( ) = default;
+				expected_state_t( expected_state_t const & ) = default;
+				expected_state_t( expected_state_t && ) = default;
+				expected_state_t & operator=( expected_state_t const & ) = default;
+				expected_state_t & operator=( expected_state_t && ) = default;
+
+				constexpr bool is_valid( flags flag ) const noexcept {
+					switch( value ) {
+					case es_any:
+					case es_number:
+					case es_string:
+					case es_boolean:
+					case es_object:
+					case es_array:
+						return (value & ~es_optional) & flag != 0;	
+					default:
+						return (value | es_optional) == es_optional;
+					}
+				}
+			};	// expected_state_t
 
 			struct state_t {
-				state_t( ) = default;
+				expected_state_t expected_state;
+
+				state_t( );
+				virtual ~state_t( );
+
 				state_t( state_t const & ) = default;
 				state_t( state_t && ) = default;
 				state_t & operator=( state_t const & ) = default;
 				state_t & operator=( state_t && ) = default;
 
-				virtual ~state_t( );
 
 				virtual void on_object_begin( );
 				virtual void on_object_end( );

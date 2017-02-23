@@ -153,6 +153,7 @@ namespace daw {
 
 			template<typename InputIterator, typename State>
 			auto parse_true( InputIterator & first, InputIterator const & last, State & state ) {
+				daw::exception::daw_throw_on_false<json_parser_exception>( state.expected_type == expected_type_t::any || state.expected_state == state.expected_type_t::boolean, "Unexpected type being parsed, unexpected boolean" );
 				++first;
 				if( first == last || 'r' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
 				if( first == last || 'u' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
@@ -163,21 +164,23 @@ namespace daw {
 
 			template<typename InputIterator, typename State>
 			auto parse_false( InputIterator & first, InputIterator const & last, State & state ) {
+				daw::exception::daw_throw_on_false<json_parser_exception>( state.expected_type == expected_type_t::any || state.expected_state == state.expected_type_t::boolean, "Unexpected type being parsed, unexpected boolean" );
 				++first;
-				if( first == last || 'a' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
-				if( first == last || 'l' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
-				if( first == last || 's' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
-				if( first == last || 'e' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
+				if( first == last || 'a' != *(first++) ) throw json_parser_exception( "Expected boolean false" );
+				if( first == last || 'l' != *(first++) ) throw json_parser_exception( "Expected boolean false" );
+				if( first == last || 's' != *(first++) ) throw json_parser_exception( "Expected boolean false" );
+				if( first == last || 'e' != *(first++) ) throw json_parser_exception( "Expected boolean false" );
 				state.on_boolean( false );
 				return first;
 			}
 			
 			template<typename InputIterator, typename State>
 			auto parse_null( InputIterator & first, InputIterator const & last, State & state ) {
+				daw::exception::daw_throw_on_false<json_parser_exception>( state.expected_type == expected_type_t::any || state.expected_state == state.expected_type_t::optional, "Unexpected type being parsed, expected " );
 				++first;
-				if( first == last || 'u' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
-				if( first == last || 'l' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
-				if( first == last || 'l' != *(first++) ) throw json_parser_exception( "Expected boolean true" );
+				if( first == last || 'u' != *(first++) ) throw json_parser_exception( "Expected null" );
+				if( first == last || 'l' != *(first++) ) throw json_parser_exception( "Expected null" );
+				if( first == last || 'l' != *(first++) ) throw json_parser_exception( "Expected null" );
 				state.on_null( );
 				return first;
 			}
