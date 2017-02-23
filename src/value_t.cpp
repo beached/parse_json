@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2016 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -126,14 +126,8 @@ namespace daw {
 				return get<integral_t>( m_value );
 			}
 
-			namespace {
-				constexpr bool is_numeric( value_t::value_types const t ) noexcept {
-					return t == value_t::value_types::real || t == value_t::value_types::integral;
-				}
-			}	// namespace anonymous
-
 			value_t::real_t value_t::get_real( ) const {
-				daw::exception::daw_throw_on_false( is_numeric( m_value_type )  );
+				daw::exception::daw_throw_on_false( is_numeric( )  );
 				using namespace boost;
 				using namespace daw;
 				if( m_value_type == value_types::integral ) {
@@ -167,6 +161,10 @@ namespace daw {
 
 			bool value_t::is_real( ) const {
 				return m_value_type == value_types::real;
+			}
+
+			bool value_t::is_numeric( ) const {
+				return is_real( ) || is_integral( );
 			}
 
 			bool value_t::is_string( ) const {

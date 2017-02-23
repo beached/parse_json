@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2016 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -65,7 +65,7 @@ namespace daw {
 
 			template<typename First, typename Second>
 			std::string value_to_json( boost::string_view name, std::pair<First, Second> const & value ) {
-				auto result = daw::json::details::json_name( name ) + "{ ";
+				std::string result = daw::json::details::json_name( name ) + "{ ";
 				result += value_to_json( "key", value.first ) + ", ";
 				result += value_to_json( "value", value.second ) + " }";
 				return result;
