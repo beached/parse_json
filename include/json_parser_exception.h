@@ -22,27 +22,24 @@
 
 #pragma once
 
-#include "json_parser_exception.h"
-#include "daw_json_parser_impl.h"
+#include <stdexcept>
 
 namespace daw {
 	namespace json {
-		template<typename InputIterator, typename State>
-		void json_parser( InputIterator first, auto last, State & state ) {
-			first = impl::skip_whitespace( first, last );
-			while( first != last ) {
-				switch( *first ) {
-					case '{':
-						first = impl::parse_object( first, last, state );
-						break;
-					case '[':
-						first = impl::parse_array( first, last, state );
-						break;
-					default:
-						throw json_parser_exception( "Expected an array '[' or object '{' at start of json file" );
-				}
-				first = impl::skip_whitespace( first, last );
-			}
-		}
+		struct json_parser_exception final: public std::runtime_error {
+			json_parser_exception( std::string message ):
+					std::runtime_error{ std::move( message ) } { }
+
+			~json_parser_exception( ) = default;
+
+			json_parser_exception( json_parser_exception const & ) = default;
+
+			json_parser_exception( json_parser_exception && ) = default;
+
+			json_parser_exception & operator=( json_parser_exception const & ) = default;
+
+			json_parser_exception & operator=( json_parser_exception && ) = default;
+		};    // struct json_parser_exception
 	}    // namespace json
-}    // namespace daw
+}	// namespace daw
+
