@@ -32,81 +32,33 @@
 
 namespace daw {
 	namespace json {
+		namespace types {
+			enum class expected_json_types: uint8_t { integral, real, string, boolean, integral_array, real_array, string_array, boolean_array, object, object_array };
+		}
+
+		template<typename Derived>
 		struct json_binding_t {
-			enum class expected_json_types: uint8_t { array, boolean, number, object, string };
-			using serialize_function_t = std::function<std::string( void const * object )>; 
-			using deserialize_function_t = std::function<void( void * object, boost::string_view )>; 
+			using to_json_function_t = std::function<std::string( Derived const & )>; 
+			using from_json_function_t = std::function<void( Derived &, boost::string_view )>; 
 
-			expected_json_types expected_json_type;
+			types::expected_json_types expected_json_type;
 			bool is_optional;	
-			serialize_function_t serialize_function;
-			deserialize_function_t deserialize_function;
+			from_json_function_t from_json_function;
+			to_json_function_t to_json_function;
 
-			json_binding_t( ):
-					is_optional{ false },
-					serialize_function{ nullptr },
-					deserialize_function{ nullptr } { }
+			json_binding_t( types::expected_json_types ExpectedJsonType, bool IsOptional, from_json_function_t FromJson, to_json_function_t ToJson ):
+					expected_json_type{ ExpectedJsonType },
+					is_optional{ IsOptional },
+					from_json_function{ FromJson },
+					to_json_function{ ToJson } { }
 
+			json_binding_t( ) = delete;
 			~json_binding_t( ) = default;
 			json_binding_t( json_binding_t const & ) = default;
 			json_binding_t( json_binding_t && ) = default;
 			json_binding_t & operator=( json_binding_t const & ) = default;
 			json_binding_t & operator=( json_binding_t && ) = default;
 		};	// json_binding_t
-		
-	
-		template<typename Class, size_t MemberOffset>
-		json_binding_t json_bind_integral( ) {
-			json_binding_t result;
-		
-			result.serialize_function = []( daw::not_null<void const *> obj_ptr, std::ostream & os ) {
-				auto obj = static_cast<Class const *>(obj_ptr);
-				auto const & member = ClassMember  (obj.&Class::ClassMember);
-				using std::to_string;
-				return to_string( member );
-			};
-
-			result.deserialize_function = []( daw::not_null<void *> object, boost::string_view str ) {
-				auto obj = static_cast<Class *>(obj_ptr);
-				auto & member = *(obj.*ClassMember);
-		
-				auto end = std::next( str.data( ), str.size( ) );
-				member = strtol( str.data( ), &end, 0 ); 
-			};
-			return result;
-		}
-
-		template<typename Class, typename ClassMember>
-		json_binding_t json_bind_integral_optional( ) {
-			json_binding_t result;
-			result.is_optional = true;
-		
-			result.serialize_function = []( daw::not_null<void const *> obj_ptr, std::ostream & os ) {
-				auto obj = static_cast<Class const *>(obj_ptr);
-				auto const member = obj.*ClassMember;
-				if( member ) {
-					using std::to_string;
-					return to_string( member );
-				}
-				return "null";
-			};
-
-			result.deserialize_function = []( daw::not_null<void *> object, boost::string_view str ) {
-				auto obj = static_cast<Class *>(obj_ptr);
-				auto member = obj.*ClassMember;
-
-				if( 'n' == str[0] ) {
-					member = nullptr;
-					return;
-				}
-				auto end = std::next( str.data( ), str.size( ) );
-				*member = strtol( str.data( ), &end, 0 ); 
-			};
-			return result;
-		}
-
 	}	// namespace json
 }    // namespace daw
 
-#define JSON_EXPECT( type_name, json_name, member_name ) \
-	daw::json::json_bind_##type_name##<
