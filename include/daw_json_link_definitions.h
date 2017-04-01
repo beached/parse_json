@@ -237,15 +237,12 @@ namespace daw {
 		}
 		*/
 		template<typename Derived>
-		JsonLink<Derived>::~JsonLink( ) { }
-
-		template<typename Derived>
 		bool JsonLink<Derived>::is_linked( impl::string_value name ) const {
 			return m_data.m_data_map.count( name ) != 0;
 		}
 
 		template<typename Derived>
-		JsonLink<Derived>::JsonLink( ) { }
+		JsonLink<Derived>::~JsonLink( ) noexcept { }
 
 		template<typename Derived>
 		std::string & JsonLink<Derived>::json_object_name( ) {
@@ -1031,7 +1028,7 @@ namespace daw {
 			auto value_ptr = &value;
 			set_name( value, name.to_string( ) );
 			data_description_t data_description;
-			data_description.json_type = "map?";
+			data_description.json_type = impl::value_t::string_t{ "map?" };
 			using ::daw::json::schema::get_schema;
 			data_description.json_type = get_schema( name, value );
 			data_description.bind_functions.encode = standard_encoder( name, value );
@@ -1059,7 +1056,7 @@ namespace daw {
 			auto value_ptr = &value;
 			set_name( value, name.to_string( ) );
 			data_description_t data_description;
-			data_description.json_type = "map?";
+			data_description.json_type = impl::value_t::string_t{ "map?" };
 			using ::daw::json::schema::get_schema;
 			data_description.json_type = get_schema( name, value );
 			data_description.bind_functions.encode = standard_encoder( name, value );
@@ -1087,7 +1084,7 @@ namespace daw {
 			auto value_ptr = &value;
 			set_name( value, name.to_string( ) );
 			data_description_t data_description;
-			data_description.json_type = "map?";
+			data_description.json_type = impl::value_t::string_t{ "map?" };
 			using ::daw::json::schema::get_schema;
 			data_description.json_type = get_schema( name, value );
 			data_description.bind_functions.encode = standard_encoder( name, value );

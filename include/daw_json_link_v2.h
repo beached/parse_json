@@ -186,15 +186,22 @@ namespace daw {
 
 			template<typename SerializeFunction, typename DeserializeFunction> 
 			void link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function );
-		public:
-			virtual ~JsonLink( );
 
-			bool is_linked( impl::string_value name ) const;
-			JsonLink( );
-			JsonLink( JsonLink const & ) = delete;
-			JsonLink( JsonLink && ) = delete;
+			constexpr static uint8_t to_nibble( uint8_t c ) noexcept;
+		
+			template<typename T>
+			static std::string value_to_hex( T const & value );
+
+		protected:
+			constexpr JsonLink( ) noexcept { }
+			~JsonLink( ) noexcept; 
+		public:
+			JsonLink( JsonLink const & ) = default;
+			JsonLink( JsonLink && ) = default;
 			JsonLink & operator=( JsonLink const & ) = default;
 			JsonLink & operator=( JsonLink && ) = default;
+
+			bool is_linked( impl::string_value name ) const;
 			std::string & json_object_name( );
 			std::string const & json_object_name( ) const;
 			::daw::json::impl::value_t get_schema_obj( ) const;
@@ -205,7 +212,8 @@ namespace daw {
 			void from_string( char const *json_text_begin, char const *json_text_end );
 			void from_file( boost::string_view filename );
 			void to_file( boost::string_view file_name, bool overwrite = true );
-		public:
+
+		protected:
 			template<typename T>
 			static void call_decode( T &, json_obj );
 
@@ -439,13 +447,6 @@ namespace daw {
 			template<typename Duration>
 			void link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts );
 
-		private:
-			constexpr static uint8_t to_nibble( uint8_t c ) noexcept;
-		
-			template<typename T>
-			static std::string value_to_hex( T const & value );
-
-		public:
 			template<typename T>
 			void link_hex_value( boost::string_view name, T & value );
 
