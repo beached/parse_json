@@ -54,17 +54,6 @@
 
 namespace daw {
 	namespace json {
-		namespace impl {
-			int64_t str_to_int( boost::string_view str, int64_t );
-			uint64_t str_to_int( boost::string_view str, uint64_t );
-			int32_t str_to_int( boost::string_view str, int32_t );
-			uint32_t str_to_int( boost::string_view str, uint32_t );
-			int16_t str_to_int( boost::string_view str, int16_t );
-			uint16_t str_to_int( boost::string_view str, uint16_t );
-			int8_t str_to_int( boost::string_view str, int8_t );
-			uint8_t str_to_int( boost::string_view str, uint8_t );
-		}	// namespace impl
-
 		template<typename Derived>
 		class JsonLink;
 
@@ -83,106 +72,79 @@ namespace daw {
 		template<typename Derived>
 		::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const & obj );
 
-		namespace schema {
-			::daw::json::impl::value_t get_schema( boost::string_view name );
 
-			::daw::json::impl::value_t get_schema( boost::string_view name, bool const & );
-
-			::daw::json::impl::value_t get_schema( boost::string_view name, std::nullptr_t );
-
-			::daw::json::impl::value_t get_schema( boost::string_view name, std::string const & );
-
-			::daw::json::impl::value_t get_schema( boost::string_view name, boost::posix_time::ptime const & );
-
-			::daw::json::impl::value_t make_type_obj( boost::string_view name, ::daw::json::impl::value_t selected_type );
-
-			template<typename Key, typename Value>
-			auto get_schema( boost::string_view name, std::pair<Key, Value> const & );
-			//::daw::json::impl::value_t get_schema( boost::string_view name, std::pair<Key, Value> const & );
-
-			template<typename T, typename std::enable_if_t<daw::traits::is_container_not_string<T>::value, long> = 0>
-			auto get_schema( boost::string_view name, T const & );
-
-			template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long> = 0>
-			auto get_schema( boost::string_view name, T const & );
-
-			template<typename T, typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<bool, T>::value, long> = 0>
-			auto get_schema( boost::string_view name, T const & );
+		namespace impl {
+			int64_t str_to_int( boost::string_view str, int64_t );
+			uint64_t str_to_int( boost::string_view str, uint64_t );
+			int32_t str_to_int( boost::string_view str, int32_t );
+			uint32_t str_to_int( boost::string_view str, uint32_t );
+			int16_t str_to_int( boost::string_view str, int16_t );
+			uint16_t str_to_int( boost::string_view str, uint16_t );
+			int8_t str_to_int( boost::string_view str, int8_t );
+			uint8_t str_to_int( boost::string_view str, uint8_t );
 
 			template<typename T>
-			auto get_schema( boost::string_view name, boost::optional<T> const & );
+			struct standard_encoder_t final {
+				std::string name_copy;
+				T const * value_ptr;
 
-			template<typename T>
-			auto get_schema( boost::string_view name, daw::optional<T> const & );
+				standard_encoder_t( boost::string_view n, T const & v );
+				standard_encoder_t( ) = delete;
 
-			template<typename T>
-			auto get_schema( boost::string_view name, daw::optional_poly<T> const & );
+				~standard_encoder_t( ) = default;
+				standard_encoder_t( standard_encoder_t const & ) = default;
+				standard_encoder_t( standard_encoder_t && ) = default;
+				standard_encoder_t & operator=( standard_encoder_t const & ) = default;
+				standard_encoder_t & operator=( standard_encoder_t && ) = default;
 
-			template<typename T, typename std::enable_if_t<daw::traits::is_streamable<T>::value && !daw::traits::is_numeric<T>::value && !std::is_same<std::string, T>::value, long> = 0>
-			auto get_schema( boost::string_view name, T const & );
-		}    // namespace schema
+				void operator( )( std::string & json_text ) const;
+			};	// standard_encoder_t
 
-		template<typename T>
-		struct standard_encoder_t final {
-			std::string name_copy;
-			T const * value_ptr;
+			using encode_function_t = std::function<void( std::string & json_text )>;
+			using decode_function_t = std::function<void( json_obj json_values )>;
 
-			standard_encoder_t( boost::string_view n, T const & v );
-			standard_encoder_t( ) = delete;
+			struct bind_functions_t final {
+				encode_function_t encode;
+				decode_function_t decode;
 
-			~standard_encoder_t( ) = default;
-			standard_encoder_t( standard_encoder_t const & ) = default;
-			standard_encoder_t( standard_encoder_t && ) = default;
-			standard_encoder_t & operator=( standard_encoder_t const & ) = default;
-			standard_encoder_t & operator=( standard_encoder_t && ) = default;
+				bind_functions_t( );
+				~bind_functions_t( ) = default;
+				bind_functions_t( bind_functions_t const & ) = default;
+				bind_functions_t( bind_functions_t && ) = default;
+				bind_functions_t & operator=( bind_functions_t const & ) = default;
+				bind_functions_t & operator=( bind_functions_t && ) = default;
+			};	// bind_functions_t
 
-			void operator( )( std::string & json_text ) const;
-		};	// standard_encoder_t
+			struct data_description_t final {
+				::daw::json::impl::value_t json_type;
+				bind_functions_t bind_functions;
 
-		using encode_function_t = std::function<void( std::string & json_text )>;
-		using decode_function_t = std::function<void( json_obj json_values )>;
+				data_description_t( );
+				~data_description_t( ) = default;
+				data_description_t( data_description_t const & ) = default;
+				data_description_t( data_description_t && ) = default;
+				data_description_t & operator=( data_description_t const & ) = default;
+				data_description_t & operator=( data_description_t && ) = default;
+			};    // data_description
 
-		struct bind_functions_t final {
-			encode_function_t encode;
-			decode_function_t decode;
+			struct data_t final {
+				std::string m_name;
+				std::map<impl::string_value, data_description_t> m_data_map;
 
-			bind_functions_t( );
-			~bind_functions_t( ) = default;
-			bind_functions_t( bind_functions_t const & ) = default;
-			bind_functions_t( bind_functions_t && ) = default;
-			bind_functions_t & operator=( bind_functions_t const & ) = default;
-			bind_functions_t & operator=( bind_functions_t && ) = default;
-		};	// bind_functions_t
+				data_t( ) = default;
+				data_t( data_t const & ) = default;
+				data_t( data_t & ) = default;
+				data_t & operator=( data_t const & ) = default;
+				data_t & operator=( data_t & ) = default;
+				~data_t( ) = default;
 
-		struct data_description_t final {
-			::daw::json::impl::value_t json_type;
-			bind_functions_t bind_functions;
-
-			data_description_t( );
-			~data_description_t( ) = default;
-			data_description_t( data_description_t const & ) = default;
-			data_description_t( data_description_t && ) = default;
-			data_description_t & operator=( data_description_t const & ) = default;
-			data_description_t & operator=( data_description_t && ) = default;
-		};    // data_description
-
-		struct data_t final {
-			std::string m_name;
-			std::map<impl::string_value, data_description_t> m_data_map;
-
-			data_t( ) = default;
-			data_t( data_t const & ) = default;
-			data_t( data_t & ) = default;
-			data_t & operator=( data_t const & ) = default;
-			data_t & operator=( data_t & ) = default;
-			~data_t( ) = default;
-
-			data_t( boost::string_view name );
-		};	// data_t
+				data_t( boost::string_view name );
+			};	// data_t
+		}	// namespace impl
 
 		template<typename Derived>
 		class JsonLink {
-			static data_t m_data;
+			static impl::data_t m_data;
 
 			template<typename SerializeFunction, typename DeserializeFunction> 
 			void link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function );
@@ -225,7 +187,7 @@ namespace daw {
 			static void set_name( JsonLink & obj, boost::string_view name );
 
 			template<typename T>
-			static encode_function_t standard_encoder( boost::string_view name, T const & value );
+			static impl::encode_function_t standard_encoder( boost::string_view name, T const & value );
 
 			template<typename T>
 			static T decoder_helper( boost::string_view name, json_obj const & json_values );
@@ -234,7 +196,7 @@ namespace daw {
 			static boost::optional<T> nullable_decoder_helper( boost::string_view name, json_obj const & json_values );
 
 			template<typename T, typename U = T>
-			static decode_function_t standard_decoder( boost::string_view name, T & value );
+			static impl::decode_function_t standard_decoder( boost::string_view name, T & value );
 
 			template<typename T>
 			static uint8_t hex_to_integral( T && value );
@@ -247,21 +209,21 @@ namespace daw {
 			static std::string unescape_string( boost::string_view src );
 
 			template<typename T, typename U = T>
-			static decode_function_t string_decoder( boost::string_view name, T & value );
+			static impl::decode_function_t string_decoder( boost::string_view name, T & value );
 
 			template<typename T, typename U = T>
-			static decode_function_t standard_decoder( boost::string_view name, boost::optional<T> & value );
+			static impl::decode_function_t standard_decoder( boost::string_view name, boost::optional<T> & value );
 
 			template<typename T, typename U = T>
-			static decode_function_t standard_decoder( boost::string_view name, daw::optional<T> & value );
+			static impl::decode_function_t standard_decoder( boost::string_view name, daw::optional<T> & value );
 
 			template<typename T, typename U = T>
-			static decode_function_t standard_decoder( boost::string_view name, daw::optional_poly<T> & value );
+			static impl::decode_function_t standard_decoder( boost::string_view name, daw::optional_poly<T> & value );
 
 			template<typename T>
-			static bind_functions_t standard_bind_functions( boost::string_view name, T & value );
+			static impl::bind_functions_t standard_bind_functions( boost::string_view name, T & value );
 		
-			void add_to_data_map( boost::string_view name, data_description_t desc );
+			void add_to_data_map( boost::string_view name, impl::data_description_t desc );
 
 			///
 			/// \param name - name of integral value to link
