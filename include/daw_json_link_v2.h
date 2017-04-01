@@ -179,8 +179,7 @@ namespace daw {
 				data_t & operator=( data_t & ) = default;
 				~data_t( ) = default;
 
-				template<typename T>
-				data_t( T && name );
+				data_t( boost::string_view name );
 			};
 			static data_t m_data;
 
@@ -191,7 +190,7 @@ namespace daw {
 			virtual ~JsonLink( );
 
 			bool is_linked( impl::string_value name ) const;
-			JsonLink( std::string name = "" );
+			JsonLink( );
 			JsonLink( JsonLink const & ) = delete;
 			JsonLink( JsonLink && ) = delete;
 			JsonLink & operator=( JsonLink const & ) = default;

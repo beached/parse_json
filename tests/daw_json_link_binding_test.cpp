@@ -25,7 +25,7 @@
 #include <iostream>
 
 #include "daw_json_link_v2.h"
-
+/*
 struct test: public json_link_v2<test> {
 	int32_t a;
 	int64_t b;
@@ -100,9 +100,9 @@ struct test2: public json_link_v2<test2> {
 struct tmp {
 	int n;
 };
-
+*/
 int main( int, char** ) {
-	auto b = daw::json::json_bind_integral<tmp, &tmp::n>( );
+//	auto b = daw::json::json_bind_integral<tmp, &tmp::n>( );
 
 
 	return EXIT_SUCCESS;

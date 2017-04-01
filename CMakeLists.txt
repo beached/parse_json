@@ -89,7 +89,7 @@ set( HEADER_FILES_v2
 	${HEADER_FOLDER}/daw_json_link_v2.h
 	${HEADER_FOLDER}/daw_json_link_binding.h
 	${HEADER_FOLDER}/daw_json_parser_v2.h
-	${HEADER_FOLDER}/json_parser_exception.h
+	${HEADER_FOLDER}/daw_json_parser_exception.h
 	${HEADER_FOLDER}/daw_json_parser_impl.h
 )
 
@@ -97,6 +97,7 @@ set( SOURCE_FILES_v2
 	${SOURCE_FOLDER}/daw_json_parser_v2.cpp
 	${SOURCE_FOLDER}/daw_json_parser_v2_state.cpp
 	${SOURCE_FOLDER}/daw_json_link_v2.cpp
+	${SOURCE_FOLDER}/daw_json_parser_exception.cpp
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )

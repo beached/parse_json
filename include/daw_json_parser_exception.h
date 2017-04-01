@@ -30,7 +30,7 @@ namespace daw {
 			json_parser_exception( std::string message ):
 					std::runtime_error{ std::move( message ) } { }
 
-			~json_parser_exception( ) = default;
+			~json_parser_exception( );
 
 			json_parser_exception( json_parser_exception const & ) = default;
 

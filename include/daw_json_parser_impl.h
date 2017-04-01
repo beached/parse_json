@@ -32,7 +32,8 @@
 #include <daw/daw_parser_helper.h>
 #include <daw/daw_traits.h>
 
-#include "json_parser_exception.h"
+#include "daw_json_parser_exception.h"
+
 namespace daw {
 	namespace json {
 		namespace impl {

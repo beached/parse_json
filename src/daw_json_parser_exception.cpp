@@ -20,17 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <string>
+#include "daw_json_parser_exception.h"
 
-#include "daw_json_link_v2.h"
 
 namespace daw {
 	namespace json {
-		namespace impl {
-			std::string to_string( std::string val ) {
-				return val;
-			}
-		}	// namespace impl
-	}	// namespace json
+		json_parser_exception::~json_parser_exception( ) { }
+	}    // namespace json
 }	// namespace daw
 

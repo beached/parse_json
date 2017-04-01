@@ -22,13 +22,15 @@
 
 #pragma once
 
-#include "json_parser_exception.h"
+#include <string>
+
+#include "daw_json_parser_exception.h"
 #include "daw_json_parser_impl.h"
 
 namespace daw {
 	namespace json {
-		template<typename InputIterator, typename State>
-		void json_parser( InputIterator first, auto last, State & state ) {
+		template<typename InputIteratorFirst, typename InputIteratorLast, typename State>
+		void json_parser( InputIteratorFirst first, InputIteratorLast last, State & state ) {
 			first = impl::skip_whitespace( first, last );
 			while( first != last ) {
 				switch( *first ) {
