@@ -55,6 +55,23 @@
 namespace daw {
 	namespace json {
 		namespace impl {
+			template<typename T>
+			struct standard_encoder_t final {
+				std::string name_copy;
+				T const * value_ptr;
+
+				standard_encoder_t( boost::string_view n, T const & v );
+				standard_encoder_t( ) = delete;
+
+				~standard_encoder_t( ) = default;
+				standard_encoder_t( standard_encoder_t const & ) = default;
+				standard_encoder_t( standard_encoder_t && ) = default;
+				standard_encoder_t & operator=( standard_encoder_t const & ) = default;
+				standard_encoder_t & operator=( standard_encoder_t && ) = default;
+
+				void operator( )( std::string & json_text ) const;
+			};	// standard_encoder_t
+
 			namespace schema {
 				::daw::json::impl::value_t get_schema( boost::string_view name );
 
@@ -267,7 +284,7 @@ namespace daw {
 		}
 		*/
 		template<typename Derived>
-		bool JsonLink<Derived>::is_linked( impl::string_value name ) const {
+		bool JsonLink<Derived>::is_linked( impl::string_value name ) {
 			return m_data.m_data_map.count( name ) != 0;
 		}
 
@@ -275,17 +292,12 @@ namespace daw {
 		JsonLink<Derived>::~JsonLink( ) noexcept { }
 
 		template<typename Derived>
-		std::string & JsonLink<Derived>::json_object_name( ) {
+		std::string const & JsonLink<Derived>::json_object_name( ) {
 			return m_data.m_name;
 		}
 
 		template<typename Derived>
-		std::string const & JsonLink<Derived>::json_object_name( ) const {
-			return m_data.m_name;
-		}
-
-		template<typename Derived>
-		::daw::json::impl::value_t JsonLink<Derived>::get_schema_obj( ) const {
+		::daw::json::impl::value_t JsonLink<Derived>::get_schema_obj( ) {
 			::daw::json::impl::object_value result;
 			using mapped_value_t = typename decltype( m_data.m_data_map )::value_type;
 			std::transform( std::begin( m_data.m_data_map ), std::end( m_data.m_data_map ), std::back_inserter( result ),
