@@ -51,10 +51,6 @@ namespace daw {
 				m_value{ value },
 				m_value_type{ value_types::real } { }
 
-			value_t::value_t( std::string const & value ):
-				m_value{ string_value{ range::create_char_range( value ) } },
-				m_value_type{ value_types::string } { }
-
 			value_t::value_t( boost::string_view value ):
 				m_value{ string_value{ value } },
 				m_value_type{ value_types::string } { }
@@ -83,6 +79,10 @@ namespace daw {
 				m_value{ other.m_value },
 				m_value_type{ other.m_value_type } { }
 
+			value_t::value_t( value_t && other ):
+				m_value{ std::move( other.m_value ) },
+				m_value_type{ other.m_value_type } { }
+
 			value_t & value_t::operator=( value_t const & rhs ) {
 				if( this != &rhs ) {
 					m_value = rhs.m_value;
@@ -91,15 +91,59 @@ namespace daw {
 				return *this;
 			}
 
-			value_t::value_t( value_t && other ):
-				m_value{ std::move( other.m_value ) },
-				m_value_type{ other.m_value_type } { }
-
 			value_t & value_t::operator=( value_t && rhs ) {
 				if( this != &rhs ) {
 					m_value = std::move( rhs.m_value );
 					m_value_type = rhs.m_value_type;
 				}
+				return *this;
+			}
+
+			value_t & value_t::operator=( value_t::integral_t const & rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::integral;
+				return *this;
+			}
+
+			value_t & value_t::operator=( value_t::real_t const & rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::real;
+				return *this;
+			}
+
+			value_t & value_t::operator=( boost::string_view rhs ) {
+				m_value = string_value{ rhs };
+				m_value_type = value_types::string;
+				return *this;
+			}
+
+			value_t & value_t::operator=( value_t::string_t rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::string;
+				return *this;
+			}
+
+			value_t & value_t::operator=( value_t::boolean_t rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::boolean;
+				return *this;
+			}
+
+			value_t & value_t::operator=( std::nullptr_t rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::null;
+				return *this;
+			}
+
+			value_t & value_t::operator=( value_t::array_t rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::array;
+				return *this;
+			}
+
+			value_t & value_t::operator=( value_t::object_t rhs ) {
+				m_value = rhs;
+				m_value_type = value_types::object;
 				return *this;
 			}
 

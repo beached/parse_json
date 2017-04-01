@@ -61,7 +61,6 @@ namespace daw {
 
 				object_value & operator=( object_value && ) = default;
 
-
 				inline std::vector<object_value_item> & container( ) {
 					return members_v;
 				}
@@ -94,7 +93,6 @@ namespace daw {
 
 			using array_value = std::vector<value_t>;
 
-
 			struct value_t {
 				using integral_t = intmax_t;
 				using real_t = double;
@@ -122,9 +120,7 @@ namespace daw {
 
 				explicit value_t( real_t const & value );
 
-				explicit value_t( std::string const & value );
-
-				explicit value_t( boost::string_view value );
+				value_t( boost::string_view value );
 
 				explicit value_t( string_t value );
 
@@ -142,9 +138,25 @@ namespace daw {
 
 				value_t & operator=( value_t const & rhs );
 
-				value_t( value_t && );
-
 				value_t & operator=( value_t && );
+
+				value_t & operator=( value_t::integral_t const & rhs );
+
+				value_t & operator=( value_t::real_t const & rhs );
+
+				value_t & operator=( boost::string_view rhs );
+
+				value_t & operator=( value_t::string_t rhs );
+
+				value_t & operator=( value_t::boolean_t rhs );
+
+				value_t & operator=( std::nullptr_t rhs );
+
+				value_t & operator=( value_t::array_t rhs );
+
+				value_t & operator=( value_t::object_t rhs );
+
+				value_t( value_t && );
 
 				integral_t get_integral( ) const;
 

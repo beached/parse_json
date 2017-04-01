@@ -213,18 +213,15 @@ namespace daw {
 			json_text = value_to_json( name_copy, *value_ptr );
 		}
 
-		template<typename Derived>
-		JsonLink<Derived>::bind_functions_t::bind_functions_t( ):
+		bind_functions_t::bind_functions_t( ):
 				encode{ nullptr },
 				decode{ nullptr } { }
 
-		template<typename Derived>
-		JsonLink<Derived>::data_description_t::data_description_t( ):
+		data_description_t::data_description_t( ):
 				json_type{ nullptr },
 				bind_functions{ } { }
 
-		template<typename Derived>
-		JsonLink<Derived>::data_t::data_t( boost::string_view name ):
+		data_t::data_t( boost::string_view name ):
 				m_name{ name.to_string( ) },
 				m_data_map{ } { }
 
@@ -244,7 +241,7 @@ namespace daw {
 
 		template<typename Derived>
 		bool JsonLink<Derived>::is_linked( impl::string_value name ) const {
-			return m_data->m_data_map.count( name ) != 0;
+			return m_data.m_data_map.count( name ) != 0;
 		}
 
 		template<typename Derived>
@@ -252,19 +249,19 @@ namespace daw {
 
 		template<typename Derived>
 		std::string & JsonLink<Derived>::json_object_name( ) {
-			return m_data->m_name;
+			return m_data.m_name;
 		}
 
 		template<typename Derived>
 		std::string const & JsonLink<Derived>::json_object_name( ) const {
-			return m_data->m_name;
+			return m_data.m_name;
 		}
 
 		template<typename Derived>
 		::daw::json::impl::value_t JsonLink<Derived>::get_schema_obj( ) const {
 			::daw::json::impl::object_value result;
-			using mapped_value_t = typename decltype( m_data->m_data_map )::value_type;
-			std::transform( std::begin( m_data->m_data_map ), std::end( m_data->m_data_map ), std::back_inserter( result ),
+			using mapped_value_t = typename decltype( m_data.m_data_map )::value_type;
+			std::transform( std::begin( m_data.m_data_map ), std::end( m_data.m_data_map ), std::back_inserter( result ),
 					[]( mapped_value_t const & value ) {
 					return ::daw::json::impl::make_object_value_item( value.first,
 							value.second.json_type );
@@ -275,7 +272,7 @@ namespace daw {
 		template<typename Derived>
 		std::string JsonLink<Derived>::to_string( ) const {
 			std::stringstream result;
-			auto range = daw::range::make_range( m_data->m_data_map );
+			auto range = daw::range::make_range( m_data.m_data_map );
 			std::string tmp;
 
 			range.front( ).second.bind_functions.encode( tmp );
@@ -363,7 +360,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T>
-		typename JsonLink<Derived>::encode_function_t JsonLink<Derived>::standard_encoder( boost::string_view name, T const & value ) {
+		encode_function_t JsonLink<Derived>::standard_encoder( boost::string_view name, T const & value ) {
 			encode_function_t result = standard_encoder_t<T>{ name, value };
 			return result;
 		}
@@ -396,7 +393,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T, typename U>
-		typename JsonLink<Derived>::decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, T & value ) {
+		decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, T & value ) {
 			return [value_ptr = &value, name_copy = name.to_string( )]( json_obj json_values ) mutable {
 				daw::exception::daw_throw_on_false( value_ptr );
 				auto new_val = decoder_helper<U>( name_copy, json_values );
@@ -506,7 +503,7 @@ namespace daw {
 
 
 		template<typename Derived> template<typename T, typename U>
-		typename JsonLink<Derived>::decode_function_t JsonLink<Derived>::string_decoder( boost::string_view name, T & value ) {
+		decode_function_t JsonLink<Derived>::string_decoder( boost::string_view name, T & value ) {
 			auto value_ptr = &value;
 			auto name_copy = name.to_string( );
 			return [value_ptr, name_copy]( json_obj json_values ) mutable {
@@ -517,7 +514,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T, typename U>
-		typename JsonLink<Derived>::decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, boost::optional<T> & value ) {
+		decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, boost::optional<T> & value ) {
 			auto value_ptr = &value;
 			auto name_copy = name.to_string( );
 			return [value_ptr, name_copy]( json_obj json_values ) mutable {
@@ -528,7 +525,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T, typename U>
-		typename JsonLink<Derived>::decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, daw::optional<T> & value ) {
+		decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, daw::optional<T> & value ) {
 			auto value_ptr = &value;
 			auto name_copy = name.to_string( );
 			return [value_ptr, name_copy]( json_obj json_values ) mutable {
@@ -543,7 +540,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T, typename U>
-		typename JsonLink<Derived>::decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, daw::optional_poly<T> & value ) {
+		decode_function_t JsonLink<Derived>::standard_decoder( boost::string_view name, daw::optional_poly<T> & value ) {
 			auto value_ptr = &value;
 			auto name_copy = name.to_string( );
 			return [value_ptr, name_copy]( json_obj json_values ) mutable {
@@ -558,7 +555,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T>
-		typename JsonLink<Derived>::bind_functions_t JsonLink<Derived>::standard_bind_functions( boost::string_view name, T & value ) {
+		bind_functions_t JsonLink<Derived>::standard_bind_functions( boost::string_view name, T & value ) {
 			bind_functions_t bind_functions;
 			bind_functions.encode = standard_encoder( name, value );
 			bind_functions.decode = standard_decoder( name, value );
@@ -567,8 +564,8 @@ namespace daw {
 		template<typename Derived>
 		void JsonLink<Derived>::add_to_data_map( boost::string_view name, data_description_t desc ) {
 			auto key = range::create_char_range( name );
-			daw::exception::daw_throw_on_false( m_data->m_data_map.count( key ) == 0 ); 
-			auto result = m_data->m_data_map.emplace( std::move( key ), std::move( desc ) );
+			daw::exception::daw_throw_on_false( m_data.m_data_map.count( key ) == 0 ); 
+			auto result = m_data.m_data_map.emplace( std::move( key ), std::move( desc ) );
 			daw::exception::daw_throw_on_false( result.second );
 		}
 

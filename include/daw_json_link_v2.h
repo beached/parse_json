@@ -139,53 +139,53 @@ namespace daw {
 			void operator( )( std::string & json_text ) const;
 		};	// standard_encoder_t
 
+		using encode_function_t = std::function<void( std::string & json_text )>;
+		using decode_function_t = std::function<void( json_obj json_values )>;
+
+		struct bind_functions_t final {
+			encode_function_t encode;
+			decode_function_t decode;
+
+			bind_functions_t( );
+			~bind_functions_t( ) = default;
+			bind_functions_t( bind_functions_t const & ) = default;
+			bind_functions_t( bind_functions_t && ) = default;
+			bind_functions_t & operator=( bind_functions_t const & ) = default;
+			bind_functions_t & operator=( bind_functions_t && ) = default;
+		};	// bind_functions_t
+
+		struct data_description_t final {
+			::daw::json::impl::value_t json_type;
+			bind_functions_t bind_functions;
+
+			data_description_t( );
+			~data_description_t( ) = default;
+			data_description_t( data_description_t const & ) = default;
+			data_description_t( data_description_t && ) = default;
+			data_description_t & operator=( data_description_t const & ) = default;
+			data_description_t & operator=( data_description_t && ) = default;
+		};    // data_description
+
+		struct data_t final {
+			std::string m_name;
+			std::map<impl::string_value, data_description_t> m_data_map;
+
+			data_t( ) = default;
+			data_t( data_t const & ) = default;
+			data_t( data_t & ) = default;
+			data_t & operator=( data_t const & ) = default;
+			data_t & operator=( data_t & ) = default;
+			~data_t( ) = default;
+
+			data_t( boost::string_view name );
+		};	// data_t
+
 		template<typename Derived>
 		class JsonLink {
-			using encode_function_t = std::function<void( std::string & json_text )>;
-			using decode_function_t = std::function<void( json_obj json_values )>;
-
-			struct bind_functions_t final {
-				encode_function_t encode;
-				decode_function_t decode;
-
-				bind_functions_t( );
-				~bind_functions_t( ) = default;
-				bind_functions_t( bind_functions_t const & ) = default;
-				bind_functions_t( bind_functions_t && ) = default;
-				bind_functions_t & operator=( bind_functions_t const & ) = default;
-				bind_functions_t & operator=( bind_functions_t && ) = default;
-			};	// bind_functions_t
-
-			struct data_description_t final {
-				::daw::json::impl::value_t json_type;
-				bind_functions_t bind_functions;
-
-				data_description_t( );
-				~data_description_t( ) = default;
-				data_description_t( data_description_t const & ) = default;
-				data_description_t( data_description_t && ) = default;
-				data_description_t & operator=( data_description_t const & ) = default;
-				data_description_t & operator=( data_description_t && ) = default;
-			};    // data_description
-
-			struct data_t {
-				std::string m_name;
-				std::map<impl::string_value, data_description_t> m_data_map;
-
-				data_t( ) = default;
-				data_t( data_t const & ) = default;
-				data_t( data_t & ) = default;
-				data_t & operator=( data_t const & ) = default;
-				data_t & operator=( data_t & ) = default;
-				~data_t( ) = default;
-
-				data_t( boost::string_view name );
-			};
 			static data_t m_data;
 
 			template<typename SerializeFunction, typename DeserializeFunction> 
 			void link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function );
-
 		public:
 			virtual ~JsonLink( );
 
