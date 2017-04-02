@@ -55,7 +55,7 @@
 namespace daw {
 	namespace json {
 		template<typename Derived>
-		class JsonLink;
+		struct JsonLink;
 
 		template<typename Derived>
 		std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data );
@@ -125,38 +125,85 @@ namespace daw {
 		}	// namespace impl
 
 		template<typename Derived>
-		class JsonLink {
-			static impl::data_t m_data;
+		struct JsonLink {
+			JsonLink( ) = default; 
+			JsonLink( JsonLink const & ) = default;
+			JsonLink( JsonLink && ) = default;
+			JsonLink & operator=( JsonLink const & ) = default;
+			JsonLink & operator=( JsonLink && ) = default;
+
+			std::string to_json_string( ) const;
+			void to_json_file( boost::string_view file_name, bool overwrite = true ) const;
+			void from_json_string( boost::string_view const json_text );
+			void from_json_string( char const *json_text_begin, char const *json_text_end );
+			void from_json_file( boost::string_view filename );
+			void from_json_obj( json_obj const & json_values );
+		protected:
+			~JsonLink( ) noexcept; 
+
+			///
+			/// \param name - name of integral value to link
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_integral( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of real(float/double...) value to link
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_real( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of string value to link
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_string( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of boolean(true/false) value to link
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_boolean( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of JsonLink<type> obect value to link
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_object( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of array(vector) value to link
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_array( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of map(unorderd_map/map) value to link.
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_map( boost::string_view name, GetFunction get_function );
+
+			///
+			/// \param name - name of streamable value(operator<<, operator>>) to link.
+			/// \param get_function - a function returning a T, and taking a const ref to Derived
+			template<typename GetFunction, bool is_optional = false>
+			static void json_link_streamable( boost::string_view name, GetFunction get_function );
+		private:
+			Derived & as_derived( );
+			Derived const & as_derived( ) const;
+
+			static bool is_linked( impl::string_value name );
+			static std::string const & json_object_name( );
+			static ::daw::json::impl::value_t get_schema_obj( );
 
 			template<typename SerializeFunction, typename DeserializeFunction> 
-			static void link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function );
+			static void json_link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function );
 
 			constexpr static uint8_t to_nibble( uint8_t c ) noexcept;
 		
 			template<typename T>
 			static std::string value_to_hex( T const & value );
 
-		protected:
-			constexpr JsonLink( ) noexcept { }
-			~JsonLink( ) noexcept; 
-		public:
-			JsonLink( JsonLink const & ) = default;
-			JsonLink( JsonLink && ) = default;
-			JsonLink & operator=( JsonLink const & ) = default;
-			JsonLink & operator=( JsonLink && ) = default;
-
-			std::string to_string( ) const;
-			void write_to_file( boost::string_view filename, bool overwrite = true ) const;
-			void from_json_obj( json_obj const & json_values );
-			void from_string( boost::string_view const json_text );
-			void from_string( char const *json_text_begin, char const *json_text_end );
-			void from_file( boost::string_view filename );
-			void to_file( boost::string_view file_name, bool overwrite = true );
-
-			static bool is_linked( impl::string_value name );
-			static std::string const & json_object_name( );
-			static ::daw::json::impl::value_t get_schema_obj( );
-		protected:
 			template<typename T>
 			static void call_decode( T &, json_obj );
 
@@ -206,238 +253,7 @@ namespace daw {
 		
 			static void add_to_data_map( boost::string_view name, impl::data_description_t desc );
 
-			///
-			/// \param name - name of integral value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			static void link_integral( boost::string_view name, T & value );
-
-			///
-			/// \param name - name of integral value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			static void link_integral( boost::string_view name, boost::optional<T> & value );
-
-			///
-			/// \param name - name of integral value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			static void link_integral( boost::string_view name, daw::optional<T> & value );
-
-			///
-			/// \param name - name of integral value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-			static void link_integral( boost::string_view name, daw::optional_poly<T> & value );
-
-			///
-			/// \param name - name of real(float/double...) value to link
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_real( boost::string_view name, T & value );
-
-			///
-			/// \param name - name of real value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long> = 0>
-			static void link_real( boost::string_view name, boost::optional<T> & value );
-
-			///
-			/// \param name - name of string value to link
-			/// \param value - a reference to the linked value
-			static void link_string( boost::string_view name, boost::optional<std::string> & value );
-
-			///
-			/// \param name - name of string value to link
-			/// \param value - a reference to the linked value
-			static void link_string( boost::string_view name, daw::optional<std::string> & value );
-
-			///
-			/// \param name - name of string value to link
-			/// \param value - a reference to the linked value
-			static void link_string( boost::string_view name, daw::optional_poly<std::string> & value );
-
-			///
-			/// \param name - name of string value to link
-			/// \param value - a reference to the linked value
-			static void link_string( boost::string_view name, std::string & value );
-
-			///
-			/// \param name - name of boolean(true/false) value to link
-			/// \param value - a reference to the linked value
-			static void link_boolean( boost::string_view name, bool & value );
-
-			///
-			/// \param name - name of boolean(true/false) value to link
-			/// \param value - a reference to the linked value
-			static void link_boolean( boost::string_view name, boost::optional<bool> & value );
-
-			///
-			/// \param name - name of boolean(true/false) value to link
-			/// \param value - a reference to the linked value
-			static void link_boolean( boost::string_view name, daw::optional<bool> & value );
-
-			///
-			/// \param name - name of boolean(true/false) value to link
-			/// \param value - a reference to the linked value
-			static void link_boolean( boost::string_view name, daw::optional_poly<bool> & value );
-
-			///
-			/// \param name - name of JsonLink<type> obect value to link
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_object( boost::string_view name, JsonLink<T> & value );
-
-			///
-			/// \param name - name of JsonLink<type> obect value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-			static void link_object( boost::string_view name, boost::optional<T> & value );
-
-			///
-			/// \param name - name of JsonLink<type> obect value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-			static void link_object( boost::string_view name, daw::optional<T> & value );
-
-			///
-			/// \param name - name of JsonLink<type> obect value to link
-			/// \param value - a reference to the linked value
-			template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long> = 0>
-			static void link_object( boost::string_view name, daw::optional_poly<T> & value );
-
-			///
-			/// \param name - name of array(vector) value to link
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_array( boost::string_view name, T & value );
-
-			///
-			/// \param name - name of array(vector) value to link
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_array( boost::string_view name, boost::optional<T> & value );
-			
-			///
-			/// \param name - name of array(vector) value to link
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_array( boost::string_view name, daw::optional<T> & value );
-
-			///
-			/// \param name - name of array(vector) value to link
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_array( boost::string_view name, daw::optional_poly<T> & value );
-
-			///
-			/// \param name - name of map(unorderd_map/map) value to link.
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_map( boost::string_view name, T & value );
-
-			///
-			/// \param name - name of map(unorderd_map/map) value to link.
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_map( boost::string_view name, boost::optional<T> & value );
-
-			///
-			/// \param name - name of map(unorderd_map/map) value to link.
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_map( boost::string_view name, daw::optional<T> & value );
-
-			///
-			/// \param name - name of map(unorderd_map/map) value to link.
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_map( boost::string_view name, daw::optional_poly<T> & value );
-
-			///
-			/// \param name - name of streamable value(operator<<, operator>>) to link.
-			/// \param value - a reference to the linked value
-			template<typename T>
-			static void link_streamable( boost::string_view name, T & value );
-
-			template<typename T>
-			static void link_streamable( boost::string_view name, boost::optional<T> & value );
-
-			/// Summary: Encoder Function has signature std::string( T const & ) and Decoder function has signature T( std::string const & )
-			template<typename T, typename EncoderFunction, typename DecoderFunction>
-			static void link_jsonstring( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function );
-
-			template<typename T, typename EncoderFunction, typename DecoderFunction>
-			static void link_jsonstring( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function );
-
-			template<typename T, typename EncoderFunction, typename DecoderFunction>
-			static void link_jsonintegral( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function );
-
-			template<typename T, typename EncoderFunction, typename DecoderFunction>
-			static void link_jsonintegral( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function );
-
-			template<typename T, typename EncoderFunction, typename DecoderFunction>
-			static void link_jsonreal( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function );
-
-			template<typename T, typename EncoderFunction, typename DecoderFunction>
-			static void link_jsonreal( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function );
-
-			template<typename Duration>
-			static void link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts );
-
-			template<typename T>
-			static void link_hex_value( boost::string_view name, T & value );
-
-			/// @brief Link an vector of Values that will be encoded as a hex string( e.g. 5 -> 0x05 )
-			/// @tparam T data element type in vector
-			/// @param name Name of class member
-			/// @param values vector of values to encode/decode
-			template<typename T>
-			static void link_hex_array( boost::string_view name, std::vector<T> & values );
-
-			template<typename Integral>
-			static void link_json_string_to_integral( boost::string_view name, Integral & i );
-
-			template<typename Integral>
-			static void link_json_string_to_integral( boost::string_view name, boost::optional<Integral> & i );
-
-			template<typename Real>
-			static void link_json_string_to_real( boost::string_view name, Real & r );
-
-			template<typename T, typename ToReal, typename FromReal>
-			static void link_json_string_to_real( boost::string_view name, T & value, ToReal to_real, FromReal from_real );
-
-			template<typename T>
-			static void link_json_string_to_real( boost::string_view name, boost::optional<T> & r );
-
-			template<typename T, typename ToReal, typename FromReal>
-			static void link_json_string_to_real( boost::string_view name, boost::optional<T> & value, ToReal to_real, FromReal from_real );
-			
-			template<typename Duration>
-			static void link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts );
-
-			template<typename Duration>
-			static void link_epoch_milliseconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts );
-
-			///
-			/// \param name - name of timestamp value(boost ptime) to link.
-			/// \param value - a reference to the linked value
-			static void link_timestamp( boost::string_view name, boost::posix_time::ptime & value );
-
-			///
-			/// \param name - name of timestamp value(boost ptime) to link.
-			/// \param value - a reference to the linked value
-			static void link_timestamp( boost::string_view name, boost::optional<boost::posix_time::ptime> & value );
-			
-			///
-			/// \param name - name of timestamp value(boost ptime) to link.
-			/// \param value - a reference to the linked value
-			static void link_timestamp( boost::string_view name, daw::optional<boost::posix_time::ptime> & value );
-
-			///
-			/// \param name - name of timestamp value(boost ptime) to link.
-			/// \param value - a reference to the linked value
-			static void link_timestamp( boost::string_view name, daw::optional_poly<boost::posix_time::ptime> & value );
+			static impl::data_t m_data;
 		};    // JsonLink
 
 		template<typename Derived>
@@ -476,4 +292,7 @@ namespace daw {
 }    // namespace daw
 
 #include "daw_json_link_definitions.h"
+
+#define LINK_JSON( json_type, derived_type, json_name, value_name )\
+	json_link_ ## json_type( #json_name, []( derived_type & obj ) { return obj.value_name ; } )
 

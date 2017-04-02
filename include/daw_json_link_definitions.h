@@ -113,9 +113,6 @@ namespace daw {
 		}	// namespace impl
 
 		template<typename Derived>
-		class JsonLink;
-
-		template<typename Derived>
 		std::ostream & operator<<( std::ostream & os, JsonLink<Derived> const & data );
 
 		template<typename Derived>
@@ -274,7 +271,7 @@ namespace daw {
 
 		/*
 		template<typename Derived> template<typename SerializeFunction, typename DeserializeFunction> 
-		void JsonLink<Derived>::link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function ) {
+		void JsonLink<Derived>::json_link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function ) {
 			using source_value_t = std::result_of_t<DeserializeFunction( Derived & )>;
 			set_name( value, name );
 			impl::data_description_t data_description;
@@ -309,7 +306,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		std::string JsonLink<Derived>::to_string( ) const {
+		std::string JsonLink<Derived>::to_json_string( ) const {
 			std::stringstream result;
 			auto range = daw::range::make_range( m_data.m_data_map );
 			std::string tmp;
@@ -324,9 +321,28 @@ namespace daw {
 			}
 			return details::json_name( m_data.m_name ) + details::enbrace( result.str( ) );
 		}
+			
+		template<typename Derived>
+		void JsonLink<Derived>::from_json_obj( json_obj const & json_values ) {
+			for( auto & value : m_data.m_data_map ) {
+				value.second.bind_functions.decode( json_values );
+			}
+		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::write_to_file( boost::string_view filename, bool overwrite ) const {
+		void JsonLink<Derived>::from_json_string( boost::string_view const json_text ) {
+			auto tmp = parse_json( json_text );
+			from_json_obj( std::move( tmp ) );
+		}
+
+		template<typename Derived>
+		void JsonLink<Derived>::from_json_string( char const *json_text_begin, char const *json_text_end ) {
+			auto tmp = parse_json( json_text_begin, json_text_end );
+			from_json_obj( std::move( tmp ) );
+		}
+
+		template<typename Derived>
+		void JsonLink<Derived>::to_json_file( boost::string_view filename, bool overwrite ) const {
 			daw::exception::daw_throw_on_false( !filename.empty( ) );								
 			auto fname = filename.to_string( );
 			if( !overwrite && boost::filesystem::exists( fname.c_str( ) ) ) {
@@ -339,31 +355,12 @@ namespace daw {
 			if( !out_file.is_open( ) ) {
 				throw std::runtime_error( "Could not open file for writing" );
 			}
-			out_file << to_string( );
+			out_file << to_json_string( );
 			out_file.close( );
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::from_json_obj( json_obj const & json_values ) {
-			for( auto & value : m_data.m_data_map ) {
-				value.second.bind_functions.decode( json_values );
-			}
-		}
-
-		template<typename Derived>
-		void JsonLink<Derived>::from_string( boost::string_view const json_text ) {
-			auto tmp = parse_json( json_text );
-			from_json_obj( std::move( tmp ) );
-		}
-
-		template<typename Derived>
-		void JsonLink<Derived>::from_string( char const *json_text_begin, char const *json_text_end ) {
-			auto tmp = parse_json( json_text_begin, json_text_end );
-			from_json_obj( std::move( tmp ) );
-		}
-
-		template<typename Derived>
-		void JsonLink<Derived>::from_file( boost::string_view filename ) {
+		void JsonLink<Derived>::from_json_file( boost::string_view filename ) {
 			std::ifstream in_file;
 			in_file.open( filename.data( ) );
 			if( !in_file ) {
@@ -371,15 +368,7 @@ namespace daw {
 			}
 			std::string const data{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } };
 			in_file.close( );
-			from_string( data );	
-		}
-
-		template<typename Derived>
-		void JsonLink<Derived>::to_file( boost::string_view file_name, bool overwrite ) {
-			daw::exception::daw_throw_on_true( !overwrite && boost::filesystem::exists( file_name.data( ) ), "File exists but overwrite not permitted" );
-			std::ofstream out_file;
-			out_file.open( file_name.data( ), std::ios::out | std::ios::trunc );
-			out_file << to_string( ); 
+			from_json_string( data );	
 		}
 
 		template<typename Derived> template<typename T>
@@ -608,223 +597,88 @@ namespace daw {
 			daw::exception::daw_throw_on_false( result.second );
 		}
 
-		///
-		/// \param name - name of integral value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long>>
-		void JsonLink<Derived>::link_integral( boost::string_view name, T & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
+		template<typename Derived>
+		Derived & JsonLink<Derived>::as_derived( ) {
+			return *static_cast<Derived*>( this ); 
+		}
 
-			data_description.bind_functions.encode = standard_encoder( name, value );
-
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto result = decoder_helper<int64_t>( name, json_values );
-				daw::exception::daw_throw_on_false( result <= std::numeric_limits<T>::max( ) );
-				daw::exception::daw_throw_on_false( result >= std::numeric_limits<T>::min( ) );
-				*value_ptr = static_cast<T>(result);
-			};
-			add_to_data_map( name, std::move( data_description ) );
+		template<typename Derived>
+		Derived const & JsonLink<Derived>::as_derived( ) const {
+			return *static_cast<Derived const *>( this ); 
 		}
 
 		///
 		/// \param name - name of integral value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long>>
-		void JsonLink<Derived>::link_integral( boost::string_view name, boost::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_integral( boost::string_view name, GetFunction get_function ) {
+			set_name( get_function, name.to_string( ) );
 			impl::data_description_t data_description;
 			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
+			data_description.json_type = get_schema( name, get_function );
 
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto result = nullable_decoder_helper<int64_t>( name, json_values );
-				if( result ) {
-					daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-					daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
-					*value_ptr = static_cast<T>(*result);
+			data_description.bind_functions.encode = standard_encoder( name, get_function );
+
+			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
+				if( json_values.is_integral( ) ) {
+					auto result = decoder_helper<int64_t>( name, json_values );
+					using T = decltype( get_function( derived_obj ) );
+					daw::exception::daw_throw_on_false( result <= std::numeric_limits<T>::max( ) );
+					daw::exception::daw_throw_on_false( result >= std::numeric_limits<T>::min( ) );
+					get_function( derived_obj ) = static_cast<T>( result );
 				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		///
-		/// \param name - name of integral value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long>>
-		void JsonLink<Derived>::link_integral( boost::string_view name, daw::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto result = nullable_decoder_helper<int64_t>( name, json_values );
-				if( result ) {
-					daw::exception::daw_throw_on_false( *result <=
-							std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-					daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
-				}
-				*value_ptr = static_cast<T>(*result);
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		///
-		/// \param name - name of integral value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long>>
-		void JsonLink<Derived>::link_integral( boost::string_view name, daw::optional_poly<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto result = nullable_decoder_helper<int64_t>( name, json_values );
-				if( result ) {
-					daw::exception::daw_throw_on_false( *result <= std::numeric_limits<T>::max( ) );    // TODO determine if throwing is more appropriate
-					daw::exception::daw_throw_on_false( *result >= std::numeric_limits<T>::min( ) );
-				}
-				*value_ptr = static_cast<T>(*result);
+				daw::exception::daw_throw_on_false( is_optional || json_values.is_integral( ) );
 			};
 			add_to_data_map( name, std::move( data_description ) );
 		}
 
 		///
 		/// \param name - name of real(float/double...) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_real( boost::string_view name, T & value ) {
-			set_name( value, name.to_string( ) );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_real( boost::string_view name, GetFunction get_function ) {
+			set_name( get_function, name.to_string( ) );
 			impl::data_description_t data_description;
 			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = standard_decoder<double>( name, value );
-			add_to_data_map( name, std::move( data_description ) );
-		}
+			data_description.json_type = get_schema( name, get_function );
+			data_description.bind_functions.encode = standard_encoder( name, get_function );
 
-		///
-		/// \param name - name of real value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_floating_point<T>::value, long>>
-		void JsonLink<Derived>::link_real( boost::string_view name, boost::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto result = nullable_decoder_helper<double>( name, json_values );
-				if( result ) {
-					*value_ptr = static_cast<T>(*result);
-				} else {
-					*value_ptr = boost::none;
+			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
+				if( json_values.is_numeric( ) ) {
+					get_function( derived_obj ) = decoder_helper<double>( name, json_values );
 				}
+				daw::exception::daw_throw_on_false( is_optional || json_values.is_numeric( ) );
 			};
 			add_to_data_map( name, std::move( data_description ) );
 		}
 
 		///
 		/// \param name - name of string value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_string( boost::string_view name, boost::optional<std::string> & value ) {
-			return link_value( name, value );
-		}
-
-		///
-		/// \param name - name of string value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_string( boost::string_view name, daw::optional<std::string> & value ) {
-			return link_value( name, value );
-		}
-
-		///
-		/// \param name - name of string value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_string( boost::string_view name, daw::optional_poly<std::string> & value ) {
-			return link_value( name, value );
-		}
-
-		///
-		/// \param name - name of string value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_string( boost::string_view name, std::string & value ) {
-			//return link_value( name, value );
-			// Need to parse escaped values
-			set_name( value, name );
-			impl::data_description_t data_description;
-			data_description.json_type = ::daw::json::impl::schema::get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = string_decoder( name, value );
-			add_to_data_map( name, std::move( data_description ) );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_string( boost::string_view name, GetFunction get_function ) {
+			json_link_value<is_optional>( name, get_function );
 		}
 
 		///
 		/// \param name - name of boolean(true/false) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_boolean( boost::string_view name, bool & value ) {
-			return link_value( name, value );
-		}
-
-		///
-		/// \param name - name of boolean(true/false) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_boolean( boost::string_view name, boost::optional<bool> & value ) {
-			return link_value( name, value );
-		}
-
-		///
-		/// \param name - name of boolean(true/false) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_boolean( boost::string_view name, daw::optional<bool> & value ) {
-			return link_value( name, value );
-		}
-
-		///
-		/// \param name - name of boolean(true/false) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_boolean( boost::string_view name, daw::optional_poly<bool> & value ) {
-			return link_value( name, value );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_boolean( boost::string_view name, GetFunction get_function ) {
+			json_link_value<is_optional>( name, get_function );
 		}
 
 		///
 		/// \param name - name of JsonLink<type> obect value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_object( boost::string_view name, JsonLink<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_object( boost::string_view name, GetFunction get_function ) {
+			set_name( get_function, name.to_string( ) );
 			impl::data_description_t data_description;
-			data_description.json_type = value.get_schema_obj( );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
+			using obj_t = decltype( get_function( std::declval<Derived>( ) ) ); 
+			data_description.json_type = obj_t::get_schema_obj( );
+			data_description.bind_functions.encode = standard_encoder( name, get_function );
+			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
 				auto obj = json_values.get_object( );
 				auto member = obj.find( name );
 				if( obj.end( ) == member ) {
@@ -837,97 +691,25 @@ namespace daw {
 					ss << "}";
 					throw std::runtime_error( ss.str( ) );
 				}
-				daw::exception::daw_throw_on_false( member->second.is_object( ) );
-				value_ptr->from_json_obj( member->second );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		///
-		/// \param name - name of JsonLink<type> obect value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long>>
-		void JsonLink<Derived>::link_object( boost::string_view name, boost::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			data_description.json_type = (T { }).get_schema_obj( );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					value_ptr->emplace( );	// Ensure a T type is default constructed
-					(*value_ptr)->from_json_obj( member->second );
+				daw::exception::daw_throw_on_false( is_optional || member->second.is_object( ) );
+				if( member->second.is_object( ) ) {
+					get_function( derived_obj ).from_json_obj( member->second );
 				}
+				daw::exception::daw_throw_on_false( is_optional || json_values.is_object( ) );
 			};
 			add_to_data_map( name, std::move( data_description ) );
 		}
-
-		///
-		/// \param name - name of JsonLink<type> obect value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long>>
-		void JsonLink<Derived>::link_object( boost::string_view name, daw::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			data_description.json_type = (T { }).get_schema_obj( );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					value_ptr->emplace( );	// Ensure a T type is default constructed
-					(*value_ptr)->from_json_obj( member->second );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		///
-		/// \param name - name of JsonLink<type> obect value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T, typename std::enable_if_t<std::is_base_of<JsonLink<T>, T>::value, long>>
-		void JsonLink<Derived>::link_object( boost::string_view name, daw::optional_poly<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			data_description.json_type = (T { }).get_schema_obj( );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					value_ptr->emplace( );	// Ensure a T type is default constructed
-					(*value_ptr)->from_json_obj( member->second );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		///
+	
 		/// \param name - name of array(vector) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_array( boost::string_view name, T & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_array( boost::string_view name, GetFunction get_function ) {
+			set_name( get_function, name.to_string( ) );
 			impl::data_description_t data_description;
 			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
+			data_description.json_type = get_schema( name, get_function );
+			data_description.bind_functions.encode = standard_encoder( name, get_function );
+			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
 				auto obj = json_values.get_object( );
 				auto member = obj.find( name );
 				if( obj.end( ) == member ) {
@@ -940,90 +722,12 @@ namespace daw {
 					ss << "}";
 					throw std::runtime_error( ss.str( ) );
 				}
-				daw::exception::daw_throw_on_false( member->second.is_array( ) );
+				daw::exception::daw_throw_on_false( is_optional || member->second.is_array( ) );
 				using namespace parse;
-				json_to_value( *value_ptr, member->second );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
+				if( member->second.is_array( ) ) {
+					json_to_value( get_function( derived_obj ), member->second );
+				}
 
-		///
-		/// \param name - name of array(vector) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_array( boost::string_view name, boost::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_array( ) );
-					using namespace parse;
-					json_to_value( *value_ptr, member->second );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-		
-		///
-		/// \param name - name of array(vector) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_array( boost::string_view name, daw::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_array( ) );
-					using namespace parse;
-					json_to_value( *value_ptr, member->second );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		///
-		/// \param name - name of array(vector) value to link
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_array( boost::string_view name, daw::optional_poly<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_array( ) );
-					using namespace parse;
-					json_to_value( *value_ptr, member->second );
-				}
 			};
 			add_to_data_map( name, std::move( data_description ) );
 			
@@ -1031,17 +735,15 @@ namespace daw {
 
 		///
 		/// \param name - name of map(unorderd_map/map) value to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_map( boost::string_view name, T & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_map( boost::string_view name, GetFunction get_function ) {
+			set_name( get_function, name.to_string( ) );
 			impl::data_description_t data_description;
 			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
+			data_description.json_type = get_schema( name, get_function );
+			data_description.bind_functions.encode = standard_encoder( name, get_function );
+			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
 				auto val_obj = json_values.get_object( );
 				auto member = val_obj.find( name );
 				if( val_obj.end( ) == member ) {
@@ -1054,92 +756,10 @@ namespace daw {
 					ss << "}";
 					throw std::runtime_error( ss.str( ) );
 				}
-				daw::exception::daw_throw_on_false( member->second.is_array( ) );
+				daw::exception::daw_throw_on_false( is_optional || member->second.is_array( ) );
 				using namespace parse;
-				json_to_value( *value_ptr, member->second );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		///
-		/// \param name - name of map(unorderd_map/map) value to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_map( boost::string_view name, boost::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			data_description.json_type = impl::value_t::string_t{ "map?" };
-			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto val_obj = json_values.get_object( );
-				auto member = val_obj.find( name );
-				if( val_obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_array( ) );
-					using namespace parse;
-					json_to_value( *value_ptr, member->second );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		///
-		/// \param name - name of map(unorderd_map/map) value to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_map( boost::string_view name, daw::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			data_description.json_type = impl::value_t::string_t{ "map?" };
-			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto val_obj = json_values.get_object( );
-				auto member = val_obj.find( name );
-				if( val_obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_array( ) );
-					using namespace parse;
-					json_to_value( *value_ptr, member->second );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		///
-		/// \param name - name of map(unorderd_map/map) value to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_map( boost::string_view name, daw::optional_poly<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name.to_string( ) );
-			impl::data_description_t data_description;
-			data_description.json_type = impl::value_t::string_t{ "map?" };
-			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = standard_encoder( name, value );
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto val_obj = json_values.get_object( );
-				auto member = val_obj.find( name );
-				if( val_obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_array( ) );
-					using namespace parse;
-					json_to_value( *value_ptr, member->second );
+				if( member->second.is_array( ) ) {
+					json_to_value( get_function( derived_obj ), member->second );
 				}
 			};
 			add_to_data_map( name, std::move( data_description ) );
@@ -1148,20 +768,17 @@ namespace daw {
 
 		///
 		/// \param name - name of streamable value(operator<<, operator>>) to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_streamable( boost::string_view name, T & value ) {
-			auto value_ptr = &value;
-			set_name( value, name );
+		/// \param get_function - a function returning a T, and taking a const ref to Derived
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_streamable( boost::string_view name, GetFunction get_function ) {
+			set_name( get_function, name );
 			impl::data_description_t data_description;
 			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name.to_string( ), boost::lexical_cast<std::string>( *value_ptr ) );
+			data_description.json_type = get_schema( name, get_function );
+			data_description.bind_functions.encode = [get_function, name]( Derived & derived_obj, std::string & json_text ) {
+				json_text = generate::value_to_json( name.to_string( ), boost::lexical_cast<std::string>( get_function( derived_obj ) ) );
 			};
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
+			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
 				auto obj = json_values.get_object( );
 				auto member = obj.find( name );
 				if( obj.end( ) == member ) {
@@ -1174,581 +791,15 @@ namespace daw {
 					ss << "}";
 					throw std::runtime_error( ss.str( ) );
 				}
-				daw::exception::daw_throw_on_false( member->second.is_string( ) );
-				std::stringstream ss( member->second.get_string( ) );
-				ss >> *value_ptr;
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_streamable( boost::string_view name, boost::optional<T> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				if( *value_ptr ) {
-					json_text = generate::value_to_json( name.to_string( ), boost::lexical_cast<std::string>( **value_ptr ) );
-				} else {
-					json_text = generate::value_to_json( name.to_string( ) );
-				}
-			};
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					value_ptr->reset( );
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_string( ) );
+				daw::exception::daw_throw_on_false( is_optional || member->second.is_string( ) );
+				if( member->second.is_string( ) ) {
 					std::stringstream ss( member->second.get_string( ) );
-					auto str = ss.str( );
-					value_ptr->emplace( );
-					ss >> **value_ptr;
+					ss >> get_function( derived_obj );
 				}
 			};
 			add_to_data_map( name, std::move( data_description ) );
+		}
 			
-		}
-
-		/// Summary: Encoder Function has signature std::string( T const & ) and Decoder function has signature T( std::string const & )
-		template<typename Derived> template<typename T, typename EncoderFunction, typename DecoderFunction>
-		void JsonLink<Derived>::link_jsonstring( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, std::string{ } );
-			data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
-			};
-			data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto const & member = obj.find( name_copy );
-				if( obj.end( ) == member ) {
-					std::stringstream ss;
-					ss << "JSON object does not match expected object layout.  Missing member '" << name_copy << "'";
-					ss << " available members { ";
-					for( auto const & m: obj.container( ) ) {
-						ss << "'" << m.first << "' ";
-					}
-					ss << "}";
-					throw std::runtime_error( ss.str( ) );
-				}
-				daw::exception::daw_throw_on_false( member->second.is_string( ) );
-				auto coded_str = member->second.get_string( );
-				*value_ptr = decode_function( std::move( coded_str ) );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		template<typename Derived> template<typename T, typename EncoderFunction, typename DecoderFunction>
-		void JsonLink<Derived>::link_jsonstring( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, std::string{ } );
-			data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
-			};
-			data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto const & member = obj.find( name_copy );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_string( ) );
-					auto coded_str = member->second.get_string( );
-					*value_ptr = decode_function( std::move( coded_str ) );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		template<typename Derived> template<typename T, typename EncoderFunction, typename DecoderFunction>
-		void JsonLink<Derived>::link_jsonintegral( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
-			set_name( value, name ); 
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, impl::value_t::integral_t{ } );
-			data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
-			};
-			data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto member = obj.find( name_copy );
-				if( obj.end( ) == member ) {
-					std::stringstream ss;
-					ss << "JSON object does not match expected object layout.  Missing member '" << name_copy << "'";
-					ss << " available members { ";
-					for( auto const & m: obj.container( ) ) {
-						ss << "'" << m.first << "' ";
-					}
-					ss << "}";
-					throw std::runtime_error( ss.str( ) );
-				}
-				daw::exception::daw_throw_on_false( member->second.is_integral( ) );
-				*value_ptr = decode_function( member->second.get_integral( ) );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		template<typename Derived> template<typename T, typename EncoderFunction, typename DecoderFunction>
-		void JsonLink<Derived>::link_jsonintegral( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
-			set_name( value, name ); 
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, impl::value_t::integral_t{ } );
-			data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
-			};
-			data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto member = obj.find( name_copy );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_integral( ) );
-					*value_ptr = decode_function( member->second.get_integral( ) );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		template<typename Derived> template<typename T, typename EncoderFunction, typename DecoderFunction>
-		void JsonLink<Derived>::link_jsonreal( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
-			set_name( value, name ); 
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, impl::value_t::real_t{ } );
-			data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
-			};
-			data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto member = obj.find( name_copy );
-				if( obj.end( ) == member ) {
-					std::stringstream ss;
-					ss << "JSON object does not match expected object layout.  Missing member '" << name_copy << "'";
-					ss << " available members { ";
-					for( auto const & m: obj.container( ) ) {
-						ss << "'" << m.first << "' ";
-					}
-					ss << "}";
-					throw std::runtime_error( ss.str( ) );
-				}
-				daw::exception::daw_throw_on_false( member->second.is_numeric( ) );
-				*value_ptr = decode_function( member->second.get_real( ) );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		template<typename Derived> template<typename T, typename EncoderFunction, typename DecoderFunction>
-		void JsonLink<Derived>::link_jsonreal( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
-			set_name( value, name ); 
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, impl::value_t::real_t{ } );
-			data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
-			};
-			data_description.bind_functions.decode = [value_ptr = &value, name_copy = name.to_string( ), decode_function]( json_obj const & json_values ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto const & obj = json_values.get_object( );
-				auto member = obj.find( name_copy );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_numeric( ) );
-					*value_ptr = decode_function( member->second.get_real( ) );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-		}
-
-		template<typename Derived> template<typename Duration>
-		void JsonLink<Derived>::link_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts, std::vector<std::string> const & fmts ) {
-			using tp_t = std::chrono::time_point<std::chrono::system_clock, Duration>;
-			auto const from_ts = [fmts]( boost::string_view str ) {
-				std::istringstream in;
-				tp_t tp;
-
-				for( auto const & fmt: fmts ) {
-					in.str( str.to_string( ) );
-					date::parse( in, fmt, tp );
-					if( !in.fail( ) ) {
-						break;
-					}
-					in.clear();
-					in.exceptions( std::ios::failbit );
-				}   
-				if( in.fail( ) ) {
-					tp = tp_t{ };
-				}
-				return tp; 
-			};   
-			
-			auto const to_ts = [fmt=fmts.front( )]( tp_t const & tp ) -> std::string {
-				return date::format( fmt, tp );
-			};
-
-			return link_jsonstring( name, ts, to_ts, from_ts );
-		}
-		namespace impl {
-			constexpr uint8_t ensure_lower_case( uint8_t c ) {
-				return c | static_cast<uint8_t>( ' ' );
-			}
-		}	// namespace impl
-		constexpr uint8_t to_nibble( uint8_t c ) noexcept {
-			// Assumes that '0' <= c <= '9' or 'a'|'A' <= c <= 'f'|'F'
-			uint8_t result = 0;
-			if( c <= '9' ) {
-				result = c - '0';
-			} else {
-				c = impl::ensure_lower_case( c );
-				result = 10 + (c - 'a');
-			}
-			daw::exception::dbg_throw_on_false( result < 16, "Error in hex_char to nible calculation" );
-			return result;
-		}
-	
-		template<typename Derived> template<typename T>
-		std::string JsonLink<Derived>::value_to_hex( T const & value ) {
-			std::string result;
-			daw::nibble_queue_gen<T> nq{ value };
-
-			while( nq.can_pop( 1 ) ) {
-				auto const nibble = nq.pop_front( 1 );
-				daw::exception::dbg_throw_on_false( nibble < 16, "Invalid nibble value" );
-				if( nibble < 10 ) {
-					result += static_cast<char>('0' + nibble);
-				} else {
-					result += static_cast<char>('a' + (nibble-10));
-				}
-			}
-			return result;
-		}
-
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_hex_value( boost::string_view name, T & value ) {
-			auto const from_hexstring = []( boost::string_view str ) {
-				daw::exception::daw_throw_on_false( (str.size( )/2)/sizeof( T ) == 1 );
-				daw::nibble_queue_gen<T> nq;
-				for( auto c: str ) {
-					nq.push_back( to_nibble( c ) );
-				}
-				return nq.value( );
-			};
-
-			auto const to_hexstring = []( T const & v ) {
-				return value_to_hex( v );
-			};
-
-			return link_jsonstring( name, value, to_hexstring, from_hexstring );
-		}
-
-		/// @brief Link an vector of Values that will be encoded as a hex string( e.g. 5 -> 0x05 )
-		/// @tparam T data element type in vector
-		/// @param name Name of class member
-		/// @param values vector of values to encode/decode
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_hex_array( boost::string_view name, std::vector<T> & values ) {
-			auto const from_hexstring = []( boost::string_view str ) {
-				daw::exception::daw_throw_on_false( str.size( )%(sizeof( T )*2) == 0 );
-				std::vector<T> result;
-				daw::nibble_queue_gen<T> nq;
-				for( auto c: str ) {
-					nq.push_back( to_nibble( c ), 1 );
-					if( nq.full( ) ) {
-						auto const v = nq.value( );
-						result.push_back( v );
-						nq.clear( );
-					}
-				}
-				return result;
-			};
-
-			auto const to_hexstring = []( std::vector<T> const & arry ) {
-				std::string result;
-				for( auto const & v: arry ) {
-					result += value_to_hex( v );	
-				}
-				return result;
-			};
-			return link_jsonstring( name, values, to_hexstring, from_hexstring );
-		}
-
-		template<typename Derived> template<typename Integral>
-		void JsonLink<Derived>::link_json_string_to_integral( boost::string_view name, Integral & i ) {
-			auto const from_str = []( boost::string_view str ) {
-				return impl::str_to_int( str, Integral{ } );
-			};
-			auto const to_str = []( Integral const & integral ) {
-				using std::to_string;
-				return to_string( integral );
-			};
-			return link_jsonstring( name, i, to_str, from_str );
-		}
-
-		template<typename Derived> template<typename Integral>
-		void JsonLink<Derived>::link_json_string_to_integral( boost::string_view name, boost::optional<Integral> & i ) {
-			auto const from_str = []( boost::string_view str ) -> boost::optional<Integral> {
-				if( str.empty( ) ) {
-					return boost::none;
-				}
-				return impl::str_to_int( str, Integral{ } );
-			};
-			auto const to_str = []( boost::optional<Integral> const & integral ) -> std::string {
-				if( !integral ) {
-					return "";
-				}
-				using std::to_string;
-				return to_string( *integral );
-			};
-			return link_jsonstring( name, i, to_str, from_str );
-		}
-
-		template<typename Derived> template<typename Real>
-		void JsonLink<Derived>::link_json_string_to_real( boost::string_view name, Real & r ) {
-			auto const from_str = []( boost::string_view str ) {
-				return atof( str.begin( ) );
-			};
-			auto const to_str = []( Real const & real ) {
-				return std::to_string( real );
-			};
-			return link_jsonstring( name, r, to_str, from_str );
-		}
-
-		template<typename Derived> template<typename T, typename ToReal, typename FromReal>
-		void JsonLink<Derived>::link_json_string_to_real( boost::string_view name, T & value, ToReal to_real, FromReal from_real ) {
-			auto const from_str = [from_real]( boost::string_view str ) {
-				auto real_val = atof( str.begin( ) );
-				return from_real( std::move( real_val ) );
-			};
-			auto const to_str = [to_real]( T const & t ) {
-				auto tmp = to_real( t );
-				return std::to_string( tmp );
-			};
-			return link_jsonstring( name, value, to_str, from_str );
-		}
-
-		template<typename Derived> template<typename T>
-		void JsonLink<Derived>::link_json_string_to_real( boost::string_view name, boost::optional<T> & r ) {
-			auto const from_str = []( boost::string_view str ) -> boost::optional<T> {
-				if( str.empty( ) ) {
-					return boost::none;
-				} 
-				return atof( str.begin( ) );
-			};
-			auto const to_str = []( boost::optional<T> const & real ) -> boost::optional<std::string> {
-				if( !real ) {
-					return boost::none;
-				}
-				return std::to_string( *real );
-			};
-			return link_jsonstring( name, r, to_str, from_str );
-		}
-
-		template<typename Derived> template<typename T, typename ToReal, typename FromReal>
-		void JsonLink<Derived>::link_json_string_to_real( boost::string_view name, boost::optional<T> & value, ToReal to_real, FromReal from_real ) {
-			auto const from_str = [from_real]( boost::string_view str ) -> boost::optional<T> {
-				if( str.empty( ) ) {
-					return boost::none;
-				}
-				auto real_val = atof( str.begin( ) );
-				return from_real( std::move( real_val ) );
-			};
-			auto const to_str = [to_real]( boost::optional<T> const & t ) -> boost::optional<std::string> {
-				if( !t ) {
-					return boost::none;
-				}
-				auto tmp = to_real( *t );
-				return std::to_string( tmp );
-			};
-			return link_jsonstring( name, value, to_str, from_str );
-		}
-
-		
-		template<typename Derived> template<typename Duration>
-		void JsonLink<Derived>::link_iso8601_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
-			std::vector<std::string> const fmts = { "%FT%TZ", "%FT%T%Ez" };
-			return link_timestamp( name, ts, fmts  );
-		}
-
-		template<typename Derived> template<typename Duration>
-		void JsonLink<Derived>::link_epoch_milliseconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
-			auto const to_ts = []( impl::value_t::integral_t const & i ) {
-				using namespace date;
-				using namespace std::chrono;
-				std::chrono::system_clock::time_point const epoch{ };
-				auto result = epoch + milliseconds{ i };
-				return result;
-			};
-
-			auto const from_ts = []( std::chrono::time_point<std::chrono::system_clock, Duration> const & t ) -> impl::value_t::integral_t {
-				using namespace date;
-				using namespace std::chrono;
-				std::chrono::system_clock::time_point const epoch{ };
-				auto result = std::chrono::duration_cast<std::chrono::milliseconds>( t - epoch ).count( );
-				return result;
-			};
-			return link_jsonintegral( name, ts, from_ts, to_ts );
-		}
-
-		///
-		/// \param name - name of timestamp value(boost ptime) to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_timestamp( boost::string_view name, boost::posix_time::ptime & value ) {
-			auto value_ptr = &value;
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, value );
-			data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				json_text = generate::value_to_json( name.to_string( ),	boost::posix_time::to_iso_extended_string( *value_ptr ) + 'Z' );
-			};
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member ) {
-					std::stringstream ss;
-					ss << "JSON object does not match expected object layout.  Missing member '" << name.to_string( ) << "'";
-					ss << " available members { ";
-					for( auto const & m: obj.container( ) ) {
-						ss << "'" << m.first << "' ";
-					}
-					ss << "}";
-					throw std::runtime_error( ss.str( ) );
-				}
-				daw::exception::daw_throw_on_false( member->second.is_string( ) );
-				*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-		///
-		/// \param name - name of timestamp value(boost ptime) to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_timestamp( boost::string_view name, boost::optional<boost::posix_time::ptime> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
-			data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				if( *value_ptr ) {
-					json_text = generate::value_to_json( name.to_string( ),	boost::posix_time::to_iso_extended_string( *(*value_ptr) ) + 'Z' );
-				} else {
-					json_text = generate::value_to_json( name.to_string( ) );
-				}
-			};
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = boost::none;
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_string( ) );
-					*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-		
-		///
-		/// \param name - name of timestamp value(boost ptime) to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_timestamp( boost::string_view name, daw::optional<boost::posix_time::ptime> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
-			data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				if( *value_ptr ) {
-					json_text = generate::value_to_json( name.to_string( ),
-							boost::posix_time::to_iso_extended_string(
-								*(*value_ptr) ) +
-							'Z' );
-				} else {
-					json_text = generate::value_to_json( name.to_string( ) );
-				}
-			};
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = daw::optional<boost::posix_time::ptime>{ };
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_string( ) );
-					*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
-
-		///
-		/// \param name - name of timestamp value(boost ptime) to link.
-		/// \param value - a reference to the linked value
-		template<typename Derived>
-		void JsonLink<Derived>::link_timestamp( boost::string_view name, daw::optional_poly<boost::posix_time::ptime> & value ) {
-			auto value_ptr = &value;
-			set_name( value, name );
-			impl::data_description_t data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, boost::posix_time::ptime{ } );
-			data_description.bind_functions.encode = [value_ptr, name]( std::string & json_text ) {
-				daw::exception::daw_throw_on_false( value_ptr );
-				if( *value_ptr ) {
-					json_text = generate::value_to_json( name.to_string( ),	boost::posix_time::to_iso_extended_string( *(*value_ptr) ) + 'Z' );
-				} else {
-					json_text = generate::value_to_json( name.to_string( ) );
-				}
-			};
-			data_description.bind_functions.decode = [value_ptr, name]( json_obj const & json_values ) mutable {
-				daw::exception::daw_throw_on_false( value_ptr );
-				auto obj = json_values.get_object( );
-				auto member = obj.find( name );
-				if( obj.end( ) == member || member->second.is_null( ) ) {
-					*value_ptr = daw::optional_poly<boost::posix_time::ptime>{ };
-				} else {
-					daw::exception::daw_throw_on_false( member->second.is_string( ) );
-					*value_ptr = boost::posix_time::from_iso_string( member->second.get_string( ) );
-				}
-			};
-			add_to_data_map( name, std::move( data_description ) );
-			
-		}
-
 		//
 		// END OF JSONLINK
 		//
@@ -1783,7 +834,7 @@ namespace daw {
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-		auto array_from_string( boost::string_view data, bool use_default_on_error ) {
+		auto array_from_json_string( boost::string_view data, bool use_default_on_error ) {
 			std::vector<Derived> result;
 			auto json = parse_json( data );
 			if( !json.is_array( ) ) {
@@ -1811,7 +862,7 @@ namespace daw {
 			if( !in_file ) {
 				throw std::runtime_error( "Could not open file" );
 			}
-			return array_from_string<Derived>( std::string{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } }, use_default_on_error );
+			return array_from_json_string<Derived>( std::string{ std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ } }, use_default_on_error );
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
@@ -1838,7 +889,7 @@ namespace daw {
 		template<typename Derived>
 		std::istream & operator>>( std::istream & is, JsonLink<Derived> & data ) {
 			std::string str{ std::istreambuf_iterator<char>{ is }, std::istreambuf_iterator<char>{ } };
-			data.from_string( str );
+			data.from_json_string( str );
 			return is;
 		}
 	}    // namespace json

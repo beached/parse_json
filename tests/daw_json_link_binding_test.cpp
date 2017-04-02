@@ -25,85 +25,25 @@
 #include <iostream>
 
 #include "daw_json_link_v2.h"
-/*
-struct test: public json_link_v2<test> {
+
+struct test final: public daw::json::JsonLink<test> {
 	int32_t a;
 	int64_t b;
 	std::string c;
 	double d;
 	int16_t e;
 
-	static auto bind_json( test & object ) {
-		using std::to_string;
-		json_expect_integral( "a", 
-			[]( auto & obj, auto val ) { 
-				obj.a = val; 
-			},
-			[]( auto const & obj ) { 
-				return to_string( obj.a ); 
-			} );
-
-		json_expect_integral_string( "b", 
-			[]( auto & obj, auto val ) { 
-				auto const tmp = stoll( val.c_str( ) );
-				obj.b = tmp; 
-			},
-			[]( auto const & obj ) {
-				return to_string( obj.b );
-			} );
-
-		json_expect_string( "c", 
-			[]( auto & obj, auto val ) {
-				obj.c = val.to_string( );
-			},
-			[]( auto const & obj ) {
-				return obj.c;
-			} );
-
-		json_expect_real( "d", 
-			[]( auto & obj, auto val ) {
-				obj.d = val;
-			},
-			[]( auto const & obj ) {
-				return to_string( obj.d );
-			} );
-
-		JSON_EXPECT( real, "e", e );
+	static auto map_to_json( ) {
+		json_link_integral( "a", []( test const & obj ) { return obj.a; } );
+		json_link_integral( "b", []( test const & obj ) { return obj.b; } );
+		json_link_string( "c", []( test const & obj ) { return obj.c; } );
+		json_link_real( "d", []( test const & obj ) { return obj.d; } );
+		LINK_JSON( integral, test, "e", e );
 	}
 };	// test
 
-struct test2: public json_link_v2<test2> {
-	bool a;
-	test b;
-
-	static auto bind_json( test2 & object ) {
-		using std::to_string;
-		json_expect_boolean( "a", 
-			[]( auto & obj, bool val ) {
-				obj.a = val;
-			},
-			[]( auto const & obj ) {
-				return to_string( obj.a );
-			} );
-
-		json_expect_object( "b", 
-			[]( auto & obj, auto val ) {
-				b = val;
-			},
-			[]( auto const & obj ) {
-				return obj.to_json_string( );
-			} );
-	}
-};	// test2
-
-
-struct tmp {
-	int n;
-};
-*/
 int main( int, char** ) {
-//	auto b = daw::json::json_bind_integral<tmp, &tmp::n>( );
-
+	test t;
 
 	return EXIT_SUCCESS;
 }
