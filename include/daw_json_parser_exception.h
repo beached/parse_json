@@ -34,11 +34,12 @@ namespace daw {
 
 			json_parser_exception( json_parser_exception const & ) = default;
 
-			json_parser_exception( json_parser_exception && ) = default;
+			json_parser_exception( json_parser_exception && ) noexcept = default;
+			json_parser_exception & operator=( json_parser_exception && ) noexcept = default;
 
-			json_parser_exception & operator=( json_parser_exception const & ) = default;
-
-			json_parser_exception & operator=( json_parser_exception && ) = default;
+			json_parser_exception & operator=( json_parser_exception const & rhs ) {
+				return *this = json_parser_exception{ rhs };
+			}
 		};    // struct json_parser_exception
 	}    // namespace json
 }	// namespace daw

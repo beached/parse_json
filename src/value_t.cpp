@@ -45,7 +45,7 @@ namespace daw {
 
 			value_t::value_t( int64_t const & value ):
 				m_value{ value },
-				m_value_type{ value_types::integral } { }
+				m_value_type{ value_types::integer } { }
 
 			value_t::value_t( double const & value ):
 				m_value{ value },
@@ -79,34 +79,28 @@ namespace daw {
 				m_value{ other.m_value },
 				m_value_type{ other.m_value_type } { }
 
-			value_t::value_t( value_t && other ):
+			value_t::value_t( value_t && other ) noexcept:
 				m_value{ std::move( other.m_value ) },
 				m_value_type{ other.m_value_type } { }
 
+			value_t & value_t::operator=( value_t && rhs ) noexcept {
+				m_value = std::move( rhs.m_value );
+				m_value_type = std::move( rhs.m_value_type );
+				return *this;
+			}
+
 			value_t & value_t::operator=( value_t const & rhs ) {
-				if( this != &rhs ) {
-					m_value = rhs.m_value;
-					m_value_type = rhs.m_value_type;
-				}
+				return *this = value_t{ rhs };
+			}
+
+			value_t & value_t::operator=( value_t::integer_t rhs ) {
+				m_value = std::move( rhs );
+				m_value_type = value_types::integer;
 				return *this;
 			}
 
-			value_t & value_t::operator=( value_t && rhs ) {
-				if( this != &rhs ) {
-					m_value = std::move( rhs.m_value );
-					m_value_type = rhs.m_value_type;
-				}
-				return *this;
-			}
-
-			value_t & value_t::operator=( value_t::integral_t const & rhs ) {
-				m_value = rhs;
-				m_value_type = value_types::integral;
-				return *this;
-			}
-
-			value_t & value_t::operator=( value_t::real_t const & rhs ) {
-				m_value = rhs;
+			value_t & value_t::operator=( value_t::real_t rhs ) {
+				m_value = std::move( rhs );
 				m_value_type = value_types::real;
 				return *this;
 			}
@@ -118,31 +112,31 @@ namespace daw {
 			}
 
 			value_t & value_t::operator=( value_t::string_t rhs ) {
-				m_value = rhs;
+				m_value = std::move( rhs );
 				m_value_type = value_types::string;
 				return *this;
 			}
 
 			value_t & value_t::operator=( value_t::boolean_t rhs ) {
-				m_value = rhs;
+				m_value = std::move( rhs );
 				m_value_type = value_types::boolean;
 				return *this;
 			}
 
 			value_t & value_t::operator=( std::nullptr_t rhs ) {
-				m_value = rhs;
+				m_value = std::move( rhs );
 				m_value_type = value_types::null;
 				return *this;
 			}
 
 			value_t & value_t::operator=( value_t::array_t rhs ) {
-				m_value = rhs;
+				m_value = std::move( rhs );
 				m_value_type = value_types::array;
 				return *this;
 			}
 
 			value_t & value_t::operator=( value_t::object_t rhs ) {
-				m_value = rhs;
+				m_value = std::move( rhs );
 				m_value_type = value_types::object;
 				return *this;
 			}
@@ -163,19 +157,19 @@ namespace daw {
 				return get<bool>( m_value );
 			}
 
-			value_t::integral_t value_t::get_integral( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::integral );
+			value_t::integer_t value_t::get_integer( ) const {
+				daw::exception::daw_throw_on_false( m_value_type == value_types::integer );
 				using namespace boost; 
 				using namespace daw; 
-				return get<integral_t>( m_value );
+				return get<integer_t>( m_value );
 			}
 
 			value_t::real_t value_t::get_real( ) const {
 				daw::exception::daw_throw_on_false( is_numeric( )  );
 				using namespace boost;
 				using namespace daw;
-				if( m_value_type == value_types::integral ) {
-					return static_cast<double>( get_integral( ) );
+				if( m_value_type == value_types::integer ) {
+					return static_cast<double>( get_integer( ) );
 				}
 				return get<double>( m_value );
 			}
@@ -199,8 +193,8 @@ namespace daw {
 				return get<string_value>( m_value );
 			}
 
-			bool value_t::is_integral( ) const {
-				return m_value_type == value_types::integral;
+			bool value_t::is_integer( ) const {
+				return m_value_type == value_types::integer;
 			}
 
 			bool value_t::is_real( ) const {
@@ -208,7 +202,7 @@ namespace daw {
 			}
 
 			bool value_t::is_numeric( ) const {
-				return is_real( ) || is_integral( );
+				return is_real( ) || is_integer( );
 			}
 
 			bool value_t::is_string( ) const {
@@ -286,8 +280,8 @@ namespace daw {
 					case value_t::value_types::boolean: 
 						ss << (value.get_boolean( ) ? "True" : "False");
 						break;
-					case value_t::value_types::integral: 
-						ss << value.get_integral( );
+					case value_t::value_types::integer: 
+						ss << value.get_integer( );
 						break;
 					case value_t::value_types::null: 
 						ss << "null";
@@ -383,7 +377,7 @@ namespace daw {
 
 			std::string to_string( value_t::value_types type ) noexcept {
 				switch( type ) {
-					case value_t::value_types::integral: return "integral";
+					case value_t::value_types::integer: return "integer";
 					case value_t::value_types::real: return "real";
 					case value_t::value_types::string: return "string";
 					case value_t::value_types::boolean: return "boolean";

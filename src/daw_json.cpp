@@ -198,8 +198,8 @@ namespace daw {
 						return value_to_json_object( name, value.get_object( ));
 					case value_t::value_types::boolean:
 						return value_to_json( name, value.get_boolean( ));
-					case value_t::value_types::integral:
-						return value_to_json( name, value.get_integral( ));
+					case value_t::value_types::integer:
+						return value_to_json( name, value.get_integer( ));
 					case value_t::value_types::real:
 						return value_to_json( name, value.get_real( ));
 					case value_t::value_types::string:
@@ -250,7 +250,7 @@ namespace daw {
 
 			// Number, integer
 			void json_to_value( int64_t &to, ::daw::json::impl::value_t const &from ) {
-				to = from.get_integral( );
+				to = from.get_integer( );
 			}
 
 			// Number, real

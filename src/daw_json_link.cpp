@@ -45,25 +45,25 @@ namespace daw {
 
 			int16_t str_to_int( boost::string_view str, int16_t ) {
 				int32_t tmp = std::stol( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int16_t>::min( ) && tmp <= std::numeric_limits<int16_t>::max( ), "Value out of range for 16bit integral" ); 
+				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int16_t>::min( ) && tmp <= std::numeric_limits<int16_t>::max( ), "Value out of range for 16bit integer" ); 
 				return static_cast<int16_t>(tmp);
 			}
 
 			uint16_t str_to_int( boost::string_view str, uint16_t ) {
 				uint32_t tmp = std::stoul( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint16_t>::max( ), "Value out of range for 16bit unsigned integral" ); 
+				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint16_t>::max( ), "Value out of range for 16bit unsigned integer" ); 
 				return static_cast<uint16_t>(tmp);
 			}
 
 			int8_t str_to_int( boost::string_view str, int8_t ) {
 				int32_t tmp = std::stol( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int8_t>::min( ) && tmp <= std::numeric_limits<int8_t>::max( ), "Value out of range for 8bit integral" ); 
+				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int8_t>::min( ) && tmp <= std::numeric_limits<int8_t>::max( ), "Value out of range for 8bit integer" ); 
 				return static_cast<int8_t>(tmp);
 			}
 
 			uint8_t str_to_int( boost::string_view str, uint8_t ) {
 				uint32_t tmp = std::stoul( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint8_t>::max( ), "Value out of range for 8bit unsigned integral" ); 
+				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint8_t>::max( ), "Value out of range for 8bit unsigned integer" ); 
 				return static_cast<uint8_t>(tmp);
 			}
 		}	// namespace impl

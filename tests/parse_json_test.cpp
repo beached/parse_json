@@ -81,8 +81,8 @@ struct A: public daw::json::JsonLink<A> {
 	~A( );
 
 	void set_jsonlinks( ) {
-		link_integral( "a", a );
-		link_integral( "b", b );
+		link_integer( "a", a );
+		link_integer( "b", b );
 		link_real( "c", c );
 		link_array( "d", d );
 		link_boolean( "e", e );
@@ -147,7 +147,7 @@ struct C : public daw::json::JsonLink<C> {
 	~C( );
 
 	void set_jsonlinks( ) {	
-		link_integral( "a", a );
+		link_integer( "a", a );
 	}
 };
 
@@ -195,7 +195,7 @@ struct Test: public daw::json::JsonLink<Test> {
 
 private:
 	void link_values( ) {
-		link_integral( "b", b );
+		link_integer( "b", b );
 		link_real( "c", c );
 		link_string( "d", d );
 		link_string( "e", e );

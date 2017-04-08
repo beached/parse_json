@@ -54,8 +54,8 @@ namespace daw {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_string" );
 			}
 
-			void state_t::on_integral( boost::string_view ) { 
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integral" );
+			void state_t::on_integer( boost::string_view ) { 
+				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integer" );
 			}
 
 			void state_t::on_real( boost::string_view ) { 
@@ -146,9 +146,9 @@ namespace daw {
 			// state_in_object_value
 			//
 
-			void state_in_object_value_t::on_integral( boost::string_view value ) {
+			void state_in_object_value_t::on_integer( boost::string_view value ) {
 				// Save data
-				//current_value( ) = value_t{ to_integral( value ) };
+				//current_value( ) = value_t{ to_integer( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
@@ -198,7 +198,7 @@ namespace daw {
 				// Save data
 			}
 
-			void state_in_array_t::on_integral( boost::string_view value )  {
+			void state_in_array_t::on_integer( boost::string_view value )  {
 				// Save data
 			}
 
@@ -238,7 +238,7 @@ namespace daw {
 				// Save data
 			}
 
-			void state_none_t::on_integral( boost::string_view value ) {
+			void state_none_t::on_integer( boost::string_view value ) {
 				// Save data
 			}
 
@@ -307,8 +307,8 @@ namespace daw {
 				daw::json::state::current_state( ).on_string( value ); 
 			}
 			
-			void state_control_t::on_integral( boost::string_view value ) const {
-				daw::json::state::current_state( ).on_integral( value ); 
+			void state_control_t::on_integer( boost::string_view value ) const {
+				daw::json::state::current_state( ).on_integer( value ); 
 			}
 			
 			void state_control_t::on_real( boost::string_view value ) const {

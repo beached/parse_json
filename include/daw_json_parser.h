@@ -48,11 +48,10 @@ namespace daw {
 
 			JsonParserException( JsonParserException const & ) = default;
 
-			JsonParserException( JsonParserException && ) = default;
+			JsonParserException( JsonParserException && ) noexcept = default;
+			JsonParserException & operator=( JsonParserException && ) noexcept = default;
 
-			JsonParserException & operator=( JsonParserException const & ) = default;
-
-			JsonParserException & operator=( JsonParserException && ) = default;
+			JsonParserException & operator=( JsonParserException const & rhs );
 		};    // struct JsonParserException
 
 		using json_obj = impl::value_t;

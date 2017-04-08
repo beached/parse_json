@@ -47,7 +47,7 @@ namespace daw {
 				}
 
 			template<typename InputIterator, typename State>
-				auto parse_integral( InputIterator & first, InputIterator const & last, State & state ) {
+				auto parse_integer( InputIterator & first, InputIterator const & last, State & state ) {
 					if( first == last || !isdigit( *first ) ) {
 						throw json_parser_exception( "Expecting digits, found none '" + state.buffer + "'" );
 					}
@@ -90,16 +90,16 @@ namespace daw {
 						state.push( *first );
 						++first;
 					}
-					first = parse_integral( first, last, state );
+					first = parse_integer( first, last, state );
 
 					if( first == last || !is_a( *first, '.', 'E', 'e' ) ) {
-						state.on_integral( state.buffer );
+						state.on_integer( state.buffer );
 						return first;
 					}
 					if( '.' == *first ) {
 						state.push( *first );
 						++first;
-						first = parse_integral( first, last, state );
+						first = parse_integer( first, last, state );
 					}
 					if( first == last || !is_a( *first, 'e', 'E' ) ) {
 						state.on_real( state.buffer );
@@ -111,7 +111,7 @@ namespace daw {
 						state.push( *first );
 						++first;
 					}
-					first = parse_integral( first, last, state );
+					first = parse_integer( first, last, state );
 					state.on_real( state.buffer );
 					return first;
 				}

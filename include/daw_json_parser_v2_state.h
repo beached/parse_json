@@ -37,9 +37,9 @@ namespace daw {
 			struct state_t {
 				state_t( ) = default;
 				state_t( state_t const & ) = default;
-				state_t( state_t && ) = default;
+				state_t( state_t && ) noexcept = default;
 				state_t & operator=( state_t const & ) = default;
-				state_t & operator=( state_t && ) = default;
+				state_t & operator=( state_t && ) noexcept = default;
 
 				virtual ~state_t( );
 
@@ -48,7 +48,7 @@ namespace daw {
 				virtual void on_array_begin( );
 				virtual void on_array_end( );
 				virtual void on_string( boost::string_view );
-				virtual void on_integral( boost::string_view );
+				virtual void on_integer( boost::string_view );
 				virtual void on_real( boost::string_view );
 				virtual void on_boolean( bool ); 
 				virtual void on_null( );
@@ -58,9 +58,9 @@ namespace daw {
 			struct state_in_object_name_t: public state_t {
 				state_in_object_name_t( ) = default;
 				state_in_object_name_t( state_in_object_name_t const & ) = default;
-				state_in_object_name_t( state_in_object_name_t && ) = default;
+				state_in_object_name_t( state_in_object_name_t && ) noexcept = default;
 				state_in_object_name_t & operator=( state_in_object_name_t const & ) = default;
-				state_in_object_name_t & operator=( state_in_object_name_t && ) = default;
+				state_in_object_name_t & operator=( state_in_object_name_t && ) noexcept = default;
 
 				~state_in_object_name_t( );
 				std::string to_string( ) const override;
@@ -71,9 +71,9 @@ namespace daw {
 			struct state_in_object_value_t: public state_t {
 				state_in_object_value_t( ) = default;
 				state_in_object_value_t( state_in_object_value_t const & ) = default;
-				state_in_object_value_t( state_in_object_value_t && ) = default;
+				state_in_object_value_t( state_in_object_value_t && ) noexcept = default;
 				state_in_object_value_t & operator=( state_in_object_value_t const & ) = default;
-				state_in_object_value_t & operator=( state_in_object_value_t && ) = default;
+				state_in_object_value_t & operator=( state_in_object_value_t && ) noexcept = default;
 
 				~state_in_object_value_t( );
 
@@ -82,7 +82,7 @@ namespace daw {
 				void on_array_begin( ) override;
 				void on_null( ) override;
 
-				void on_integral( boost::string_view value ) override;
+				void on_integer( boost::string_view value ) override;
 				void on_real( boost::string_view value ) override;
 				void on_string( boost::string_view value ) override;
 				void on_boolean( bool value ) override;
@@ -91,9 +91,9 @@ namespace daw {
 			struct state_in_array_t: public state_t {
 				state_in_array_t( ) = default;
 				state_in_array_t( state_in_array_t const & ) = default;
-				state_in_array_t( state_in_array_t && ) = default;
+				state_in_array_t( state_in_array_t && ) noexcept = default;
 				state_in_array_t & operator=( state_in_array_t const & ) = default;
-				state_in_array_t & operator=( state_in_array_t && ) = default;
+				state_in_array_t & operator=( state_in_array_t && ) noexcept = default;
 
 				~state_in_array_t( );
 
@@ -102,7 +102,7 @@ namespace daw {
 				void on_array_begin( ) override;
 				void on_array_end( ) override;
 				void on_null( ) override;
-				void on_integral( boost::string_view value ) override;
+				void on_integer( boost::string_view value ) override;
 				void on_real( boost::string_view value ) override;
 				void on_string( boost::string_view value ) override;
 				void on_boolean( bool value ) override;
@@ -111,9 +111,9 @@ namespace daw {
 			struct state_none_t: public state_t {
 				state_none_t( ) = default;
 				state_none_t( state_none_t const & ) = default;
-				state_none_t( state_none_t && ) = default;
+				state_none_t( state_none_t && ) noexcept = default;
 				state_none_t & operator=( state_none_t const & ) = default;
-				state_none_t & operator=( state_none_t && ) = default;
+				state_none_t & operator=( state_none_t && ) noexcept = default;
 
 				~state_none_t( );
 
@@ -121,7 +121,7 @@ namespace daw {
 				void on_object_begin( ) override;
 				void on_array_begin( ) override;
 				void on_null( ) override;
-				void on_integral( boost::string_view value ) override;
+				void on_integer( boost::string_view value ) override;
 				void on_real( boost::string_view value ) override;
 				void on_string( boost::string_view value ) override;
 				void on_boolean( bool value ) override;
@@ -145,7 +145,7 @@ namespace daw {
 				void on_array_begin( ) const;
 				void on_array_end( ) const;				
 				void on_string( boost::string_view value ) const; 
-				void on_integral( boost::string_view value ) const;
+				void on_integer( boost::string_view value ) const;
 				void on_real( boost::string_view value ) const; 
 				void on_boolean( bool value ) const; 
 				void on_null( ) const; 

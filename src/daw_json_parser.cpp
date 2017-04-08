@@ -38,6 +38,10 @@ namespace daw {
 		JsonParserException::JsonParserException( std::string msg ):
 			message( std::move( msg ) ) { }
 
+		JsonParserException & JsonParserException::operator=( JsonParserException const & rhs ) {
+			return *this = JsonParserException{ rhs };
+		}
+
 		namespace {
 			template<typename T>
 				T *copy_value( T *ptr ) {
@@ -307,7 +311,7 @@ namespace daw {
 		}
 
 		template<> int64_t get<int64_t>( ::daw::json::impl::value_t const & val ) {
-			return val.get_integral( );
+			return val.get_integer( );
 		}
 
 		template<> double get<double>( ::daw::json::impl::value_t const & val ) {

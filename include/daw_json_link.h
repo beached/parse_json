@@ -236,10 +236,11 @@ namespace daw {
 					bind_functions_t( bind_functions_t const & ) = default;
 
 					bind_functions_t( bind_functions_t && ) = default;
-
-					bind_functions_t & operator=( bind_functions_t const & ) = default;
-
 					bind_functions_t & operator=( bind_functions_t && ) = default;
+
+					bind_functions_t & operator=( bind_functions_t const & rhs ) {
+						return *this = bind_functions_t{ rhs };
+					}
 				};	// bind_functions_t
 
 				struct data_description_t final {
@@ -255,11 +256,11 @@ namespace daw {
 					data_description_t( data_description_t const & ) = default;
 
 					data_description_t( data_description_t && ) = default;
-
-					data_description_t & operator=( data_description_t const & ) = default;
-
 					data_description_t & operator=( data_description_t && ) = default;
 
+					data_description_t & operator=( data_description_t const & rhs ) {
+						return *this = data_description_t{ rhs };
+					}	
 
 				};    // data_description
 
@@ -270,9 +271,12 @@ namespace daw {
 
 					data_t( ) = default;
 					data_t( data_t const & ) = default;
-					data_t( data_t & ) = default;
-					data_t & operator=( data_t const & ) = default;
-					data_t & operator=( data_t & ) = default;
+					data_t( data_t && ) noexcept = default;
+					data_t & operator=( data_t && ) noexcept = default;
+					data_t & operator=( data_t const & rhs ) {
+						return *this = data_t{ rhs };
+					}
+
 					~data_t( ) = default;
 
 					template<typename T>
@@ -283,7 +287,7 @@ namespace daw {
 				daw::heap_value<data_t> m_data;
 
 				///
-				/// \param name - name of integral value to link
+				/// \param name - name of integer value to link
 				/// \param value - a reference to the linked value
 				template<typename T> 
 				void link_value( boost::string_view name, T & value ) {
@@ -306,8 +310,8 @@ namespace daw {
 
 				JsonLink( JsonLink const & ) = delete;
 				JsonLink( JsonLink && ) = delete;
-				JsonLink & operator=( JsonLink const & ) = default;
-				JsonLink & operator=( JsonLink && ) = default;
+				JsonLink & operator=( JsonLink const & ) = delete;
+				JsonLink & operator=( JsonLink && ) = delete;
 
 				std::string & json_object_name( ) {
 					return m_data->m_name;
@@ -455,7 +459,7 @@ namespace daw {
 				}
 
 				template<typename T>
-				static uint8_t hex_to_integral( T && value ) {
+				static uint8_t hex_to_integer( T && value ) {
 					if( 'A' <= value && value <= 'F' ) {
 						return static_cast<uint8_t>((value - 'A') + 10);
 					} else if( 'a' <= value && value <= 'a' ) {
@@ -472,7 +476,7 @@ namespace daw {
 					daw::nibble_queue_gen<uint16_t, uint16_t> nibbles;
 					auto it = first;
 					for( ; it != (first + count) && it != last; ++it ) {
-						nibbles.push_back( hex_to_integral( *it ) );
+						nibbles.push_back( hex_to_integer( *it ) );
 					}
 					if( nibbles.full( ) ) {
 						throw std::runtime_error( "Unicode escape sequence was not properly formed" );
@@ -621,10 +625,10 @@ namespace daw {
 				}
 
 				///
-				/// \param name - name of integral value to link
+				/// \param name - name of integer value to link
 				/// \param value - a reference to the linked value
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				void link_integral( boost::string_view name, T & value ) {
+				void link_integer( boost::string_view name, T & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -652,10 +656,10 @@ namespace daw {
 
 
 				///
-				/// \param name - name of integral value to link
+				/// \param name - name of integer value to link
 				/// \param value - a reference to the linked value
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				void link_integral( boost::string_view name, boost::optional<T> & value ) {
+				void link_integer( boost::string_view name, boost::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -676,10 +680,10 @@ namespace daw {
 				}
 
 				///
-				/// \param name - name of integral value to link
+				/// \param name - name of integer value to link
 				/// \param value - a reference to the linked value
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				void link_integral( boost::string_view name, daw::optional<T> & value ) {
+				void link_integer( boost::string_view name, daw::optional<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -701,10 +705,10 @@ namespace daw {
 				}
 
 				///
-				/// \param name - name of integral value to link
+				/// \param name - name of integer value to link
 				/// \param value - a reference to the linked value
 				template<typename T, typename std::enable_if_t<std::is_integral<T>::value, long> = 0>
-				void link_integral( boost::string_view name, daw::optional_poly<T> & value ) {
+				void link_integer( boost::string_view name, daw::optional_poly<T> & value ) {
 					auto value_ptr = &value;
 					set_name( value, name.to_string( ) );
 					data_description_t data_description;
@@ -1289,11 +1293,11 @@ namespace daw {
 				}
 
 				template<typename T, typename EncoderFunction, typename DecoderFunction>
-				void link_jsonintegral( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+				void link_jsoninteger( boost::string_view name, T & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
 					set_name( value, name ); 
 					data_description_t data_description;
 					using daw::json::schema::get_schema;
-					data_description.json_type = get_schema( name, impl::value_t::integral_t{ } );
+					data_description.json_type = get_schema( name, impl::value_t::integer_t{ } );
 					data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
 						daw::exception::daw_throw_on_false( value_ptr );
 						json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
@@ -1312,18 +1316,18 @@ namespace daw {
 							ss << "}";
 							throw std::runtime_error( ss.str( ) );
 						}
-						daw::exception::daw_throw_on_false( member->second.is_integral( ) );
-						*value_ptr = decode_function( member->second.get_integral( ) );
+						daw::exception::daw_throw_on_false( member->second.is_integer( ) );
+						*value_ptr = decode_function( member->second.get_integer( ) );
 					};
 					add_to_data_map( name, std::move( data_description ) );
 				}
 
 				template<typename T, typename EncoderFunction, typename DecoderFunction>
-				void link_jsonintegral( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
+				void link_jsoninteger( boost::string_view name, boost::optional<T> & value, EncoderFunction encode_function, DecoderFunction decode_function ) {
 					set_name( value, name ); 
 					data_description_t data_description;
 					using daw::json::schema::get_schema;
-					data_description.json_type = get_schema( name, impl::value_t::integral_t{ } );
+					data_description.json_type = get_schema( name, impl::value_t::integer_t{ } );
 					data_description.bind_functions.encode = [value_ptr = &value, name_copy = name.to_string( ), encode_function]( std::string & json_text ) {
 						daw::exception::daw_throw_on_false( value_ptr );
 						json_text = generate::value_to_json( name_copy, encode_function( *value_ptr ) );
@@ -1335,8 +1339,8 @@ namespace daw {
 						if( obj.end( ) == member || member->second.is_null( ) ) {
 							*value_ptr = boost::none;
 						} else {
-							daw::exception::daw_throw_on_false( member->second.is_integral( ) );
-							*value_ptr = decode_function( member->second.get_integral( ) );
+							daw::exception::daw_throw_on_false( member->second.is_integer( ) );
+							*value_ptr = decode_function( member->second.get_integer( ) );
 						}
 					};
 					add_to_data_map( name, std::move( data_description ) );
@@ -1513,31 +1517,31 @@ namespace daw {
 				}
 
 				template<typename Integral>
-				void link_json_string_to_integral( boost::string_view name, Integral & i ) {
+				void link_json_string_to_integer( boost::string_view name, Integral & i ) {
 					static auto const from_str = []( boost::string_view str ) {
 						return impl::str_to_int( str, Integral{ } );
 					};
-					static auto const to_str = []( Integral const & integral ) {
+					static auto const to_str = []( Integral const & integer ) {
 						using std::to_string;
-						return to_string( integral );
+						return to_string( integer );
 					};
 					return link_jsonstring( name, i, to_str, from_str );
 				}
 
 				template<typename Integral>
-				void link_json_string_to_integral( boost::string_view name, boost::optional<Integral> & i ) {
+				void link_json_string_to_integer( boost::string_view name, boost::optional<Integral> & i ) {
 					static auto const from_str = []( boost::string_view str ) -> boost::optional<Integral> {
 						if( str.empty( ) ) {
 							return boost::none;
 						}
 						return impl::str_to_int( str, Integral{ } );
 					};
-					static auto const to_str = []( boost::optional<Integral> const & integral ) -> std::string {
-						if( !integral ) {
+					static auto const to_str = []( boost::optional<Integral> const & integer ) -> std::string {
+						if( !integer ) {
 							return "";
 						}
 						using std::to_string;
-						return to_string( *integral );
+						return to_string( *integer );
 					};
 					return link_jsonstring( name, i, to_str, from_str );
 				}
@@ -1611,7 +1615,7 @@ namespace daw {
 
 				template<typename Duration>
 				void link_epoch_milliseconds_timestamp( boost::string_view name, std::chrono::time_point<std::chrono::system_clock, Duration> & ts ) {
-					static auto const to_ts = []( impl::value_t::integral_t const & i ) {
+					static auto const to_ts = []( impl::value_t::integer_t const & i ) {
 						using namespace date;
 						using namespace std::chrono;
 						static std::chrono::system_clock::time_point const epoch{ };
@@ -1619,14 +1623,14 @@ namespace daw {
 						return result;
 					};
 
-					static auto const from_ts = []( std::chrono::time_point<std::chrono::system_clock, Duration> const & t ) -> impl::value_t::integral_t {
+					static auto const from_ts = []( std::chrono::time_point<std::chrono::system_clock, Duration> const & t ) -> impl::value_t::integer_t {
 						using namespace date;
 						using namespace std::chrono;
 						static std::chrono::system_clock::time_point const epoch{ };
 						auto result = std::chrono::duration_cast<std::chrono::milliseconds>( t - epoch ).count( );
 						return result;
 					};
-					return link_jsonintegral( name, ts, from_ts, to_ts );
+					return link_jsoninteger( name, ts, from_ts, to_ts );
 				}
 
 				///

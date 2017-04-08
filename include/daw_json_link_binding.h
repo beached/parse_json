@@ -33,7 +33,7 @@
 namespace daw {
 	namespace json {
 		namespace types {
-			enum class expected_json_types: uint8_t { integral, real, string, boolean, integral_array, real_array, string_array, boolean_array, object, object_array };
+			enum class expected_json_types: uint8_t { integer, real, string, boolean, integral_array, real_array, string_array, boolean_array, object, object_array };
 		}
 
 		template<typename Derived>
@@ -55,9 +55,13 @@ namespace daw {
 			json_binding_t( ) = delete;
 			~json_binding_t( ) = default;
 			json_binding_t( json_binding_t const & ) = default;
-			json_binding_t( json_binding_t && ) = default;
-			json_binding_t & operator=( json_binding_t const & ) = default;
-			json_binding_t & operator=( json_binding_t && ) = default;
+			json_binding_t( json_binding_t && ) noexcept = default;
+			json_binding_t & operator=( json_binding_t && ) noexcept = default;
+
+			json_binding_t & operator=( json_binding_t const & rhs ) {
+				return *this = json_binding_t{ rhs };
+			}
+
 		};	// json_binding_t
 	}	// namespace json
 }    // namespace daw

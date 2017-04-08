@@ -57,9 +57,10 @@ namespace daw {
 
 				object_value( object_value && ) = default;
 
-				object_value & operator=( object_value const & ) = default;
-
-				object_value & operator=( object_value && ) = default;
+				object_value & operator=( object_value ov ) {
+					members_v = std::move( ov.members_v );
+					return *this;
+				}
 
 				inline std::vector<object_value_item> & container( ) {
 					return members_v;
@@ -94,7 +95,7 @@ namespace daw {
 			using array_value = std::vector<value_t>;
 
 			struct value_t {
-				using integral_t = intmax_t;
+				using integer_t = intmax_t;
 				using real_t = double;
 				using string_t = string_value;
 				using boolean_t = bool;
@@ -102,7 +103,7 @@ namespace daw {
 				using object_t = object_value;
 
 				enum class value_types {
-					integral,
+					integer,
 					real,
 					string,
 					boolean,
@@ -111,12 +112,12 @@ namespace daw {
 					object
 				};
 			private:
-				boost::variant<integral_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
+				boost::variant<integer_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
 				value_types m_value_type;
 			public:
 				value_t( );
 
-				explicit value_t( integral_t const & value );
+				explicit value_t( integer_t const & value );
 
 				explicit value_t( real_t const & value );
 
@@ -136,13 +137,14 @@ namespace daw {
 
 				value_t( value_t const & other );
 
+				value_t( value_t && other ) noexcept;
+				value_t & operator=( value_t && other ) noexcept;
+
 				value_t & operator=( value_t const & rhs );
 
-				value_t & operator=( value_t && );
+				value_t & operator=( value_t::integer_t rhs );
 
-				value_t & operator=( value_t::integral_t const & rhs );
-
-				value_t & operator=( value_t::real_t const & rhs );
+				value_t & operator=( value_t::real_t rhs );
 
 				value_t & operator=( boost::string_view rhs );
 
@@ -156,9 +158,7 @@ namespace daw {
 
 				value_t & operator=( value_t::object_t rhs );
 
-				value_t( value_t && );
-
-				integral_t get_integral( ) const;
+				integer_t get_integer( ) const;
 
 				real_t get_real( ) const;
 
@@ -182,7 +182,7 @@ namespace daw {
 
 				void cleanup( );
 
-				bool is_integral( ) const;
+				bool is_integer( ) const;
 
 				bool is_real( ) const;
 

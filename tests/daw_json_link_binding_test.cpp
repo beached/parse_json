@@ -34,11 +34,11 @@ struct test final: public daw::json::JsonLink<test> {
 	int16_t e;
 
 	static auto map_to_json( ) {
-		json_link_integral( "a", []( test const & obj ) { return obj.a; } );
-		json_link_integral( "b", []( test const & obj ) { return obj.b; } );
-		json_link_string( "c", []( test const & obj ) { return obj.c; } );
-		json_link_real( "d", []( test const & obj ) { return obj.d; } );
-		LINK_JSON( integral, test, "e", e );
+		LINK_JSON( integer, test, "a", a );
+		LINK_JSON( integer, test, "b", b );
+		LINK_JSON( string, test, "c", c );
+		LINK_JSON( real, test, "d", d );
+		LINK_JSON( integer, test, "e", e );
 	}
 };	// test
 

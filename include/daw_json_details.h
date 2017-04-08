@@ -178,7 +178,7 @@ namespace daw {
 			template<typename T, typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, int64_t>::value, long>>
 			void json_to_value( T & to, ::daw::json::impl::value_t const & from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-				daw::exception::daw_throw_on_false( from.is_integral( ) );
+				daw::exception::daw_throw_on_false( from.is_integer( ) );
 				auto result = get<int64_t>( from );
 				daw::exception::daw_throw_on_false( static_cast<int64_t>(std::numeric_limits<T>::max( )) >= result );
 				daw::exception::daw_throw_on_false( static_cast<int64_t>(std::numeric_limits<T>::min( )) <= result );
