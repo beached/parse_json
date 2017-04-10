@@ -112,7 +112,7 @@ struct A: public daw::json::JsonLink<A> {
 		set_jsonlinks( );		
 	}
 
-	~A( );
+	~A( ) final;
 
 	void set_jsonlinks( ) {
 		link_integer( "integer_01", integer_01 );
@@ -147,7 +147,7 @@ struct A: public daw::json::JsonLink<A> {
 	}
 };	// A
 
-A::~A( ) { }
+A::~A( ) = default;
 
 struct B: public daw::json::JsonLink<B> {
 	A object_01;
@@ -161,7 +161,7 @@ struct B: public daw::json::JsonLink<B> {
 		set_jsonlinks( );
 	}
 	
-	~B( );
+	~B( ) final;
 
 	void set_jsonlinks( ) {
 		link_object( "object_01", object_01 );
@@ -169,7 +169,7 @@ struct B: public daw::json::JsonLink<B> {
 	}
 };	// B
 
-B::~B( ) { }
+B::~B( ) = default;
 
 struct empty: public daw::json::JsonLink<empty> {
 	empty( ):
@@ -181,10 +181,10 @@ struct empty: public daw::json::JsonLink<empty> {
 	empty( empty && ):
 		daw::json::JsonLink<empty>{ } { }
 
-	~empty( );
+	~empty( ) final;
 };
 
-empty::~empty( ) { }
+empty::~empty( ) = default;
 
 int main( int, char ** ) {
 	B obj_b_01;

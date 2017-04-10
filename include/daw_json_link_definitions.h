@@ -255,16 +255,18 @@ namespace daw {
 			}
 		}    // namespace schema
 
-		template<typename Derived, typename GetFunction, typename ResultOfGetFunction = std::decay<decltype(std::declval<GetFunction>( )( std::declval<Derived>( ) ) )>>
-		impl::standard_encoder_t<Derived, ResultOfGetFunction>::standard_encoder_t( boost::string_view n, GetFunction func ):
+		/// DAW
+		/*
+		template<typename Derived> template<typename GetFunction, typename ResultOfGetFunction = std::decay_t<decltype(std::declval<GetFunction>( )( std::declval<Derived>( ) ) )>>
+		impl::encode_function_t<Derived>::encode_function_t( boost::string_view n, GetFunction func ):
 				name_copy{ n.to_string( ) },
 				get_funcion{ std::move( func ) } { }
-
-		template<typename Derived, typename T> 
-		void impl::standard_encoder_t<Derived, T>::operator( )( std::string & json_text ) const {
+		template<typename Derived> 
+		void impl::encode_function_t<Derived>::operator( )( std::string & json_text ) const {
 			using namespace generate;
 			json_text = value_to_json( name_copy, get_function );
 		}
+		*/
 
 		template<typename Derived>
 		impl::bind_functions_t<Derived>::bind_functions_t( ):
@@ -433,7 +435,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename GetFunction>
-		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name, GetFunction func ) {
+		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name, GetFunction get_function ) {
 			return [get_function, name_copy = name.to_string( )]( Derived & derived_obj, json_obj json_values ) mutable {
 				auto new_val = decoder_helper<Derived, GetFunction>( name_copy, json_values );
 				get_function( derived_obj ) = new_val;
@@ -483,12 +485,14 @@ namespace daw {
 				result.push_back( static_cast<uint8_t>((ucs2 >> 12) | 0xE0 ) );
 				result.push_back( static_cast<uint8_t>(((ucs2 >> 6) & 0x3F) | 0x80 ) );
 				result.push_back( static_cast<uint8_t>((ucs2 & 0x3F) | 0x80 ) );
+			/* 32bit input
 			} else if( ucs2 >= 0x10000 && ucs2 < 0x10FFFF ) {
-				/* http://tidy.sourceforge.net/cgi-bin/lxr/source/src/utf8.c#L380 */
+				// http://tidy.sourceforge.net/cgi-bin/lxr/source/src/utf8.c#L380 
 				result.push_back( static_cast<uint8_t>(0xF0 | (ucs2 >> 18)) );
 				result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 12) & 0x3F)) );
 				result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 >> 6) & 0x3F)) );
 				result.push_back( static_cast<uint8_t>(0x80 | ((ucs2 & 0x3F))) );
+			*/
 			} else {
 				throw std::runtime_error( "Bad input" );
 			}
@@ -629,14 +633,14 @@ namespace daw {
 			data_description.bind_functions.encode = standard_encoder( name, get_function );
 
 			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
-				if( json_values.is_integral( ) ) {
+				if( json_values.is_integer( ) ) {
 					auto result = decoder_helper<int64_t>( name, json_values );
 					using T = std::decay_t<decltype( get_function( derived_obj ) )>;
 					daw::exception::daw_throw_on_false( result <= std::numeric_limits<T>::max( ) );
 					daw::exception::daw_throw_on_false( result >= std::numeric_limits<T>::min( ) );
 					get_function( derived_obj ) = static_cast<T>( result );
 				}
-				daw::exception::daw_throw_on_false( is_optional || json_values.is_integral( ) );
+				daw::exception::daw_throw_on_false( is_optional || json_values.is_integer( ) );
 			};
 			add_to_data_map( name, std::move( data_description ) );
 		}

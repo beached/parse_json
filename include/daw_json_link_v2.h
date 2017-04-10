@@ -73,7 +73,7 @@ namespace daw {
 		::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const & obj );
 
 
-		template<typename Derived, typename GetFunction, typename = decltype( get_function( std::declval<Derived>( ) ) )>
+		template<typename Derived, typename GetFunction, typename = decltype( std::declval<GetFunction>( )( std::declval<Derived>( ) ) )>
 		::daw::json::impl::value_t get_schema( boost::string_view name, GetFunction get_function );
 
 		namespace impl {
@@ -248,6 +248,9 @@ namespace daw {
 			template<typename T, typename U = T>
 			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, T & value );
 
+			template<typename GetFunction>
+			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, GetFunction get_function );
+
 			template<typename T>
 			static uint8_t hex_to_integer( T && value );
 
@@ -260,6 +263,9 @@ namespace daw {
 
 			template<typename T, typename U = T>
 			static impl::decode_function_t<Derived> string_decoder( boost::string_view name, T & value );
+
+			template<typename GetFunction>
+			static impl::decode_function_t<Derived> string_decoder( boost::string_view name, GetFunction get_function );
 
 			template<typename T, typename U = T>
 			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, boost::optional<T> & value );
