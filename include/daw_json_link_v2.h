@@ -72,10 +72,6 @@ namespace daw {
 		template<typename Derived>
 		::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const & obj );
 
-
-		template<typename Derived, typename GetFunction, typename = decltype( std::declval<GetFunction>( )( std::declval<Derived>( ) ) )>
-		::daw::json::impl::value_t get_schema( boost::string_view name, GetFunction get_function );
-
 		namespace impl {
 			int64_t str_to_int( boost::string_view str, int64_t );
 			uint64_t str_to_int( boost::string_view str, uint64_t );
@@ -218,8 +214,8 @@ namespace daw {
 			static std::string const & json_object_name( );
 			static ::daw::json::impl::value_t get_schema_obj( );
 
-			template<typename SerializeFunction, typename DeserializeFunction> 
-			static void json_link_value( boost::string_view name, SerializeFunction serialize_function, DeserializeFunction deserialize_function );
+			template<typename GetFunction, bool is_optional = false> 
+			static void json_link_value( boost::string_view name, GetFunction get_function );
 
 			constexpr static uint8_t to_nibble( uint8_t c ) noexcept;
 		
@@ -236,17 +232,14 @@ namespace daw {
 
 			static void set_name( JsonLink & obj, boost::string_view name );
 
-			template<typename T>
-			static impl::encode_function_t<Derived> standard_encoder( boost::string_view name, T const & value );
+			template<typename GetFunction>
+			static impl::encode_function_t<Derived> standard_encoder( boost::string_view name, GetFunction get_fucntion );
 
 			template<typename T>
 			static T decoder_helper( boost::string_view name, json_obj const & json_values );
 
 			template<typename T>
 			static boost::optional<T> nullable_decoder_helper( boost::string_view name, json_obj const & json_values );
-
-			template<typename T, typename U = T>
-			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, T & value );
 
 			template<typename GetFunction>
 			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, GetFunction get_function );
@@ -267,17 +260,8 @@ namespace daw {
 			template<typename GetFunction>
 			static impl::decode_function_t<Derived> string_decoder( boost::string_view name, GetFunction get_function );
 
-			template<typename T, typename U = T>
-			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, boost::optional<T> & value );
-
-			template<typename T, typename U = T>
-			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, daw::optional<T> & value );
-
-			template<typename T, typename U = T>
-			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, daw::optional_poly<T> & value );
-
-			template<typename T>
-			static impl::bind_functions_t<Derived> standard_bind_functions( boost::string_view name, T & value );
+			template<typename GetFunction>
+			static impl::bind_functions_t<Derived> standard_bind_functions( boost::string_view name, GetFunction get_function );
 		
 			static void add_to_data_map( boost::string_view name, impl::data_description_t<Derived> desc );
 
@@ -289,9 +273,6 @@ namespace daw {
 
 		template<typename Derived>
 		std::string value_to_json( boost::string_view name, JsonLink<Derived> const & obj );
-
-		template<typename Derived>
-		::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const & obj );
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
 		Derived from_file( boost::string_view file_name, bool use_default_on_error );

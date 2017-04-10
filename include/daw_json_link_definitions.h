@@ -86,6 +86,9 @@ namespace daw {
 
 				::daw::json::impl::value_t get_schema( boost::string_view name, boost::posix_time::ptime const & );
 
+				template<typename Derived, typename GetFunction>
+				::daw::json::impl::value_t get_schema( boost::string_view name, GetFunction get_function );
+
 				::daw::json::impl::value_t make_type_obj( boost::string_view name, ::daw::json::impl::value_t selected_type );
 
 				template<typename Key, typename Value>
@@ -294,6 +297,19 @@ namespace daw {
 			add_to_data_map( name, std::move( data_description ) );
 		}
 		*/
+
+		template<typename Derived> template<typename GetFunction, bool is_optional>
+		void JsonLink<Derived>::json_link_value( boost::string_view name, GetFunction get_function ) {
+			using value_t = std::decay_t<decltype( std::declval<GetFunction>( )( std::declval<Derived>( ) ) )>;
+			value_t value;	
+			set_name( value, name );
+			impl::data_description_t<Derived> data_description;
+			data_description.json_type = ::daw::json::impl::schema::get_schema( name, value );
+			data_description.bind_functions = standard_bind_functions<Derived>( name, value );
+			add_to_data_map( name, std::move( data_description ) );
+
+		}
+
 		template<typename Derived>
 		bool JsonLink<Derived>::is_linked( impl::string_value name ) {
 			return m_data.m_data_map.count( name ) != 0;
@@ -401,9 +417,9 @@ namespace daw {
 			obj.json_object_name( ) = name.to_string( );
 		}
 
-		template<typename Derived> template<typename T>
-		impl::encode_function_t<Derived> JsonLink<Derived>::standard_encoder( boost::string_view name, T const & value ) {
-			impl::encode_function_t<Derived> result = impl::standard_encoder_t<Derived, T>{ name, value };
+		template<typename Derived> template<typename GetFunction>
+		impl::encode_function_t<Derived> JsonLink<Derived>::standard_encoder( boost::string_view name, GetFunction get_function ) {
+			impl::encode_function_t<Derived> result = impl::standard_encoder_t<Derived, GetFunction>{ name, get_function };
 			return result;
 		}
 
@@ -436,9 +452,9 @@ namespace daw {
 
 		template<typename Derived> template<typename GetFunction>
 		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name, GetFunction get_function ) {
-			return [get_function, name_copy = name.to_string( )]( Derived & derived_obj, json_obj json_values ) mutable {
+			return [func = std::move( get_function ), name_copy = name.to_string( )]( Derived & derived_obj, json_obj json_values ) mutable {
 				auto new_val = decoder_helper<Derived, GetFunction>( name_copy, json_values );
-				get_function( derived_obj ) = new_val;
+				func( derived_obj ) = new_val;
 			};
 		}
 
@@ -554,6 +570,7 @@ namespace daw {
 			};
 		}
 
+		/*
 		template<typename Derived> template<typename T, typename U>
 		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name, boost::optional<T> & value ) {
 			auto value_ptr = &value;
@@ -594,14 +611,15 @@ namespace daw {
 				}
 			};
 		}
-
-		template<typename Derived> template<typename T>
-		impl::bind_functions_t<Derived> JsonLink<Derived>::standard_bind_functions( boost::string_view name, T & value ) {
+		*/
+		template<typename Derived> template<typename GetFunction>
+		impl::bind_functions_t<Derived> JsonLink<Derived>::standard_bind_functions( boost::string_view name, GetFunction get_function ) {
 			impl::bind_functions_t<Derived> bind_functions;
-			bind_functions.encode = standard_encoder( name, value );
-			bind_functions.decode = standard_decoder( name, value );
+			bind_functions.encode = standard_encoder<Derived>( name, get_function );
+			bind_functions.decode = standard_decoder<Derived>( name, get_function );
 			return bind_functions;
 		}
+		
 		template<typename Derived>
 		void JsonLink<Derived>::add_to_data_map( boost::string_view name, impl::data_description_t<Derived> desc ) {
 			auto key = range::create_char_range( name );
@@ -627,8 +645,8 @@ namespace daw {
 		void JsonLink<Derived>::json_link_integer( boost::string_view name, GetFunction get_function ) {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
-			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, get_function );
+			using namespace daw::json::impl::schema;
+			data_description.json_type = get_schema<Derived>( name, get_function );
 
 			data_description.bind_functions.encode = standard_encoder( name, get_function );
 
@@ -653,7 +671,7 @@ namespace daw {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, get_function );
+			data_description.json_type = get_schema<Derived>( name, get_function );
 			data_description.bind_functions.encode = standard_encoder( name, get_function );
 
 			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
@@ -720,7 +738,7 @@ namespace daw {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, get_function );
+			data_description.json_type = get_schema<Derived>( name, get_function );
 			data_description.bind_functions.encode = standard_encoder( name, get_function );
 			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
 				auto obj = json_values.get_object( );
@@ -754,7 +772,7 @@ namespace daw {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using ::daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, get_function );
+			data_description.json_type = get_schema<Derived>( name, get_function );
 			data_description.bind_functions.encode = standard_encoder( name, get_function );
 			data_description.bind_functions.decode = [get_function, name]( Derived & derived_obj, json_obj const & json_values ) mutable {
 				auto val_obj = json_values.get_object( );
@@ -787,7 +805,7 @@ namespace daw {
 			set_name( get_function, name );
 			impl::data_description_t<Derived> data_description;
 			using daw::json::impl::schema::get_schema;
-			data_description.json_type = get_schema( name, get_function );
+			data_description.json_type = get_schema<Derived>( name, get_function );
 			data_description.bind_functions.encode = [get_function, name]( Derived & derived_obj, std::string & json_text ) {
 				json_text = generate::value_to_json( name.to_string( ), boost::lexical_cast<std::string>( get_function( derived_obj ) ) );
 			};
