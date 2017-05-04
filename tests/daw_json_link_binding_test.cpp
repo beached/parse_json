@@ -34,7 +34,8 @@ struct test final: public daw::json::JsonLink<test> {
 	int16_t e;
 
 	static auto map_to_json( ) {
-		LINK_JSON( integer, test, "a", a );
+		json_link_integer( "a", a );
+//		LINK_JSON( integer, test, "a", a );
 		LINK_JSON( integer, test, "b", b );
 		LINK_JSON( string, test, "c", c );
 		LINK_JSON( real, test, "d", d );

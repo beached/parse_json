@@ -82,6 +82,22 @@ namespace daw {
 			int8_t str_to_int( boost::string_view str, int8_t );
 			uint8_t str_to_int( boost::string_view str, uint8_t );
 
+			namespace json_conv {
+				template<typename Derived>
+				void from_json_string( Derived &   json_obj const & json_value ) {
+					return json_obj.get_string( );
+				}
+				json_obj to_json_obj( boost::string_view value ) {
+					return json_obj{ value }; 
+				}
+				int64_t from_json_int( json_obj const & json_value ) {
+					return json_obj.get_integer( );
+				}
+				json_obj to_json_obj( int64_t value ) {
+					return json_obj{ std::move( value ) };
+				}
+			}	// namespace json_conv
+
 			template<typename Derived>
 			using encode_function_t = std::function<void( Derived & derived_obj, std::string & json_text )>;
 
@@ -140,7 +156,20 @@ namespace daw {
 
 				data_t( boost::string_view name );
 			};	// data_t
+
+			template<typename T, typename U>
+			constexpr bool can_use_for_jsonlink_v = std::integral_constant<bool, std::is_convertible<T, U>::value && std::is_convertible<U, T>::value>::value;
+
 		}	// namespace impl
+
+		template<typename Derived, typename T>
+		using get_function_t = T &(*)( Dervied & );
+
+		template<typename Derived, typename T>
+		using get_function2_t = T(*)( Derived const & );
+
+		template<typename Derived, typename T>
+		using set_function_t = void(*)( Derived &, T );
 
 		template<typename Derived>
 		struct JsonLink {
@@ -156,56 +185,42 @@ namespace daw {
 			void from_json_string( char const *json_text_begin, char const *json_text_end );
 			void from_json_file( boost::string_view filename );
 			void from_json_obj( json_obj const & json_values );
-		protected:
 			~JsonLink( ) noexcept; 
+		protected:
+			template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<int64_t, T>>>
+			static void json_link_integer( boost::string_view name, get_function_t<Derived, T> get_function );
 
-			///
-			/// \param name - name of integer value to link
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_integer( boost::string_view name, GetFunction get_function );
+			template<typename T>
+			static void json_link_integer( boost::string_view name, Derived T::* data_ptr );
 
-			///
-			/// \param name - name of real(float/double...) value to link
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_real( boost::string_view name, GetFunction get_function );
+			static void json_link_integer( boost::string_view name, get_function2_t<Derived, int64_t> get_function, set_function_t<Derived, int64_t> set_function );
 
-			///
-			/// \param name - name of string value to link
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_string( boost::string_view name, GetFunction get_function );
+			template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<double, T>>>
+			static void json_link_real( boost::string_view name, get_function_t<Derived, T> get_function );
 
-			///
-			/// \param name - name of boolean(true/false) value to link
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_boolean( boost::string_view name, GetFunction get_function );
+			static void json_link_real( boost::string_view name, get_function2_t<Derived, double> get_function, set_function_t<Derived, double> set_function );
 
-			///
-			/// \param name - name of JsonLink<type> obect value to link
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_object( boost::string_view name, GetFunction get_function );
+			template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<std::string, T>>>
+			static void json_link_string( boost::string_view name, get_function_t<Derived, T> get_function );
 
-			///
-			/// \param name - name of array(vector) value to link
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_array( boost::string_view name, GetFunction get_function );
+			static void json_link_string( boost::string_view name, get_function2_t<Derived, std::string> get_function, set_function_t<Derived, std::string> set_function );
 
-			///
-			/// \param name - name of map(unorderd_map/map) value to link.
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_map( boost::string_view name, GetFunction get_function );
+			template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<std::bool, T>>>
+			static void json_link_boolean( boost::bool_view name, get_function_t<Derived, T> get_function );
 
-			///
-			/// \param name - name of streamable value(operator<<, operator>>) to link.
-			/// \param get_function - a function returning a T, and taking a const ref to Derived
-			template<typename GetFunction, bool is_optional = false>
-			static void json_link_streamable( boost::string_view name, GetFunction get_function );
+			static void json_link_boolean( boost::bool_view name, get_function2_t<Derived, std::bool> get_function, set_function_t<Derived, std::bool> set_function );
+
+			template<typename T>
+			static void json_link_object( boost::bool_view name, get_function_t<Derived, JsonLink<T>> get_function );
+
+			template<typename T>
+			static void json_link_array( boost::bool_view name, get_function_t<Derived, T> get_function );
+
+			template<typename T>
+			static void json_link_map( boost::bool_view name, get_function_t<Derived, T> get_function );
+
+			template<typename T>
+			static void json_link_streamable( boost::bool_view name, get_function_t<Derived, T> get_function );
 		private:
 			Derived & as_derived( );
 			Derived const & as_derived( ) const;
@@ -217,11 +232,6 @@ namespace daw {
 			template<typename GetFunction, bool is_optional = false> 
 			static void json_link_value( boost::string_view name, GetFunction get_function );
 
-			constexpr static uint8_t to_nibble( uint8_t c ) noexcept;
-		
-			template<typename T>
-			static std::string value_to_hex( T const & value );
-
 			template<typename T>
 			static void call_decode( T &, json_obj );
 
@@ -232,9 +242,6 @@ namespace daw {
 
 			static void set_name( JsonLink & obj, boost::string_view name );
 
-			template<typename GetFunction>
-			static impl::encode_function_t<Derived> standard_encoder( boost::string_view name, GetFunction get_fucntion );
-
 			template<typename T>
 			static T decoder_helper( boost::string_view name, json_obj const & json_values );
 
@@ -244,15 +251,8 @@ namespace daw {
 			template<typename GetFunction>
 			static impl::decode_function_t<Derived> standard_decoder( boost::string_view name, GetFunction get_function );
 
-			template<typename T>
-			static uint8_t hex_to_integer( T && value );
-
 			template<typename ForwardIterator, typename T>
 			static ForwardIterator get_cp( ForwardIterator first, ForwardIterator last, T & out );
-
-			static std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 );
-			
-			static std::string unescape_string( boost::string_view src );
 
 			template<typename T, typename U = T>
 			static impl::decode_function_t<Derived> string_decoder( boost::string_view name, T & value );
@@ -267,6 +267,18 @@ namespace daw {
 
 			static impl::data_t<Derived> m_data;
 		};    // JsonLink
+
+		constexpr uint8_t to_nibble( uint8_t c ) noexcept;
+		
+		template<typename T>
+		std::string value_to_hex( T const & value );
+
+		template<typename T>
+		uint8_t hex_to_integer( T && value );
+
+		std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 );
+		
+		std::string unescape_string( boost::string_view src );
 
 		template<typename Derived>
 		void json_to_value( JsonLink<Derived> & to, impl::value_t const & from );
