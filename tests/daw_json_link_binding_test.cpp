@@ -26,26 +26,34 @@
 
 #include "daw_json_link_v2.h"
 
-struct test final: public daw::json::JsonLink<test> {
+struct test: public daw::json::json_link<test> {
 	int32_t a;
 	int64_t b;
 	std::string c;
 	double d;
 	int16_t e;
 
-	static auto map_to_json( ) {
+	static void map_to_json( ) {
 		json_link_integer( "a", a );
-//		LINK_JSON( integer, test, "a", a );
-		LINK_JSON( integer, test, "b", b );
-		LINK_JSON( string, test, "c", c );
-		LINK_JSON( real, test, "d", d );
-		LINK_JSON( integer, test, "e", e );
+		json_link_integer_fn( "b", []( test const & obj ) { return obj.b; }, []( test & obj, auto const & value ) { obj.b = value; } );
+		json_link_string( "c", c );
+		json_link_real( "d", d );
+		json_link_integer( "e", e );
 	}
 };	// test
 
-int main( int, char** ) {
-	test t;
+struct test2: public daw::json::json_link<test2> {
+	test a;
 
+	static void map_to_json( ) {
+		json_link_object( "a", a );
+	}
+};	// test2
+
+int main( int, char** ) {
+	test2 t;
+	t.a.a = 5;
+	std::cout << t.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }
 
