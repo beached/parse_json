@@ -61,70 +61,53 @@ namespace daw {
 				return b ? "true" : "false";
 			}
 
-			namespace impl {
-				template<typename T>
-				constexpr bool is_integer_v = std::is_integral<T>::value;
-
-				template<typename T>
-				constexpr bool is_real_v = std::is_floating_point<T>::value;
-
-				template<typename T>
-				constexpr bool is_boolean_v = std::is_integral<T>::value && std::is_same<std::decay_t<T>, bool>::value;
-			}
-
-			template<typename Integer, typename = std::enable_if_t<impl::is_integer_v<Integer>>>
-			std::string to_json_value( Integer i ) {
-				return to_json_integer( i );
-			}
-
-			template<typename Real, typename = std::enable_if_t<impl::is_real_v<Real>>>
-			std::string to_json_value( Real r ) {
-				return to_json_real( r );
-			}
-
-			std::string to_json_value( boost::string_view s ) {
-				return to_json_string( s );
-			}
-
-			template<typename Boolean, typename = std::enable_if_t<impl::is_boolean_v<Boolean>>>
-			std::string to_json_value( Boolean b ) {
-				return to_json_boolean( b );
+			std::string to_json_null( void * ) {
+				return "null";
 			}
 
 			template<typename Container>
-			std::string to_json_array( Container const & c );
+			std::string to_json_array( Container const & );
 
-			template<typename T, size_t sz>
-			std::string to_json_value( T const(&c)[sz] );
+			template<typename Derived>
+			std::string to_json_object( json_link<Derived> const & );
 
-			template<typename Container,
-				typename = std::enable_if_t<
-					sizeof( decltype( std::begin( std::declval<Container>( ) ) ) ) != 0 &&
-					sizeof( decltype( std::end( std::declval<Container>( ) ) ) ) != 0
-				>
-			>
-			std::string to_json_value( Container const & c ) {
-				return to_json_array( c );
+			namespace impl {
+				template<typename T>
+				struct value_type;
+
+				template<typename T, typename = std::enable_if_t<std::is_integral<T>::value && !std::is_same<std::decay_t<T>, bool>::value>>
+				struct value_type<T> {
+					static constexpr auto const value = daw::json::impl::value_t::value_types::integer;
+				};
+
+				template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
+				struct value_type<T> {
+					static constexpr auto const value = daw::json::impl::value_t::value_types::real;
+				};
+
+				template<typename T, typename = std::enable_if_t<std::is_integral<T>::value && std::is_same<std::decay_t<T>, bool>::value>>
+				struct value_type<T> {
+					static constexpr auto const value = daw::json::impl::value_t::value_types::boolean;
+				};
+
+				template<typename T, typename = std::enable_if_t<std::is_array<T>::value>>
+				struct value_type<T> {
+					static constexpr auto const value = daw::json::impl::value_t::value_types::array;
+				};
 			}
 
-			template<typename T, size_t sz>
-			std::string to_json_value( T const(&c)[sz] ) {
-				return to_json_array( c );
-			};
-
-			template<typename T, size_t sz>
-			std::string to_json_array( T const(&c)[sz] ) {
-				std::stringstream ss;
-				ss << '[';
-				for( size_t n=0; n<sz; ++n ) {
-					if( n > 0 ) {
-						ss << ',';
-					}
-					ss << to_json_value( c[n] );
+			template<typename T>
+			std::string to_json_value( T const & value ) {
+				switch( impl::value_type<std::decay_t<T>>::value ) {
+				case value_t::value_types::integer: return to_json_integer( value );
+				case value_t::value_types::real: return to_json_real( value );
+				case value_t::value_types::string: to_json_string( value );
+				case value_t::value_types::boolean: to_json_boolean( value );
+				case value_t::value_types::null: return to_json_null( value );
+				case value_t::value_types::array: return to_json_array( value );
+				case value_t::value_types::object: return to_json_object( value );
 				}
-				ss << ']';
-				return ss.str( );
-			};
+			}
 
 			template<typename Container>
 			std::string to_json_array( Container const & c ) {
