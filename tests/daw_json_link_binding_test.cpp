@@ -32,6 +32,8 @@ struct test: public daw::json::json_link<test> {
 	std::string c;
 	double d;
 	int16_t e;
+	bool f;
+	std::vector<int> g;
 
 	static void map_to_json( ) {
 		json_link_integer( "a", a );
@@ -39,6 +41,8 @@ struct test: public daw::json::json_link<test> {
 		json_link_string( "c", c );
 		json_link_real( "d", d );
 		json_link_integer( "e", e );
+		json_link_boolean( "f", f );
+		json_link_array( "g", g );
 	}
 };	// test
 
@@ -52,7 +56,15 @@ struct test2: public daw::json::json_link<test2> {
 
 int main( int, char** ) {
 	test2 t;
-	t.a.a = 5;
+	t.a.a = 1;
+	t.a.b = 2;
+	t.a.c = "three";
+	t.a.d = 4.5;
+	t.a.e = 6;
+	t.a.f = true;
+	t.a.g.push_back( 7 );
+	t.a.g.push_back( 8 );
+	t.a.g.push_back( 9 );
 	std::cout << t.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }
