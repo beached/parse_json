@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 
-#include <daw/daw_common_mixins.h>
 #include <daw/char_range/daw_char_range.h>
+#include <daw/daw_common_mixins.h>
 #include <daw/daw_variant.h>
 
 #include "value_t.h"
@@ -49,10 +49,10 @@ namespace daw {
 			JsonParserException( JsonParserException const & ) = default;
 
 			JsonParserException( JsonParserException && ) noexcept = default;
-			JsonParserException & operator=( JsonParserException && ) noexcept = default;
+			JsonParserException &operator=( JsonParserException && ) noexcept = default;
 
-			JsonParserException & operator=( JsonParserException const & rhs );
-		};    // struct JsonParserException
+			JsonParserException &operator=( JsonParserException const &rhs );
+		}; // struct JsonParserException
 
 		using json_obj = impl::value_t;
 
@@ -61,20 +61,26 @@ namespace daw {
 		json_obj parse_json( boost::string_view const json_text );
 
 		template<typename T>
-		T get( impl::value_t const & );/*
-											   static_assert(false, "Unsupported get type called");
-											   }*/
+		T get( impl::value_t const & ); /*
+		                                        static_assert(false, "Unsupported get type called");
+		                                        }*/
 
-		template<> int64_t get<int64_t>( impl::value_t const & val );
+		template<>
+		int64_t get<int64_t>( impl::value_t const &val );
 
-		template<> double get<double>( impl::value_t const & val );
+		template<>
+		double get<double>( impl::value_t const &val );
 
-		template<> std::string get<std::string>( impl::value_t const & val );
+		template<>
+		std::string get<std::string>( impl::value_t const &val );
 
-		template<> bool get<bool>( impl::value_t const & val );
+		template<>
+		bool get<bool>( impl::value_t const &val );
 
-		template<> impl::object_value get<impl::object_value>( impl::value_t const & val );
+		template<>
+		impl::object_value get<impl::object_value>( impl::value_t const &val );
 
-		template<> impl::array_value get<impl::array_value>( impl::value_t const & val );
-	}    // namespace json
-}    // namespace daw
+		template<>
+		impl::array_value get<impl::array_value>( impl::value_t const &val );
+	} // namespace json
+} // namespace daw

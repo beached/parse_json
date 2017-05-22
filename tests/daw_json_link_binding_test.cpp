@@ -26,7 +26,7 @@
 
 #include "daw_json_link_v2.h"
 
-struct test: public daw::json::json_link<test> {
+struct test : public daw::json::json_link<test> {
 	int32_t a;
 	int64_t b;
 	std::string c;
@@ -37,24 +37,25 @@ struct test: public daw::json::json_link<test> {
 
 	static void map_to_json( ) {
 		json_link_integer( "a", a );
-		json_link_integer_fn( "b", []( test const & obj ) { return obj.b; }, []( test & obj, auto const & value ) { obj.b = value; } );
+		json_link_integer_fn( "b", []( test const &obj ) { return obj.b; },
+		                      []( test &obj, auto const &value ) { obj.b = value; } );
 		json_link_string( "c", c );
 		json_link_real( "d", d );
 		json_link_integer( "e", e );
 		json_link_boolean( "f", f );
-		json_link_array( "g", g );
+		json_link_integer_array( "g", g );
 	}
-};	// test
+}; // test
 
-struct test2: public daw::json::json_link<test2> {
+struct test2 : public daw::json::json_link<test2> {
 	test a;
 
 	static void map_to_json( ) {
 		json_link_object( "a", a );
 	}
-};	// test2
+}; // test2
 
-int main( int, char** ) {
+int main( int, char ** ) {
 	test2 t;
 	t.a.a = 1;
 	t.a.b = 2;
@@ -68,5 +69,3 @@ int main( int, char** ) {
 	std::cout << t.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }
-
-

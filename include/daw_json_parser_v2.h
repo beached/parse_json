@@ -30,21 +30,21 @@
 namespace daw {
 	namespace json {
 		template<typename InputIteratorFirst, typename InputIteratorLast, typename State>
-		void json_parser( InputIteratorFirst first, InputIteratorLast last, State & state ) {
+		void json_parser( InputIteratorFirst first, InputIteratorLast last, State &state ) {
 			first = impl::skip_whitespace( first, last );
 			while( first != last ) {
 				switch( *first ) {
-					case '{':
-						first = impl::parse_object( first, last, state );
-						break;
-					case '[':
-						first = impl::parse_array( first, last, state );
-						break;
-					default:
-						throw json_parser_exception( "Expected an array '[' or object '{' at start of json file" );
+				case '{':
+					first = impl::parse_object( first, last, state );
+					break;
+				case '[':
+					first = impl::parse_array( first, last, state );
+					break;
+				default:
+					throw json_parser_exception( "Expected an array '[' or object '{' at start of json file" );
 				}
 				first = impl::skip_whitespace( first, last );
 			}
 		}
-	}    // namespace json
-}    // namespace daw
+	} // namespace json
+} // namespace daw

@@ -23,15 +23,15 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/variant.hpp>
 #include <boost/utility/string_view.hpp>
+#include <boost/variant.hpp>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <daw/daw_common_mixins.h>
 #include <daw/char_range/daw_char_range.h>
+#include <daw/daw_common_mixins.h>
 #include <daw/daw_variant.h>
 
 namespace daw {
@@ -39,7 +39,7 @@ namespace daw {
 		namespace impl {
 			struct value_t;
 
-			struct null_value final { };
+			struct null_value final {};
 
 			using string_value = ::daw::utf_string;
 
@@ -47,7 +47,7 @@ namespace daw {
 
 			object_value_item make_object_value_item( string_value first, value_t second );
 
-			struct object_value: public daw::mixins::VectorLikeProxy<object_value, std::vector<object_value_item>> {
+			struct object_value : public daw::mixins::VectorLikeProxy<object_value, std::vector<object_value_item>> {
 				std::vector<object_value_item> members_v;
 
 				object_value( ) = default;
@@ -57,16 +57,16 @@ namespace daw {
 
 				object_value( object_value && ) = default;
 
-				object_value & operator=( object_value ov ) {
+				object_value &operator=( object_value ov ) {
 					members_v = std::move( ov.members_v );
 					return *this;
 				}
 
-				inline std::vector<object_value_item> & container( ) {
+				inline std::vector<object_value_item> &container( ) {
 					return members_v;
 				}
 
-				inline std::vector<object_value_item> const & container( ) const {
+				inline std::vector<object_value_item> const &container( ) const {
 					return members_v;
 				}
 
@@ -81,16 +81,16 @@ namespace daw {
 
 				bool has_member( boost::string_view key ) const;
 
-				mapped_type & operator[]( boost::string_view key );
+				mapped_type &operator[]( boost::string_view key );
 
-				mapped_type const & operator[]( boost::string_view key ) const;
+				mapped_type const &operator[]( boost::string_view key ) const;
 
 				inline void shrink_to_fit( ) {
 					members_v.shrink_to_fit( );
 				}
-			};    // struct object_value
+			}; // struct object_value
 
-			std::string to_string( object_value const & obj );
+			std::string to_string( object_value const &obj );
 
 			using array_value = std::vector<value_t>;
 
@@ -102,24 +102,18 @@ namespace daw {
 				using array_t = array_value;
 				using object_t = object_value;
 
-				enum class value_types {
-					integer,
-					real,
-					string,
-					boolean,
-					null,
-					array,
-					object
-				};
-			private:
+				enum class value_types { integer, real, string, boolean, null, array, object };
+
+			  private:
 				boost::variant<integer_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
 				value_types m_value_type;
-			public:
+
+			  public:
 				value_t( );
 
-				explicit value_t( integer_t const & value );
+				explicit value_t( integer_t const &value );
 
-				explicit value_t( real_t const & value );
+				explicit value_t( real_t const &value );
 
 				value_t( boost::string_view value );
 
@@ -135,28 +129,28 @@ namespace daw {
 
 				~value_t( );
 
-				value_t( value_t const & other );
+				value_t( value_t const &other );
 
-				value_t( value_t && other ) noexcept;
-				value_t & operator=( value_t && other ) noexcept;
+				value_t( value_t &&other ) noexcept;
+				value_t &operator=( value_t &&other ) noexcept;
 
-				value_t & operator=( value_t const & rhs );
+				value_t &operator=( value_t const &rhs );
 
-				value_t & operator=( value_t::integer_t rhs );
+				value_t &operator=( value_t::integer_t rhs );
 
-				value_t & operator=( value_t::real_t rhs );
+				value_t &operator=( value_t::real_t rhs );
 
-				value_t & operator=( boost::string_view rhs );
+				value_t &operator=( boost::string_view rhs );
 
-				value_t & operator=( value_t::string_t rhs );
+				value_t &operator=( value_t::string_t rhs );
 
-				value_t & operator=( value_t::boolean_t rhs );
+				value_t &operator=( value_t::boolean_t rhs );
 
-				value_t & operator=( std::nullptr_t rhs );
+				value_t &operator=( std::nullptr_t rhs );
 
-				value_t & operator=( value_t::array_t rhs );
+				value_t &operator=( value_t::array_t rhs );
 
-				value_t & operator=( value_t::object_t rhs );
+				value_t &operator=( value_t::object_t rhs );
 
 				integer_t get_integer( ) const;
 
@@ -166,17 +160,17 @@ namespace daw {
 
 				string_t get_string_value( ) const;
 
-				boolean_t const & get_boolean( ) const;
+				boolean_t const &get_boolean( ) const;
 
-				boolean_t & get_boolean( );
+				boolean_t &get_boolean( );
 
-				object_t const & get_object( ) const;
+				object_t const &get_object( ) const;
 
-				object_t & get_object( );
+				object_t &get_object( );
 
-				array_t const & get_array( ) const;
+				array_t const &get_array( ) const;
 
-				array_t & get_array( );
+				array_t &get_array( );
 
 				value_types type( ) const;
 
@@ -197,34 +191,33 @@ namespace daw {
 				bool is_array( ) const;
 
 				bool is_object( ) const;
-				
-				int compare( value_t const & rhs ) const;
-			};    // value_t
 
-			
+				int compare( value_t const &rhs ) const;
+			}; // value_t
+
 			std::string to_string( value_t::value_types type ) noexcept;
 			using value_opt_t = boost::optional<value_t>;
 
-			std::string to_string( value_t const & value );
+			std::string to_string( value_t const &value );
 
-			std::string to_string( std::shared_ptr<value_t> const & value );
+			std::string to_string( std::shared_ptr<value_t> const &value );
 
-			std::string to_string( std::ostream & os, std::shared_ptr<value_t> const & value );
+			std::string to_string( std::ostream &os, std::shared_ptr<value_t> const &value );
 
-			std::ostream & operator<<( std::ostream & os, value_t const & value );
+			std::ostream &operator<<( std::ostream &os, value_t const &value );
 
-			std::ostream & operator<<( std::ostream & os, std::shared_ptr<value_t> const & value );
+			std::ostream &operator<<( std::ostream &os, std::shared_ptr<value_t> const &value );
 
-			bool operator==( value_t const & lhs, value_t const & rhs );
-			bool operator!=( value_t const & lhs, value_t const & rhs );
-			bool operator<( value_t const & lhs, value_t const & rhs );
-			bool operator>( value_t const & lhs, value_t const & rhs );
-			bool operator<=( value_t const & lhs, value_t const & rhs );
-			bool operator>=( value_t const & lhs, value_t const & rhs );
-		}    // namespace impl
-	}    // namespace json
-}    // namespace daw
+			bool operator==( value_t const &lhs, value_t const &rhs );
+			bool operator!=( value_t const &lhs, value_t const &rhs );
+			bool operator<( value_t const &lhs, value_t const &rhs );
+			bool operator>( value_t const &lhs, value_t const &rhs );
+			bool operator<=( value_t const &lhs, value_t const &rhs );
+			bool operator>=( value_t const &lhs, value_t const &rhs );
+		} // namespace impl
+	}     // namespace json
+} // namespace daw
 
 namespace std {
-	std::string to_string( daw::json::impl::array_value const & arry );
+	std::string to_string( daw::json::impl::array_value const &arry );
 }

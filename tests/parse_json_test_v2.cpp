@@ -29,7 +29,7 @@
 #include "daw_json_parser_v2.h"
 #include "daw_json_parser_v2_state.h"
 
-int main( int argc, char** argv ) {
+int main( int argc, char **argv ) {
 	boost::iostreams::mapped_file mmap( argv[1], boost::iostreams::mapped_file::readonly );
 
 	try {
@@ -38,15 +38,14 @@ int main( int argc, char** argv ) {
 		daw::json::json_parser( mmap.const_data( ), mmap.const_data( ) + mmap.size( ), state_proxy );
 		auto const ts_end = std::chrono::system_clock::now( );
 
-		auto const duration = std::chrono::duration<double>(ts_end-ts_start).count( );
+		auto const duration = std::chrono::duration<double>( ts_end - ts_start ).count( );
 		double const sz = mmap.size( );
 		std::cout << duration << "s duration. " << state_proxy.current_state( ).to_string( ) << std::endl;
-		double const sp = sz/duration;
-		std::cout << "speed " << sp << "bytes/sec " << ((sp/1024.0)/1024.0) << "MB/s\n";
-	} catch( std::runtime_error const & ex ) {
+		double const sp = sz / duration;
+		std::cout << "speed " << sp << "bytes/sec " << ( ( sp / 1024.0 ) / 1024.0 ) << "MB/s\n";
+	} catch( std::runtime_error const &ex ) {
 		std::cerr << "Exception '" << ex.what( ) << "'\n";
 		exit( EXIT_FAILURE );
 	}
 	return EXIT_SUCCESS;
 }
-

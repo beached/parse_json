@@ -24,8 +24,8 @@
 
 #include <boost/utility/string_view.hpp>
 #include <map>
-#include <string>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include <daw/daw_traits.h>
@@ -71,46 +71,28 @@ namespace daw {
 			template<typename Derived>
 			std::string to_json_object( json_link<Derived> const & );
 
-			namespace impl {
-				template<typename T>
-				struct value_type;
-
-				template<typename T, typename = std::enable_if_t<std::is_integral<T>::value && !std::is_same<std::decay_t<T>, bool>::value>>
-				struct value_type<T> {
-					static constexpr auto const value = daw::json::impl::value_t::value_types::integer;
-				};
-
-				template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
-				struct value_type<T> {
-					static constexpr auto const value = daw::json::impl::value_t::value_types::real;
-				};
-
-				template<typename T, typename = std::enable_if_t<std::is_integral<T>::value && std::is_same<std::decay_t<T>, bool>::value>>
-				struct value_type<T> {
-					static constexpr auto const value = daw::json::impl::value_t::value_types::boolean;
-				};
-
-				template<typename T, typename = std::enable_if_t<std::is_array<T>::value>>
-				struct value_type<T> {
-					static constexpr auto const value = daw::json::impl::value_t::value_types::array;
-				};
-			}
-
 			template<typename T>
-			std::string to_json_value( T const & value ) {
-				switch( impl::value_type<std::decay_t<T>>::value ) {
-				case value_t::value_types::integer: return to_json_integer( value );
-				case value_t::value_types::real: return to_json_real( value );
-				case value_t::value_types::string: to_json_string( value );
-				case value_t::value_types::boolean: to_json_boolean( value );
-				case value_t::value_types::null: return to_json_null( value );
-				case value_t::value_types::array: return to_json_array( value );
-				case value_t::value_types::object: return to_json_object( value );
+			std::string to_json_value( T const &value, impl::value_t::value_types t ) {
+				switch( t ) {
+				case value_t::value_types::integer:
+					return to_json_integer( value );
+				case value_t::value_types::real:
+					return to_json_real( value );
+				case value_t::value_types::string:
+					return to_json_string( value );
+				case value_t::value_types::boolean:
+					return to_json_boolean( value );
+				case value_t::value_types::null:
+					return to_json_null( value );
+				case value_t::value_types::array:
+					return to_json_array( value );
+				case value_t::value_types::object:
+					return to_json_object( value );
 				}
 			}
 
 			template<typename Container>
-			std::string to_json_array( Container const & c ) {
+			std::string to_json_array( Container const &c, impl::value_t::value_types t ) {
 				using std::begin;
 				using std::end;
 				auto first = begin( c );
@@ -118,7 +100,7 @@ namespace daw {
 				std::string result = "[";
 				while( first != last ) {
 					result += ",";
-					result += to_json_value( *first );
+					result += to_json_value( *first, t );
 					++first;
 				}
 				result += "]";
@@ -134,7 +116,61 @@ namespace daw {
 					return value >= std::numeric_limits<Integer>::min( );
 				}
 			}
-		}	// namespace impl
+
+			template<typename T, typename... Args>
+			void copy_array_emplace_value( daw::json::impl::value_t const &source,
+			                               std::vector<T, Args...> const &destination ){
+
+			};
+
+			template<typename T, typename... Args>
+			void copy_array( daw::json::impl::array_value const &source, std::vector<T, Args...> const &destination ) {
+				destination.clear( );
+				for( auto const &value : source ) {
+					switch( value.type( ) ) {
+					case value_t::value_types::integer:
+						destination.emplace_back( value.get_integer( ) );
+						break;
+					case value_t::value_types::real:
+						destination.emplace_back( value.get_real( ) );
+						break;
+					case value_t::value_types::string:
+						destination.emplace_back( value.get_string( ) );
+						break;
+					case value_t::value_types::boolean:
+						destination.emplace_back( value.get_boolean( ) );
+						break;
+					case value_t::value_types::null:
+						destination.push_back( nullptr );
+						break;
+					case value_t::value_types::array: {
+						T cur_array;
+						copy_array( value.get_array( ), cur_array );
+						destination.push_back( std::move( cur_array ) );
+					} break;
+					case value_t::value_types::object:
+						destination.emplace_back( value.get_object( ) );
+						break;
+					}
+				}
+			}
+
+			struct or_all {};
+		} // namespace impl
+
+		struct link_types_t {
+			enum types_t : uint8_t {
+				nullable = 0,
+				integer = 1,
+				real = 2,
+				boolean = 4,
+				string = 8,
+				array = 16,
+				object = 32
+			};
+			template<types_t... types>
+			link_types_t( types_t... types ) {}
+		};
 
 		template<typename Derived>
 		class json_link {
@@ -144,7 +180,7 @@ namespace daw {
 			struct mapping_functions_t {
 				serialize_function_t serialize_function;
 				deserialize_function_t deserialize_function;
-			};	// mapping_functions_t
+			}; // mapping_functions_t
 
 			static std::map<std::string, mapping_functions_t> s_maps;
 
@@ -161,7 +197,8 @@ namespace daw {
 			static void add_json_map( boost::string_view name, mapping_functions_t m ) {
 				s_maps[name.to_string( )] = std::move( m );
 			}
-		protected:
+
+		  protected:
 			json_link( ) = default;
 
 			static bool has_key( boost::string_view name ) {
@@ -169,134 +206,141 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_integer_fn( boost::string_view name, GetFunction get_function, SetFunction set_function ) {
+			static void json_link_integer_fn( boost::string_view name, GetFunction get_function,
+			                                  SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
-				mapping_functions.serialize_function = [get_function]( Derived const & obj ) {
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_integer( get_function( obj ) );
 				};
 
-				mapping_functions.deserialize_function = [get_function, set_function]( Derived & obj, impl::value_t const & value ) mutable {
-					int64_t v = value.get_integer( );
-					assert( impl::can_fit<decltype( get_function( obj ) )>( v ) );
-					set_function( obj, std::move( v ) );
-				};
+				mapping_functions.deserialize_function =
+				    [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
+					    int64_t v = value.get_integer( );
+					    assert( impl::can_fit<decltype( get_function( obj ) )>( v ) );
+					    set_function( obj, std::move( v ) );
+				    };
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-			#define json_link_integer( name, member_name )\
-				json_link_integer_fn( name, []( auto const & obj ) { return obj.member_name; }, []( auto & obj, auto const & value ) { obj.member_name = static_cast<decltype(obj.member_name)>(value); } );
+#define json_link_integer( name, member_name )                                                                         \
+	json_link_integer_fn(                                                                                              \
+	    name, []( auto const &obj ) { return obj.member_name; },                                                       \
+	    []( auto &obj, auto const &value ) { obj.member_name = static_cast<decltype( obj.member_name )>( value ); } );
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_real_fn( boost::string_view name, GetFunction get_function, SetFunction set_function ) {
+			static void json_link_real_fn( boost::string_view name, GetFunction get_function,
+			                               SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
-				mapping_functions.serialize_function = [get_function]( Derived const & obj ) {
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_real( get_function( obj ) );
 				};
 
-				mapping_functions.deserialize_function = [set_function]( Derived & obj, impl::value_t const & value ) mutable {
+				mapping_functions.deserialize_function = [set_function]( Derived &obj,
+				                                                         impl::value_t const &value ) mutable {
 					set_function( obj, value.get_real( ) );
 				};
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-			#define json_link_real( name, member_name )\
-				json_link_real_fn( name, []( auto const & obj ) { return obj.member_name; }, []( auto & obj, auto const & value ) { obj.member_name = value; } );
+#define json_link_real( name, member_name )                                                                            \
+	json_link_real_fn( name, []( auto const &obj ) { return obj.member_name; },                                        \
+	                   []( auto &obj, auto const &value ) { obj.member_name = value; } );
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_string_fn( boost::string_view name, GetFunction get_function, SetFunction set_function ) {
+			static void json_link_string_fn( boost::string_view name, GetFunction get_function,
+			                                 SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
-				mapping_functions.serialize_function = [get_function]( Derived const & obj ) {
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_string( get_function( obj ) );
 				};
 
-				mapping_functions.deserialize_function = [set_function]( Derived & obj, impl::value_t const & value ) mutable {
+				mapping_functions.deserialize_function = [set_function]( Derived &obj,
+				                                                         impl::value_t const &value ) mutable {
 					set_function( obj, value.get_string( ) );
 				};
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-			#define json_link_string( name, member_name )\
-				json_link_string_fn( name, []( auto const & obj ) { return obj.member_name; }, []( auto & obj, auto const & value ) { obj.member_name = value; } );
+#define json_link_string( name, member_name )                                                                          \
+	json_link_string_fn( name, []( auto const &obj ) { return obj.member_name; },                                      \
+	                     []( auto &obj, auto const &value ) { obj.member_name = value; } );
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_boolean_fn( boost::string_view name, GetFunction get_function, SetFunction set_function ) {
+			static void json_link_boolean_fn( boost::string_view name, GetFunction get_function,
+			                                  SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
-				mapping_functions.serialize_function = [get_function]( Derived const & obj ) {
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_boolean( get_function( obj ) );
 				};
 
-				mapping_functions.deserialize_function = [get_function, set_function]( Derived & obj, impl::value_t const & value ) mutable {
-					set_function( obj, value.get_boolean( ) );
-				};
+				mapping_functions.deserialize_function =
+				    [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
+					    set_function( obj, value.get_boolean( ) );
+				    };
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-			#define json_link_boolean( name, member_name )\
-				json_link_boolean_fn( name, []( auto const & obj ) { return obj.member_name; }, []( auto & obj, auto const & value ) { obj.member_name = value; } );
-
+#define json_link_boolean( name, member_name )                                                                         \
+	json_link_boolean_fn( name, []( auto const &obj ) { return obj.member_name; },                                     \
+	                      []( auto &obj, auto const &value ) { obj.member_name = value; } );
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_array_fn( boost::string_view name, GetFunction get_function, SetFunction set_function ) {
+			static void json_link_integer_array_fn( boost::string_view name, GetFunction get_function,
+			                                        SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
-				mapping_functions.serialize_function = [get_function]( Derived const & obj ) {
-					return impl::to_json_array( get_function( obj ) );
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
+					return impl::to_json_array( get_function( obj ), impl::value_t::value_types::integer );
 				};
-
-				mapping_functions.deserialize_function = [get_function, set_function]( Derived & obj, impl::value_t const & value ) mutable {
-					using std::begin;
-//					using value_t = std::decay_t<declval( *begin( get_function( obj ) ) )>;
-
-					//set_function( obj, value.get_array( ) );
-
+				mapping_functions.deserialize_function = [set_function]( Derived &obj,
+				                                                         impl::value_t const &value ) mutable {
+					set_function( obj, value.get_array( ) );
 				};
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-			#define json_link_array( name, member_name )\
-				json_link_array_fn( name, []( auto const & obj ) { return obj.member_name; }, []( auto & obj, auto const & value ) { obj.member_name = value; } );
+#define json_link_integer_array( name, member_name )                                                                   \
+	json_link_integer_array_fn(                                                                                        \
+	    name, []( auto const &obj ) { return obj.member_name; },                                                       \
+	    []( auto &obj, auto const &value ) { daw::json::impl::copy_array( value, obj.member_name ); } );
 
-		public:
+		  public:
 			template<typename D>
 			friend void impl::from_json_object( D &, impl::object_value const & );
 
-		protected:
+		  protected:
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_object_fn( boost::string_view name, GetFunction get_function, SetFunction set_function ) {
+			static void json_link_object_fn( boost::string_view name, GetFunction get_function,
+			                                 SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 
-				mapping_functions.serialize_function = [get_function]( Derived const & obj ) {
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return get_function( obj ).to_json_string( );
 				};
 
-				mapping_functions.deserialize_function = [get_function, set_function]( Derived & obj, impl::value_t const & value ) mutable {
-					set_function( obj, value.get_object( ) );
-				};
+				mapping_functions.deserialize_function =
+				    [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
+					    set_function( obj, value.get_object( ) );
+				    };
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-			#define json_link_object( name, member_name )\
-				json_link_object_fn( name,\
-					[]( auto const & obj ) {\
-						return obj.member_name;\
-					},\
-					[]( auto & obj, auto const & value ) {\
-						from_json_object( obj.member_name, value );\
-					}\
-				);
+#define json_link_object( name, member_name )                                                                          \
+	json_link_object_fn( name, []( auto const &obj ) { return obj.member_name; },                                      \
+	                     []( auto &obj, auto const &value ) { from_json_object( obj.member_name, value ); } );
 
-		public:
+		  public:
 			~json_link( ) = default;
-			json_link( json_link const & ) = default;	
-			json_link( json_link && ) = default;	
-			json_link & operator=( json_link const & ) = default;	
-			json_link & operator=( json_link && ) = default;
+			json_link( json_link const & ) = default;
+			json_link( json_link && ) = default;
+			json_link &operator=( json_link const & ) = default;
+			json_link &operator=( json_link && ) = default;
 
 			std::string to_json_string( ) const {
 				check_json_maps( );
 				std::stringstream ss;
 				bool is_first = true;
 				ss << "{";
-				for( auto const & kv: get_json_maps( ) ) {
+				for( auto const &kv : get_json_maps( ) ) {
 					if( is_first ) {
 						is_first = false;
 					} else {
@@ -311,17 +355,17 @@ namespace daw {
 			}
 
 			static Derived from_json_string( boost::string_view json_string ) {
-				return { };
+				return {};
 			}
-		};	// json_link
+		}; // json_link
 
 		template<typename Derived>
 		std::map<std::string, typename json_link<Derived>::mapping_functions_t> json_link<Derived>::s_maps;
 
 		namespace impl {
 			template<typename D>
-			void from_json_object( D & json_link_obj, daw::json::impl::object_value const & obj ) {
-				for( auto const & kv: obj ) {
+			void from_json_object( D &json_link_obj, daw::json::impl::object_value const &obj ) {
+				for( auto const &kv : obj ) {
 					auto const value_name = kv.first.to_string( );
 					if( json_link_obj.has_key( value_name ) ) {
 						auto const mapped_functions = json_link_obj.get_json_maps( )[value_name];
@@ -329,7 +373,6 @@ namespace daw {
 					}
 				}
 			}
-		}	// namespace impl
-	}    // namespace json
-}    // namespace daw
-
+		} // namespace impl
+	}     // namespace json
+} // namespace daw

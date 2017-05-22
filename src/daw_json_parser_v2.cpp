@@ -23,8 +23,5 @@
 #include "daw_json_parser_v2.h"
 
 namespace daw {
-	namespace json {
-
-	}
-}    // namespace daw
-
+	namespace json {}
+} // namespace daw

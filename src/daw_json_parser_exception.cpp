@@ -22,10 +22,8 @@
 
 #include "daw_json_parser_exception.h"
 
-
 namespace daw {
 	namespace json {
-		json_parser_exception::~json_parser_exception( ) { }
-	}    // namespace json
-}	// namespace daw
-
+		json_parser_exception::~json_parser_exception( ) {}
+	} // namespace json
+} // namespace daw

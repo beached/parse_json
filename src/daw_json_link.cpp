@@ -28,7 +28,7 @@ namespace daw {
 		namespace impl {
 
 			int64_t str_to_int( boost::string_view str, int64_t ) {
-				return std::stoll( str.to_string( ) );	
+				return std::stoll( str.to_string( ) );
 			}
 
 			uint64_t str_to_int( boost::string_view str, uint64_t ) {
@@ -36,7 +36,7 @@ namespace daw {
 			}
 
 			int32_t str_to_int( boost::string_view str, int32_t ) {
-				return std::stol( str.to_string( ) );	
+				return std::stol( str.to_string( ) );
 			}
 
 			uint32_t str_to_int( boost::string_view str, uint32_t ) {
@@ -45,28 +45,34 @@ namespace daw {
 
 			int16_t str_to_int( boost::string_view str, int16_t ) {
 				int32_t tmp = std::stol( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int16_t>::min( ) && tmp <= std::numeric_limits<int16_t>::max( ), "Value out of range for 16bit integer" ); 
-				return static_cast<int16_t>(tmp);
+				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int16_t>::min( ) &&
+				                                        tmp <= std::numeric_limits<int16_t>::max( ),
+				                                    "Value out of range for 16bit integer" );
+				return static_cast<int16_t>( tmp );
 			}
 
 			uint16_t str_to_int( boost::string_view str, uint16_t ) {
 				uint32_t tmp = std::stoul( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint16_t>::max( ), "Value out of range for 16bit unsigned integer" ); 
-				return static_cast<uint16_t>(tmp);
+				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint16_t>::max( ),
+				                                    "Value out of range for 16bit unsigned integer" );
+				return static_cast<uint16_t>( tmp );
 			}
 
 			int8_t str_to_int( boost::string_view str, int8_t ) {
 				int32_t tmp = std::stol( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int8_t>::min( ) && tmp <= std::numeric_limits<int8_t>::max( ), "Value out of range for 8bit integer" ); 
-				return static_cast<int8_t>(tmp);
+				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int8_t>::min( ) &&
+				                                        tmp <= std::numeric_limits<int8_t>::max( ),
+				                                    "Value out of range for 8bit integer" );
+				return static_cast<int8_t>( tmp );
 			}
 
 			uint8_t str_to_int( boost::string_view str, uint8_t ) {
 				uint32_t tmp = std::stoul( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint8_t>::max( ), "Value out of range for 8bit unsigned integer" ); 
-				return static_cast<uint8_t>(tmp);
+				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint8_t>::max( ),
+				                                    "Value out of range for 8bit unsigned integer" );
+				return static_cast<uint8_t>( tmp );
 			}
-		}	// namespace impl
+		} // namespace impl
 		namespace schema {
 			using namespace ::daw::json::impl;
 
@@ -95,10 +101,11 @@ namespace daw {
 				if( !name.empty( ) ) {
 					result.push_back( make_object_value_item( range::create_char_range( "name" ), value_t( name ) ) );
 				}
-				result.push_back( make_object_value_item( range::create_char_range( "type" ), std::move( selected_type ) ) );
+				result.push_back(
+				    make_object_value_item( range::create_char_range( "type" ), std::move( selected_type ) ) );
 
 				return value_t( std::move( result ) );
 			}
-		}    // namespace schema
-	}    // namespace json
-}    // namespace daw
+		} // namespace schema
+	}     // namespace json
+} // namespace daw

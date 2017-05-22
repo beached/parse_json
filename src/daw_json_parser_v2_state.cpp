@@ -32,50 +32,50 @@
 namespace daw {
 	namespace json {
 		namespace state {
-			state_t::~state_t( ) { }
+			state_t::~state_t( ) {}
 
-			void state_t::on_object_begin( ) { 
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_begin" ); 
+			void state_t::on_object_begin( ) {
+				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_begin" );
 			}
 
-			void state_t::on_object_end( ) { 
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_end" ); 
+			void state_t::on_object_end( ) {
+				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_end" );
 			}
 
-			void state_t::on_array_begin( ) { 
+			void state_t::on_array_begin( ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_begin" );
 			}
 
-			void state_t::on_array_end( ) { 
+			void state_t::on_array_end( ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_end" );
 			}
 
-			void state_t::on_string( boost::string_view ) { 
+			void state_t::on_string( boost::string_view ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_string" );
 			}
 
-			void state_t::on_integer( boost::string_view ) { 
+			void state_t::on_integer( boost::string_view ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integer" );
 			}
 
-			void state_t::on_real( boost::string_view ) { 
+			void state_t::on_real( boost::string_view ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_real" );
 			}
 
-			void state_t::on_boolean( bool ) { 
+			void state_t::on_boolean( bool ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_boolean" );
 			}
 
-			void state_t::on_null( ) { 
+			void state_t::on_null( ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_null" );
 			}
 
-			std::vector<state_t*> & state_stack( ) {
-				static std::vector<state_t*> result = { get_state_fn( current_state_t::none ) };
+			std::vector<state_t *> &state_stack( ) {
+				static std::vector<state_t *> result = {get_state_fn( current_state_t::none )};
 				return result;
 			}
 
-			state_t & current_state( ) {
+			state_t &current_state( ) {
 				return *state_stack( ).back( );
 			}
 
@@ -92,21 +92,21 @@ namespace daw {
 			}
 
 			void pop_value( ) {
-				//value_stack( ).pop_back( );
+				// value_stack( ).pop_back( );
 			}
 
 			//
 			// state_in_object_name
 			//
 
-			state_in_object_name_t::~state_in_object_name_t( ) { }
+			state_in_object_name_t::~state_in_object_name_t( ) {}
 
 			std::string state_in_object_name_t::to_string( ) const {
 				return "state_in_object_name";
 			}
 
 			void state_in_object_name_t::on_string( boost::string_view value ) {
-				//value_t name{ value };		
+				// value_t name{ value };
 
 				// Set current object name value_t
 				set_next_state( current_state_t::in_object_value );
@@ -114,11 +114,11 @@ namespace daw {
 
 			void state_in_object_name_t::on_object_end( ) {
 				// Save value_t
-				// Assumes state is not empty	
+				// Assumes state is not empty
 				pop_state( );
 			}
 
-			state_in_object_value_t::~state_in_object_value_t( ) { }
+			state_in_object_value_t::~state_in_object_value_t( ) {}
 
 			std::string state_in_object_value_t::to_string( ) const {
 				return "state_in_object_value";
@@ -126,13 +126,13 @@ namespace daw {
 
 			void state_in_object_value_t::on_object_begin( ) {
 				// Save data
-				//push_and_set_next_value( value_t{ } );
+				// push_and_set_next_value( value_t{ } );
 				set_next_state( current_state_t::in_object_name );
 				push_and_set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_array_begin( ) {
-				//push_and_set_next_value( value_t{ } );
+				// push_and_set_next_value( value_t{ } );
 				set_next_state( current_state_t::in_object_name );
 				push_and_set_next_state( current_state_t::in_array );
 			}
@@ -148,25 +148,25 @@ namespace daw {
 
 			void state_in_object_value_t::on_integer( boost::string_view value ) {
 				// Save data
-				//current_value( ) = value_t{ to_integer( value ) };
+				// current_value( ) = value_t{ to_integer( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_real( boost::string_view value ) {
 				// Save data
-				//current_value( ) = value_t{ to_real( value ) };
+				// current_value( ) = value_t{ to_real( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_string( boost::string_view value ) {
 				// Save data
-				//current_value( ) = value_t{ value.to_string( ) };
+				// current_value( ) = value_t{ value.to_string( ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_boolean( bool value ) {
 				// Save data
-				//current_value( ) = value_t{ value };
+				// current_value( ) = value_t{ value };
 				set_next_state( current_state_t::in_object_name );
 			}
 
@@ -174,43 +174,43 @@ namespace daw {
 			// state_in_array_t
 			//
 
-			state_in_array_t::~state_in_array_t( ) { }
+			state_in_array_t::~state_in_array_t( ) {}
 
 			std::string state_in_array_t::to_string( ) const {
 				return "state_in_array";
 			}
 
-			void state_in_array_t::on_object_begin( )  {
+			void state_in_array_t::on_object_begin( ) {
 				// Save data
 				push_and_set_next_state( current_state_t::in_object_name );
 			}
 
-			void state_in_array_t::on_array_begin( )  {
+			void state_in_array_t::on_array_begin( ) {
 				// Save data
 				push_and_set_next_state( current_state_t::in_array );
 			}
 
-			void state_in_array_t::on_array_end( )  {
+			void state_in_array_t::on_array_end( ) {
 				// Save data
 				pop_state( );
 			}
-			void state_in_array_t::on_null( )  {
+			void state_in_array_t::on_null( ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_integer( boost::string_view value )  {
+			void state_in_array_t::on_integer( boost::string_view value ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_real( boost::string_view value )  {
+			void state_in_array_t::on_real( boost::string_view value ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_string( boost::string_view value )  {
+			void state_in_array_t::on_string( boost::string_view value ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_boolean( bool value )  {
+			void state_in_array_t::on_boolean( bool value ) {
 				// Save data
 			}
 
@@ -218,7 +218,7 @@ namespace daw {
 			// state_none_t
 			//
 
-			state_none_t::~state_none_t( ) { }
+			state_none_t::~state_none_t( ) {}
 
 			std::string state_none_t::to_string( ) const {
 				return "state_none";
@@ -254,76 +254,74 @@ namespace daw {
 				// Save data
 			}
 
-			state_t * get_state_fn( current_state_t s ) noexcept {
-				static state_none_t s_none{ };
-				static state_in_object_name_t s_in_object_name{ };
-				static state_in_object_value_t s_in_object_value{ };
-				static state_in_array_t s_in_array{ };
+			state_t *get_state_fn( current_state_t s ) noexcept {
+				static state_none_t s_none{};
+				static state_in_object_name_t s_in_object_name{};
+				static state_in_object_value_t s_in_object_value{};
+				static state_in_array_t s_in_array{};
 				switch( s ) {
-					case current_state_t::none:  
-						return &s_none;
-					case current_state_t::in_object_name:
-						return &s_in_object_name;
-					case current_state_t::in_object_value:
-						return &s_in_object_value;
-					case current_state_t::in_array:
-						return &s_in_array;
-					case current_state_t::current_state_t_size:
-					default:
-						std::cerr << "Unknown state" << std::endl;
-						std::abort( );
+				case current_state_t::none:
+					return &s_none;
+				case current_state_t::in_object_name:
+					return &s_in_object_name;
+				case current_state_t::in_object_value:
+					return &s_in_object_value;
+				case current_state_t::in_array:
+					return &s_in_array;
+				case current_state_t::current_state_t_size:
+				default:
+					std::cerr << "Unknown state" << std::endl;
+					std::abort( );
 				}
 			}
 
-			state_t const & state_control_t::current_state( ) const {
-				return daw::json::state::current_state( );	
+			state_t const &state_control_t::current_state( ) const {
+				return daw::json::state::current_state( );
 			}
 
-			void state_control_t::clear_buffer( ) { 
-				buffer.clear( ); 
+			void state_control_t::clear_buffer( ) {
+				buffer.clear( );
 			}
-			
-			void state_control_t::push( char c ) { 
-				buffer.push_back( c ); 
-			} 
-			
+
+			void state_control_t::push( char c ) {
+				buffer.push_back( c );
+			}
+
 			void state_control_t::on_object_begin( ) const {
-				daw::json::state::current_state( ).on_object_begin( ); 
+				daw::json::state::current_state( ).on_object_begin( );
 			}
-			
+
 			void state_control_t::on_object_end( ) const {
-				daw::json::state::current_state( ).on_object_end( ); 
+				daw::json::state::current_state( ).on_object_end( );
 			}
-			
+
 			void state_control_t::on_array_begin( ) const {
-				daw::json::state::current_state( ).on_array_begin( ); 
+				daw::json::state::current_state( ).on_array_begin( );
 			}
-			
+
 			void state_control_t::on_array_end( ) const {
-				daw::json::state::current_state( ).on_array_end( ); 
+				daw::json::state::current_state( ).on_array_end( );
 			}
-			
+
 			void state_control_t::on_string( boost::string_view value ) const {
-				daw::json::state::current_state( ).on_string( value ); 
+				daw::json::state::current_state( ).on_string( value );
 			}
-			
+
 			void state_control_t::on_integer( boost::string_view value ) const {
-				daw::json::state::current_state( ).on_integer( value ); 
+				daw::json::state::current_state( ).on_integer( value );
 			}
-			
+
 			void state_control_t::on_real( boost::string_view value ) const {
-				daw::json::state::current_state( ).on_real( value ); 
+				daw::json::state::current_state( ).on_real( value );
 			}
-			
+
 			void state_control_t::on_boolean( bool value ) const {
-				daw::json::state::current_state( ).on_boolean( value ); 
+				daw::json::state::current_state( ).on_boolean( value );
 			}
-			
+
 			void state_control_t::on_null( ) const {
-				daw::json::state::current_state( ).on_null( ); 
+				daw::json::state::current_state( ).on_null( );
 			}
-		}	// namespace state
-	}	// namespace json
-}	// namespace daw
-
-
+		} // namespace state
+	}     // namespace json
+} // namespace daw

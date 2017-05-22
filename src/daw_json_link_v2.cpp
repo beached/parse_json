@@ -30,7 +30,6 @@ namespace daw {
 			std::string to_string( std::string val ) {
 				return val;
 			}
-		}	// namespace impl
-	}	// namespace json
-}	// namespace daw
-
+		} // namespace impl
+	}     // namespace json
+} // namespace daw
