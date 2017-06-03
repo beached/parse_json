@@ -270,9 +270,9 @@ namespace daw {
 
 					data_t( ) = default;
 					data_t( data_t const & ) = default;
-					data_t( data_t & ) = default;
+					data_t( data_t && ) = default;
 					data_t & operator=( data_t const & ) = default;
-					data_t & operator=( data_t & ) = default;
+					data_t & operator=( data_t && ) = default;
 					~data_t( ) = default;
 
 					template<typename T>
