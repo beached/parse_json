@@ -32,20 +32,19 @@
 #include <date/tz.h>
 #include <fstream>
 #include <functional>
-#include <limits>
-#include <memory>
 #include <iostream>
+#include <limits>
+#include <map>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <map>
 
-#include <daw/daw_bit_queues.h>
 #include <daw/char_range/daw_char_range.h>
+#include <daw/daw_bit_queues.h>
 #include <daw/daw_exception.h>
 #include <daw/daw_heap_value.h>
 #include <daw/daw_memory_mapped_file.h>
-#include <daw/daw_bit_queues.h>
 #include <daw/daw_optional.h>
 #include <daw/daw_optional_poly.h>
 
@@ -1429,7 +1428,7 @@ namespace daw {
 				}
 
 			private:
-				constexpr static uint8_t to_nibble( uint8_t c ) noexcept {
+				static uint8_t to_nibble( uint8_t c ) noexcept {
 					// Assumes that '0' <= c <= '9' or 'a'|'A' <= c <= 'f'|'F'
 					uint8_t result = 0;
 					auto const ensure_lower_case = []( uint8_t v ) {
