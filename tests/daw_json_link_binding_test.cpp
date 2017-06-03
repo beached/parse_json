@@ -47,25 +47,25 @@ struct test : public daw::json::json_link<test> {
 	}
 }; // test
 
-struct test2 : public daw::json::json_link<test2> {
+/*struct test2 : public daw::json::json_link<test2> {
 	test a;
 
 	static void map_to_json( ) {
 		json_link_object( "a", a );
 	}
-}; // test2
+};*/ // test2
 
 int main( int, char ** ) {
-	test2 t;
-	t.a.a = 1;
-	t.a.b = 2;
-	t.a.c = "three";
-	t.a.d = 4.5;
-	t.a.e = 6;
-	t.a.f = true;
-	t.a.g.push_back( 7 );
-	t.a.g.push_back( 8 );
-	t.a.g.push_back( 9 );
+	test t;
+	t.a = 1;
+	t.b = 2;
+	t.c = "three";
+	t.d = 4.5;
+	t.e = 6;
+	t.f = true;
+	t.g.push_back( 7 );
+	t.g.push_back( 8 );
+	t.g.push_back( 9 );
 	std::cout << t.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }
