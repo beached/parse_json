@@ -481,7 +481,7 @@ namespace daw {
 					return it;
 				}
 
-				static std::vector<uint8_t> ucs2_to_utf8( uint16_t ucs2 ) {
+				static std::vector<uint8_t> ucs2_to_utf8( uint32_t ucs2 ) {
 					std::vector<uint8_t> result;
 					if( ucs2 < 0x0080 ) {
 						result.push_back( static_cast<uint8_t>(ucs2) );

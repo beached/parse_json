@@ -211,7 +211,7 @@ namespace daw {
 				}
 			}
 
-			std::string value_to_json( impl::string_value name, ::daw::json::impl::value_t const &value ) {
+			std::string value_to_json( daw::utf_string name, ::daw::json::impl::value_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
@@ -231,9 +231,9 @@ namespace daw {
 				return result.str( );
 			}
 
-			std::string value_to_json( impl::string_value name, ::daw::json::impl::object_value const &object ) {
-				return value_to_json( to_string_view( name ), object );
-			}
+//			std::string value_to_json( daw::utf_string name, ::daw::json::impl::object_value const &object ) {
+//				return value_to_json( to_string_view( name ), object );
+//			}
 
 		}    // namespace generate
 
