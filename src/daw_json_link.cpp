@@ -26,47 +26,74 @@
 namespace daw {
 	namespace json {
 		namespace impl {
+			namespace {
+				template<typename T, typename U>
+				constexpr bool within_range_of( U const value ) noexcept {
+					constexpr auto const botT = static_cast<intmax_t>( std::numeric_limits<T>::min( ) );
+					constexpr auto const botU = static_cast<intmax_t>( std::numeric_limits<U>::min( ) );
+					constexpr auto const topT = static_cast<uintmax_t>( std::numeric_limits<T>::max( ) );
+					constexpr auto const topU = static_cast<uintmax_t>( std::numeric_limits<U>::max( ) );
+					return !( ( botT > botU && value < static_cast<U>( botT ) ) ||
+					          ( topT < topU && value > static_cast<U>( topT ) ) );
+				}
+			} // namespace
 
 			int64_t str_to_int( boost::string_view str, int64_t ) {
-				return std::stoll( str.to_string( ) );	
+				auto tmp = std::stoll( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<int64_t>( tmp ),
+				                                    "Value out of range for 64bit integral" );
+				return static_cast<int64_t>( tmp );
 			}
 
 			uint64_t str_to_int( boost::string_view str, uint64_t ) {
-				return std::stoull( str.to_string( ) );
+				auto tmp = std::stoull( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<uint64_t>( tmp ),
+				                                    "Value out of range for 64bit unsigned integral" );
+				return static_cast<uint64_t>( tmp );
 			}
 
 			int32_t str_to_int( boost::string_view str, int32_t ) {
-				return std::stol( str.to_string( ) );	
+				auto tmp = std::stol( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<int32_t>( tmp ),
+				                                    "Value out of range for 32bit integral" );
+				return static_cast<int32_t>( tmp );
 			}
 
 			uint32_t str_to_int( boost::string_view str, uint32_t ) {
-				return std::stoul( str.to_string( ) );
+				auto tmp = std::stoul( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<uint32_t>( tmp ),
+				                                    "Value out of range for 32bit unsigned integral" );
+				return static_cast<uint32_t>( tmp );
 			}
 
 			int16_t str_to_int( boost::string_view str, int16_t ) {
-				int32_t tmp = std::stol( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int16_t>::min( ) && tmp <= std::numeric_limits<int16_t>::max( ), "Value out of range for 16bit integral" ); 
-				return static_cast<int16_t>(tmp);
+				auto tmp = std::stol( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<int16_t>( tmp ),
+				                                    "Value out of range for 16bit integral" );
+				return static_cast<int16_t>( tmp );
 			}
 
 			uint16_t str_to_int( boost::string_view str, uint16_t ) {
-				uint32_t tmp = std::stoul( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint16_t>::max( ), "Value out of range for 16bit unsigned integral" ); 
-				return static_cast<uint16_t>(tmp);
+				auto tmp = std::stoul( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<uint16_t>( tmp ),
+				                                    "Value out of range for 16bit unsigned integral" );
+				return static_cast<uint16_t>( tmp );
 			}
 
 			int8_t str_to_int( boost::string_view str, int8_t ) {
-				int32_t tmp = std::stol( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp >= std::numeric_limits<int8_t>::min( ) && tmp <= std::numeric_limits<int8_t>::max( ), "Value out of range for 8bit integral" ); 
-				return static_cast<int8_t>(tmp);
+				auto tmp = std::stol( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<int8_t>( tmp ),
+				                                    "Value out of range for 8bit integral" );
+				return static_cast<int8_t>( tmp );
 			}
 
 			uint8_t str_to_int( boost::string_view str, uint8_t ) {
-				uint32_t tmp = std::stoul( str.to_string( ) );
-				daw::exception::daw_throw_on_false( tmp <= std::numeric_limits<uint8_t>::max( ), "Value out of range for 8bit unsigned integral" ); 
-				return static_cast<uint8_t>(tmp);
+				auto tmp = std::stoul( str.to_string( ) );
+				daw::exception::daw_throw_on_false( within_range_of<uint8_t>( tmp ),
+				                                    "Value out of range for 8bit unsigned integral" );
+				return static_cast<uint8_t>( tmp );
 			}
-		}	// namespace impl
+		} // namespace impl
 		namespace schema {
 			using namespace ::daw::json::impl;
 
@@ -95,10 +122,11 @@ namespace daw {
 				if( !name.empty( ) ) {
 					result.push_back( make_object_value_item( range::create_char_range( "name" ), value_t( name ) ) );
 				}
-				result.push_back( make_object_value_item( range::create_char_range( "type" ), std::move( selected_type ) ) );
+				result.push_back(
+				    make_object_value_item( range::create_char_range( "type" ), std::move( selected_type ) ) );
 
 				return value_t( std::move( result ) );
 			}
-		}    // namespace schema
-	}    // namespace json
-}    // namespace daw
+		} // namespace schema
+	}     // namespace json
+} // namespace daw
