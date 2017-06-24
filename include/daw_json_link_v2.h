@@ -28,7 +28,7 @@
 #include <string>
 #include <utility>
 
-#include <daw/daw_iterator.h>
+#include <daw/daw_function_iterator.h>
 #include <daw/daw_traits.h>
 
 #include "value_t.h"
@@ -221,7 +221,7 @@ namespace daw {
 					Derived::map_to_json( );
 				}
 			}
-			static std::map<std::string, mapping_functions_t> get_json_maps( ) {
+			static std::map<std::string, mapping_functions_t> & get_json_maps( ) {
 				check_json_maps( );
 				return s_maps;
 			}
