@@ -50,6 +50,7 @@
 
 #include "daw_json.h"
 #include "daw_json_parser.h"
+#include "daw_value_to_json.h"
 
 namespace daw {
 	namespace json {
@@ -238,9 +239,6 @@ namespace daw {
 
 		template<typename Derived>
 		void json_to_value( JsonLink<Derived> &to, impl::value_t const &from );
-
-		template<typename Derived>
-		std::string value_to_json( boost::string_view name, JsonLink<Derived> const &obj );
 
 		template<typename Derived>
 		::daw::json::impl::value_t get_schema( boost::string_view name, JsonLink<Derived> const &obj );
@@ -883,11 +881,6 @@ namespace daw {
 		void json_to_value( JsonLink<Derived> &to, impl::value_t const &from ) {
 			auto val = from;
 			to.from_json_obj( val );
-		}
-
-		template<typename Derived>
-		std::string value_to_json( boost::string_view name, JsonLink<Derived> const &obj ) {
-			return details::json_name( name ) + obj.to_string( );
 		}
 
 		template<typename Derived>

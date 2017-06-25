@@ -43,65 +43,10 @@ namespace daw {
 	namespace json {
 		namespace details {
 			std::string json_name( boost::string_view name );
-
 			std::string enbrace( boost::string_view json_value );
 		} // namespace details
 
 		std::string enquote( boost::string_view value );
-
-		namespace generate {
-			//////////////////////////////////////////////////////////////////////////
-			/// Summary: Convert an optionally named value to a json string
-
-			std::string value_to_json( boost::string_view name, std::string const &value );
-
-			std::string value_to_json( boost::string_view name, bool value );
-
-			std::string value_to_json( boost::string_view name );           // Null
-			std::string undefined_value_to_json( boost::string_view name ); // undefined
-			std::string value_to_json( boost::string_view name, double const &value );
-
-			std::string value_to_json( boost::string_view name, int32_t const &value );
-
-			std::string value_to_json( boost::string_view name, uint32_t const &value );
-
-			std::string value_to_json( boost::string_view name, int64_t const &value );
-
-			std::string value_to_json( boost::string_view name, uint64_t const &value );
-
-			std::string value_to_json_object( boost::string_view name, ::daw::json::impl::object_value const &object );
-
-			std::string value_to_json( boost::string_view name, ::daw::json::impl::value_t const &value );
-
-			// Template value_to_json Declarations
-			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long> = 0>
-			std::string value_to_json( boost::string_view name, Container const &values );
-
-			template<typename First, typename Second>
-			std::string value_to_json( boost::string_view name, std::pair<First, Second> const &value );
-
-			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int> = 0>
-			std::string value_to_json_number( boost::string_view name, Number const &value );
-
-			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int> = 0>
-			std::string value_to_json_number( boost::string_view name, Number const &value );
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, boost::optional<T> const &value );
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional<T> const &value );
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional_poly<T> const &value );
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::shared_ptr<T> const &value );
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::weak_ptr<T> const &value );
-		} // namespace generate
 
 		namespace parse {
 			void json_to_value( bool &to, ::daw::json::impl::value_t const &from );

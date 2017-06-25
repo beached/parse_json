@@ -39,97 +39,10 @@
 
 #include "daw_json_interface.h"
 #include "daw_json_parser.h"
+#include "daw_value_to_json.h"
 
 namespace daw {
 	namespace json {
-		namespace generate {
-			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long>>
-
-			std::string value_to_json( boost::string_view name, Container const &values ) {
-				boost::string_view const empty_str{""};
-				std::stringstream result;
-				result << ::daw::json::details::json_name( name ) << "[ ";
-				{
-					auto values_range = daw::range::make_range( values.begin( ), values.end( ) );
-					if( !values_range.empty( ) ) {
-						result << value_to_json( empty_str, *values_range.begin( ) );
-						values_range.move_next( );
-						for( auto item : values_range ) {
-							result << "," << value_to_json( empty_str, item );
-						}
-					}
-				}
-				result << " ]";
-				return result.str( );
-			}
-
-			template<typename First, typename Second>
-			std::string value_to_json( boost::string_view name, std::pair<First, Second> const &value ) {
-				std::string result = daw::json::details::json_name( name ) + "{ ";
-				result += value_to_json( "key", value.first ) + ", ";
-				result += value_to_json( "value", value.second ) + " }";
-				return result;
-			}
-
-			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
-			std::string value_to_json_number( boost::string_view name, Number const &value ) {
-				std::stringstream ss;
-				ss << ::daw::json::details::json_name( name );
-				ss << std::setprecision( std::numeric_limits<Number>::max_digits10 ) << value;
-				return ss.str( );
-			}
-
-			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int>>
-
-			std::string value_to_json_number( boost::string_view name, Number const &value ) {
-				return ::daw::json::details::json_name( name ) + std::to_string( value );
-			}
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, boost::optional<T> const &value ) {
-				if( value ) {
-					return value_to_json( name, *value );
-				}
-				return value_to_json( name );
-			}
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional<T> const &value ) {
-				if( value ) {
-					return value_to_json( name, *value );
-				}
-				return value_to_json( name );
-			}
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional_poly<T> const &value ) {
-				if( value ) {
-					return value_to_json( name, *value );
-				}
-				return value_to_json( name );
-			}
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::shared_ptr<T> const &value ) {
-				if( !value ) {
-					value_to_json( name );
-				}
-				value_to_json( name, *value );
-			}
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::weak_ptr<T> const &value ) {
-				if( !value.expired( ) ) {
-					auto const shared_value = value.lock( );
-					if( !shared_value ) {
-						value_to_json( name );
-					}
-					value_to_json( name, *shared_value );
-				}
-			}
-		} // namespace generate
-
 		namespace parse {
 			template<typename Container,
 			         typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long>>
