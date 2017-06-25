@@ -93,7 +93,7 @@ namespace daw {
 			}
 			namespace impl {
 				decltype( auto ) add_appender( std::string &str ) {
-					return daw::make_function_iterator( [&str]( auto const &val ) { str += val; } );
+					return daw::make_function_iterator( [&str]( std::string const &val ) { str += val; } );
 				}
 
 				template<typename Container, typename Function>
