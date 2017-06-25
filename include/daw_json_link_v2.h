@@ -93,7 +93,7 @@ namespace daw {
 			}
 			namespace impl {
 				decltype( auto ) add_appender( std::string &str ) {
-					return daw::make_function_iterator( [&str]( std::string const &val ) { str += val; } );
+					return daw::make_function_iterator( [&str]( auto const &val ) { str += val; } );
 				}
 
 				template<typename Container, typename Function>
@@ -147,7 +147,7 @@ namespace daw {
 				destination.clear( );
 				using value_type = std::decay_t<decltype( *std::begin( destination ) )>;
 				std::transform( std::begin( source ), std::end( source ), std::back_inserter( destination ),
-				                [func]( auto const &v ) {
+				                [&func]( auto const &v ) {
 					                value_type dest_v = func( v );
 					                return dest_v;
 				                } );

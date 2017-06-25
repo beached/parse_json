@@ -35,8 +35,9 @@
 
 using namespace daw::json;
 
-bool path_begins_with( boost::filesystem::path const &p, std::string str ) {
-	auto const &fname = p.filename( ).native( );
+template<typename String>
+bool path_begins_with( boost::filesystem::path const &p, String const & str ) {
+	auto const &fname = p.filename( ).string( );
 	return 0 == fname.find( str );
 }
 
@@ -49,18 +50,18 @@ BOOST_AUTO_TEST_CASE( test_files ) {
 		std::cout << "Testing: " << path.stem( ) << '\n';
 		bool success = false;
 		try {
-			daw::filesystem::MemoryMappedFile<char> json_file{path.native( )};
+			auto json_file = daw::filesystem::MemoryMappedFile<char>( path );
 			if( json_file ) {
 				volatile auto const json_obj = daw::json::parse_json( json_file.cbegin( ), json_file.cend( ) );
 				success = true;
 			}
 		} catch( ... ) { success = false; }
 		if( path_begins_with( path, "y_" ) ) {
-			BOOST_REQUIRE_MESSAGE( success, "Failed parsing required file " + path.filename( ).native( ) );
+			BOOST_REQUIRE_MESSAGE( success, "Failed parsing required file " + path.filename( ).string( ) );
 		} else if( path_begins_with( path, "n_" ) ) {
-			BOOST_REQUIRE_MESSAGE( !success, "Unsuccessfuly failed to parse file " + path.filename( ).native( ) );
+			BOOST_REQUIRE_MESSAGE( !success, "Unsuccessfuly failed to parse file " + path.filename( ).string( ) );
 		} else {
-			BOOST_CHECK_MESSAGE( success, "Failed parsing optional file " + path.filename( ).native( ) );
+			BOOST_CHECK_MESSAGE( success, "Failed parsing optional file " + path.filename( ).string( ) );
 		}
 	}
 }
