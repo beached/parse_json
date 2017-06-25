@@ -26,7 +26,7 @@
 
 #include "daw_json_link_v2.h"
 
-struct __attribute__ ((packed)) test_t final: public daw::json::json_link<test_t> {
+struct test_t final: public daw::json::json_link<test_t> {
 	int32_t a;
 	int64_t b;
 	std::string c;
