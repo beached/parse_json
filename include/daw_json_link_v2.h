@@ -221,10 +221,6 @@ namespace daw {
 					Derived::map_to_json( );
 				}
 			}
-			static std::map<std::string, mapping_functions_t> & get_json_maps( ) {
-				check_json_maps( );
-				return s_maps;
-			}
 
 			static void add_json_map( boost::string_view name, mapping_functions_t m ) {
 				s_maps[name.to_string( )] = std::move( m );
@@ -232,10 +228,6 @@ namespace daw {
 
 		  protected:
 			json_link( ) = default;
-
-			static bool has_key( boost::string_view name ) {
-				return get_json_maps( ).count( name.to_string( ) ) > 0;
-			}
 
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_integer_fn( boost::string_view name, GetFunction get_function,
@@ -313,23 +305,21 @@ namespace daw {
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
-		  protected:
-			/*
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_object_fn( boost::string_view name, GetFunction get_function,
 			                                 SetFunction set_function ) {
-			    mapping_functions_t mapping_functions;
+				mapping_functions_t mapping_functions;
 
-			    mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
-			        return get_function( obj ).to_json_string( );
-			    };
+				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
+					return get_function( obj ).to_json_string( );
+				};
 
-			    mapping_functions.deserialize_function =
-			        [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
-			            set_function( obj, value.get_object( ) );
-			        };
-			    add_json_map( name, std::move( mapping_functions ) );
-			}*/
+				mapping_functions.deserialize_function =
+				    [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
+					    set_function( obj, value.get_object( ) );
+				    };
+				add_json_map( name, std::move( mapping_functions ) );
+			}
 
 		  public:
 			~json_link( ) = default;
@@ -357,26 +347,33 @@ namespace daw {
 				return ss.str( );
 			}
 
+			static bool has_key( boost::string_view name ) {
+				return get_json_maps( ).count( name.to_string( ) ) > 0;
+			}
+
 			static Derived from_json_string( boost::string_view json_string ) {
 				return {};
+			}
+
+			static std::map<std::string, mapping_functions_t> &get_json_maps( ) {
+				check_json_maps( );
+				return s_maps;
+			}
+
+			template<typename D>
+			static void from_json_object( D &json_link_obj, daw::json::impl::object_value const &obj ) {
+				for( auto const &kv : obj ) {
+					auto const value_name = kv.first.to_string( );
+					if( json_link_obj.has_key( value_name ) ) {
+						auto const mapped_functions = json_link_obj.get_json_maps( )[value_name];
+						mapped_functions.deserialize_function( json_link_obj, kv.second );
+					}
+				}
 			}
 		}; // json_link
 
 		template<typename Derived>
 		std::map<std::string, typename json_link<Derived>::mapping_functions_t> json_link<Derived>::s_maps;
-
-		namespace impl {
-			/*			template<typename D>
-			            void from_json_object( D &json_link_obj, daw::json::impl::object_value const &obj ) {
-			                for( auto const &kv : obj ) {
-			                    auto const value_name = kv.first.to_string( );
-			                    if( json_link_obj.has_key( value_name ) ) {
-			                        auto const mapped_functions = json_link_obj.get_json_maps( )[value_name];
-			                        mapped_functions.deserialize_function( json_link_obj, kv.second );
-			                    }
-			                }
-			            }*/
-		} // namespace impl
 	}     // namespace json
 } // namespace daw
 
@@ -387,7 +384,7 @@ namespace daw {
 
 #define json_link_object( name, member_name )                                                                          \
 	json_link_object_fn( name, []( auto const &obj ) { return obj.member_name; },                                      \
-	                     []( auto &obj, auto const &value ) { from_json_object( obj.member_name, value ); } );
+	                     []( auto &obj, auto const &value ) { json_link<decltype( obj )>::from_json_object( obj.member_name, value ); } );
 
 #define json_link_integer_array( name, member_name )                                                                   \
 	json_link_integer_array_fn(                                                                                        \
@@ -398,14 +395,14 @@ namespace daw {
 		        []( daw::json::impl::value_t const &macro_var_val2 ) { return macro_var_val2.get_integer( ); } );      \
 	    } );
 
-#define json_link_real_array( name, member_name )                                                                   \
-	json_link_real_array_fn(                                                                                        \
-	    name, []( auto const &macro_var_obj ) { return macro_var_obj.member_name; },                                   \
-	    []( auto &macro_var_obj, auto const &macro_var_value ) {                                                       \
-		    daw::json::impl::copy_array(                                                                               \
-		        macro_var_value, macro_var_obj.member_name,                                                            \
-		        []( daw::json::impl::value_t const &macro_var_val2 ) { return macro_var_val2.get_real( ); } );      \
-	    } );
+#define json_link_real_array( name, member_name )                                                                      \
+	json_link_real_array_fn( name, []( auto const &macro_var_obj ) { return macro_var_obj.member_name; },              \
+	                         []( auto &macro_var_obj, auto const &macro_var_value ) {                                  \
+		                         daw::json::impl::copy_array( macro_var_value, macro_var_obj.member_name,              \
+		                                                      []( daw::json::impl::value_t const &macro_var_val2 ) {   \
+			                                                      return macro_var_val2.get_real( );                   \
+		                                                      } );                                                     \
+	                         } );
 
 #define json_link_boolean_array( name, member_name )                                                                   \
 	json_link_boolean_array_fn(                                                                                        \
@@ -416,14 +413,14 @@ namespace daw {
 		        []( daw::json::impl::value_t const &macro_var_val2 ) { return macro_var_val2.get_boolean( ); } );      \
 	    } );
 
-#define json_link_string_array( name, member_name )                                                                   \
-	json_link_string_array_fn(                                                                                        \
-	    name, []( auto const &macro_var_obj ) { return macro_var_obj.member_name; },                                   \
-	    []( auto &macro_var_obj, auto const &macro_var_value ) {                                                       \
-		    daw::json::impl::copy_array(                                                                               \
-		        macro_var_value, macro_var_obj.member_name,                                                            \
-		        []( daw::json::impl::value_t const &macro_var_val2 ) { return macro_var_val2.get_string( ); } );      \
-	    } );
+#define json_link_string_array( name, member_name )                                                                    \
+	json_link_string_array_fn( name, []( auto const &macro_var_obj ) { return macro_var_obj.member_name; },            \
+	                           []( auto &macro_var_obj, auto const &macro_var_value ) {                                \
+		                           daw::json::impl::copy_array( macro_var_value, macro_var_obj.member_name,            \
+		                                                        []( daw::json::impl::value_t const &macro_var_val2 ) { \
+			                                                        return macro_var_val2.get_string( );               \
+		                                                        } );                                                   \
+	                           } );
 
 #define json_link_real( name, member_name )                                                                            \
 	json_link_real_fn( name, []( auto const &obj ) { return obj.member_name; },                                        \

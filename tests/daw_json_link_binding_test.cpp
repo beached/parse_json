@@ -26,7 +26,7 @@
 
 #include "daw_json_link_v2.h"
 
-struct test_t final: public daw::json::json_link<test_t> {
+struct test_t final : public daw::json::json_link<test_t> {
 	int32_t a;
 	int64_t b;
 	std::string c;
@@ -48,29 +48,29 @@ struct test_t final: public daw::json::json_link<test_t> {
 }; // test_t
 
 constexpr auto const expected_size = sizeof( int32_t ) + sizeof( int64_t ) + sizeof( std::string ) + sizeof( double ) +
-                               sizeof( int16_t ) + sizeof( bool ) + sizeof( std::vector<int> );
+                                     sizeof( int16_t ) + sizeof( bool ) + sizeof( std::vector<int> );
 
-    /*struct test2_t : public daw::json::json_link<test2_t> {
+struct test2_t : public daw::json::json_link<test2_t> {
 	test_t a;
 
 	static void map_to_json( ) {
 		json_link_object( "a", a );
 	}
-};*/ // test2_t
+}; // test2_t
 
-    int main( int, char ** ) {
-	test_t t;
+int main( int, char ** ) {
+	test2_t t;
 	std::cout << "size of test_t-> " << sizeof( test_t ) << " data member total sizes-> " << expected_size << '\n';
 	std::cout << "size of base->" << sizeof( daw::json::json_link<test_t> ) << '\n';
-	t.a = 1;
-	t.b = 2;
-	t.c = "three";
-	t.d = 4.5;
-	t.e = 6;
-	t.f = true;
-	t.g.push_back( 7 );
-	t.g.push_back( 8 );
-	t.g.push_back( 9 );
+	t.a.a = 1;
+	t.a.b = 2;
+	t.a.c = "three";
+	t.a.d = 4.5;
+	t.a.e = 6;
+	t.a.f = true;
+	t.a.g.push_back( 7 );
+	t.a.g.push_back( 8 );
+	t.a.g.push_back( 9 );
 	std::cout << t.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }
