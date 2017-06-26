@@ -76,7 +76,23 @@ int main( int, char ** ) {
 
 	auto t2 = test2_t::from_json_string( jstr );
 	t2.a.b = 33;
-
 	std::cout << t2.to_json_string( ) << '\n';
+
+	test_t t3;
+	t3.a.push_back( 9 );
+	t3.a.push_back( 8 );
+	t3.a.push_back( 7 );
+	t3.b = 6;
+	t3.c = 5;
+	t3.d = "t3 works";
+	t3.e = 4.3;
+	t3.f = 2;
+	t3.g = false;
+	auto const t3str = t3.to_json_string( );
+	std::cout << t3str << '\n';
+
+	t.a = test_t::from_json_string( t3str );
+
+	std::cout << t.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }
