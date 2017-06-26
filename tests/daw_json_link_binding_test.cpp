@@ -27,23 +27,23 @@
 #include "daw_json_link_v2.h"
 
 struct test_t final : public daw::json::json_link<test_t> {
-	int32_t a;
-	int64_t b;
-	std::string c;
-	double d;
-	int16_t e;
-	bool f;
-	std::vector<int> g;
+	std::vector<int> a;
+	int32_t b;
+	int64_t c;
+	std::string d;
+	double e;
+	int16_t f;
+	bool g;
 
 	static void map_to_json( ) {
-		json_link_integer( "a", a );
-		json_link_integer_fn( "b", []( test_t const &obj ) { return obj.b; },
-		                      []( test_t &obj, auto const &value ) { obj.b = value; } );
-		json_link_string( "c", c );
-		json_link_real( "d", d );
-		json_link_integer( "e", e );
-		json_link_boolean( "f", f );
-		json_link_integer_array( "g", g );
+		json_link_integer_array( "a", a );
+		json_link_integer( "b", b );
+		json_link_integer_fn( "c", []( test_t const &obj ) { return obj.c; },
+		                      []( test_t &obj, auto const &value ) { obj.c = value; } );
+		json_link_string( "d", d );
+		json_link_real( "e", e );
+		json_link_integer( "f", f );
+		json_link_boolean( "g", g );
 	}
 }; // test_t
 
@@ -59,18 +59,24 @@ struct test2_t : public daw::json::json_link<test2_t> {
 }; // test2_t
 
 int main( int, char ** ) {
-	test2_t t;
+	test_t t;
 	std::cout << "size of test_t-> " << sizeof( test_t ) << " data member total sizes-> " << expected_size << '\n';
 	std::cout << "size of base->" << sizeof( daw::json::json_link<test_t> ) << '\n';
-	t.a.a = 1;
-	t.a.b = 2;
-	t.a.c = "three";
-	t.a.d = 4.5;
-	t.a.e = 6;
-	t.a.f = true;
-	t.a.g.push_back( 7 );
-	t.a.g.push_back( 8 );
-	t.a.g.push_back( 9 );
-	std::cout << t.to_json_string( ) << '\n';
+	t.a.push_back( 1 );
+	t.a.push_back( 2 );
+	t.a.push_back( 3 );
+	t.b = 4;
+	t.c = 5;
+	t.d = "six";
+	t.e = 7.8;
+	t.f = 9;
+	t.g = true;
+	auto const jstr = t.to_json_string( );
+	std::cout << jstr << '\n';
+
+	auto t2 = daw::json::json_link<test_t>::from_json_string( jstr );
+	t2.b = 33;
+
+	std::cout << t2.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;
 }

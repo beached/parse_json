@@ -31,6 +31,7 @@
 #include <daw/daw_function_iterator.h>
 #include <daw/daw_traits.h>
 
+#include "daw_json_parser.h"
 #include "value_t.h"
 
 namespace daw {
@@ -212,6 +213,7 @@ namespace daw {
 			struct mapping_functions_t {
 				serialize_function_t serialize_function;
 				deserialize_function_t deserialize_function;
+				bool is_optional;
 			}; // mapping_functions_t
 
 			static std::map<std::string, mapping_functions_t> s_maps;
@@ -231,7 +233,7 @@ namespace daw {
 
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_integer_fn( boost::string_view name, GetFunction get_function,
-			                                  SetFunction set_function ) {
+			                                  SetFunction set_function, bool is_optional = false ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_integer( get_function( obj ) );
@@ -243,12 +245,15 @@ namespace daw {
 					    assert( impl::can_fit<decltype( get_function( obj ) )>( v ) );
 					    set_function( obj, std::move( v ) );
 				    };
+
+				mapping_functions.is_optional = is_optional;
+
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_real_fn( boost::string_view name, GetFunction get_function,
-			                               SetFunction set_function ) {
+			static void json_link_real_fn( boost::string_view name, GetFunction get_function, SetFunction set_function,
+			                               bool is_optional = false ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_real( get_function( obj ) );
@@ -258,12 +263,15 @@ namespace daw {
 				                                                         impl::value_t const &value ) mutable {
 					set_function( obj, value.get_real( ) );
 				};
+
+				mapping_functions.is_optional = is_optional;
+
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_string_fn( boost::string_view name, GetFunction get_function,
-			                                 SetFunction set_function ) {
+			                                 SetFunction set_function, bool is_optional = false ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_string( get_function( obj ) );
@@ -273,12 +281,15 @@ namespace daw {
 				                                                         impl::value_t const &value ) mutable {
 					set_function( obj, value.get_string( ) );
 				};
+
+				mapping_functions.is_optional = is_optional;
+
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_boolean_fn( boost::string_view name, GetFunction get_function,
-			                                  SetFunction set_function ) {
+			                                  SetFunction set_function, bool is_optional = false ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_boolean( get_function( obj ) );
@@ -288,12 +299,15 @@ namespace daw {
 				    [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
 					    set_function( obj, value.get_boolean( ) );
 				    };
+
+				mapping_functions.is_optional = is_optional;
+
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_integer_array_fn( boost::string_view name, GetFunction get_function,
-			                                        SetFunction set_function ) {
+			                                        SetFunction set_function, bool is_optional = false ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_integer_array( get_function( obj ) );
@@ -302,12 +316,15 @@ namespace daw {
 				                                                         impl::value_t const &value ) mutable {
 					set_function( obj, value.get_array( ) );
 				};
+
+				mapping_functions.is_optional = is_optional;
+
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
 			static void json_link_object_fn( boost::string_view name, GetFunction get_function,
-			                                 SetFunction set_function ) {
+			                                 SetFunction set_function, bool is_optional = false ) {
 				mapping_functions_t mapping_functions;
 
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -318,6 +335,9 @@ namespace daw {
 				    [get_function, set_function]( Derived &obj, impl::value_t const &value ) mutable {
 					    set_function( obj, value.get_object( ) );
 				    };
+
+				mapping_functions.is_optional = is_optional;
+
 				add_json_map( name, std::move( mapping_functions ) );
 			}
 
@@ -352,7 +372,20 @@ namespace daw {
 			}
 
 			static Derived from_json_string( boost::string_view json_string ) {
-				return {};
+				auto const json_value = daw::json::parse_json( json_string );
+				daw::exception::daw_throw_on_false( json_value.is_object( ), "Only JsonObjects can be deserialized" );
+				auto const & json_obj = json_value.get_object( );
+
+				Derived result;
+
+				for( auto const &linked_item : get_json_maps( ) ) {
+					auto const it = json_obj.find( linked_item.first );
+					daw::exception::daw_throw_on_true( it == json_obj.end( ) && !linked_item.second.is_optional,
+					                                   "Missing member in non-optional/nullable value" );
+					
+					linked_item.second.deserialize_function( result, it->second );
+				}
+				return result;
 			}
 
 			static std::map<std::string, mapping_functions_t> &get_json_maps( ) {
