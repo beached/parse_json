@@ -59,23 +59,23 @@ struct test2_t : public daw::json::json_link<test2_t> {
 }; // test2_t
 
 int main( int, char ** ) {
-	test_t t;
+	test2_t t;
 	std::cout << "size of test_t-> " << sizeof( test_t ) << " data member total sizes-> " << expected_size << '\n';
 	std::cout << "size of base->" << sizeof( daw::json::json_link<test_t> ) << '\n';
-	t.a.push_back( 1 );
-	t.a.push_back( 2 );
-	t.a.push_back( 3 );
-	t.b = 4;
-	t.c = 5;
-	t.d = "six";
-	t.e = 7.8;
-	t.f = 9;
-	t.g = true;
+	t.a.a.push_back( 1 );
+	t.a.a.push_back( 2 );
+	t.a.a.push_back( 3 );
+	t.a.b = 4;
+	t.a.c = 5;
+	t.a.d = "six";
+	t.a.e = 7.8;
+	t.a.f = 9;
+	t.a.g = true;
 	auto const jstr = t.to_json_string( );
 	std::cout << jstr << '\n';
 
-	auto t2 = daw::json::json_link<test_t>::from_json_string( jstr );
-	t2.b = 33;
+	auto t2 = test2_t::from_json_string( jstr );
+	t2.a.b = 33;
 
 	std::cout << t2.to_json_string( ) << '\n';
 	return EXIT_SUCCESS;

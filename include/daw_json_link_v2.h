@@ -371,9 +371,8 @@ namespace daw {
 				return get_json_maps( ).count( name.to_string( ) ) > 0;
 			}
 
-			static Derived from_json_string( boost::string_view json_string ) {
-				auto const json_value = daw::json::parse_json( json_string );
-				daw::exception::daw_throw_on_false( json_value.is_object( ), "Only JsonObjects can be deserialized" );
+
+			static Derived from_json_string( daw::json::impl::value_t const & json_value ) {
 				auto const & json_obj = json_value.get_object( );
 
 				Derived result;
@@ -386,6 +385,12 @@ namespace daw {
 					linked_item.second.deserialize_function( result, it->second );
 				}
 				return result;
+			}
+
+			static Derived from_json_string( boost::string_view json_string ) {
+				auto const json_value = daw::json::parse_json( json_string );
+				daw::exception::daw_throw_on_false( json_value.is_object( ), "Only JsonObjects can be deserialized" );
+				return from_json_string( json_value );
 			}
 
 			static std::map<std::string, mapping_functions_t> &get_json_maps( ) {
