@@ -846,7 +846,8 @@ namespace daw {
 			data_description.json_type = get_schema<Derived>( name, get_function );
 			data_description.bind_functions.encode = [get_function, name]( Derived &derived_obj,
 			                                                               std::string &json_text ) {
-				json_text = generate::value_to_json( name.to_string( ),
+				using namespace daw::json::generate;
+				json_text = value_to_json( name.to_string( ),
 				                                     boost::lexical_cast<std::string>( get_function( derived_obj ) ) );
 			};
 			data_description.bind_functions.decode = [get_function, name]( Derived &derived_obj,

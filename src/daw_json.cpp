@@ -39,8 +39,6 @@ namespace daw {
 	}
 
 	namespace json {
-		using namespace generate;
-
 		std::string ts_to_string( std::time_t const &timestamp, std::string format ) {
 			char buffer[200];
 			std::tm tm = {};
