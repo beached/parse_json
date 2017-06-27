@@ -21,8 +21,8 @@ struct config_t : public daw::json::json_link<config_t> {
 	~config_t( ) = default;
 
 	static void map_to_json( ) {
-		link_integer( "port", port );
-		link_string( "url_path", url_path );
+		json_link_integer( "port", port );
+		json_link_string( "url_path", url_path );
 	}
 };
 
