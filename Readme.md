@@ -39,7 +39,7 @@ int main( int argc, char **argv ) {
 }
 ```
 
-As you can see, the requirement is to inherit from the json_link class with the current class as a template parameter.  And then, use the appropriate json_link_... command to give it a name and a variable to link to.
+As you can see, the requirement is to inherit from the json_link class with the current class as a template parameter.  And then, use the appropriate json_link_... command to give it a name and a variable to link to within a static method called map_to_json( ).
 
 
 The order of the object element names is sorted in lexigraphical order of the codepoints.  This may or may not make sense depending on the situation 
