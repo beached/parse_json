@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include <boost/utility/string_view.hpp>
+#include <boost/utility/string_view_fwd.hpp>
 #include <map>
 #include <sstream>
 #include <string>
 #include <utility>
 
 #include <daw/daw_function_iterator.h>
+#include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_traits.h>
 
 #include "daw_json_parser.h"
@@ -371,9 +372,8 @@ namespace daw {
 				return get_json_maps( ).count( name.to_string( ) ) > 0;
 			}
 
-
-			static Derived from_json_string( daw::json::impl::value_t const & json_value ) {
-				auto const & json_obj = json_value.get_object( );
+			static Derived from_json_value( daw::json::impl::value_t const &json_value ) {
+				auto const &json_obj = json_value.get_object( );
 
 				Derived result;
 
@@ -381,16 +381,21 @@ namespace daw {
 					auto const it = json_obj.find( linked_item.first );
 					daw::exception::daw_throw_on_true( it == json_obj.end( ) && !linked_item.second.is_optional,
 					                                   "Missing member in non-optional/nullable value" );
-					
-					linked_item.second.deserialize_function( result, it->second );
+
+					try {
+						linked_item.second.deserialize_function( result, it->second );
+					} catch( std::exception const & ex ) {
+						std::string msg = "Exception while deserializing member '" + linked_item.first + "': " + ex.what( );
+						throw std::runtime_error( msg );
+					}
 				}
 				return result;
 			}
 
 			static Derived from_json_string( boost::string_view json_string ) {
-				auto const json_value = daw::json::parse_json( json_string );
+				auto const json_value = parse_json( json_string );
 				daw::exception::daw_throw_on_false( json_value.is_object( ), "Only JsonObjects can be deserialized" );
-				return from_json_string( json_value );
+				return from_json_value( json_value );
 			}
 
 			static std::map<std::string, mapping_functions_t> &get_json_maps( ) {
@@ -412,7 +417,100 @@ namespace daw {
 
 		template<typename Derived>
 		std::map<std::string, typename json_link<Derived>::mapping_functions_t> json_link<Derived>::s_maps;
-	}     // namespace json
+
+		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
+		Derived from_file( boost::string_view file_name, bool use_default_on_error ) {
+			if( !boost::filesystem::exists( file_name.data( ) ) ) {
+				if( use_default_on_error ) {
+					return Derived{};
+				}
+				throw std::runtime_error( "file not found" );
+			}
+			daw::filesystem::MemoryMappedFile<char> in_file{file_name};
+			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
+
+			auto const json_value = parse_json( in_file.begin( ), in_file.end( ) );
+			return Derived::from_json_value( json_value );
+		}
+
+		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
+		std::vector<Derived> array_from_json_value( daw::json::impl::value_t const & json_value, bool use_default_on_error ) {
+			std::vector<Derived> result;
+			daw::exception::daw_throw_on_false( json_value.is_array( ), "Value expected to be json array.  It was as " +
+			                                                                to_string( json_value.type( ) ) );
+			for( auto const &d : json_value.get_array( ) ) {
+				daw::exception::dbg_throw_on_false( d.is_object( ), "Expected a json object" );
+				try {
+					result.push_back( Derived::from_json_value( d ) );
+				} catch( std::exception const & ex ) {
+					using namespace std::string_literals;
+					std::string msg = "Exception while deserializing json value: "s + ex.what( );
+					throw std::runtime_error( msg );
+				}
+			}
+			return result;
+		}
+
+
+		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
+		std::vector<Derived> array_from_string( boost::string_view data, bool use_default_on_error ) {
+			return array_from_json_value<Derived>( parse_json( data ) );
+		}
+
+		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
+		std::vector<Derived> array_from_file( boost::string_view file_name, bool use_default_on_error ) {
+			if( !boost::filesystem::exists( file_name.data( ) ) ) {
+				if( use_default_on_error ) {
+					return std::vector<Derived>{};
+				}
+				throw std::runtime_error( "file not found" );
+			}
+			daw::filesystem::MemoryMappedFile<char> in_file{file_name};
+			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
+			daw::json::impl::value_t json_value;
+			try {
+				json_value = parse_json( in_file.begin( ), in_file.end( ) );
+			} catch( std::exception const & ex ) {
+				std::string msg = "Exception while parsing json file '" + file_name.to_string( ) + "': " + ex.what( );
+				throw std::runtime_error( msg );
+			}
+			try {
+				return array_from_json_value<Derived>( json_value, use_default_on_error );
+			} catch( std::exception const & ex ) {
+				std::string msg = "Exception while deserializing json array value from file '" + file_name.to_string( ) + "': " + ex.what( );
+				throw std::runtime_error( msg );
+			}
+		}
+
+		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
+		Derived from_file( boost::string_view file_name ) {
+			daw::filesystem::MemoryMappedFile<char> in_file{file_name};
+			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
+
+			auto const json_value = parse_json( in_file.begin( ), in_file.end( ) );
+			return Derived::from_json_value( json_value );
+		}
+
+		template<typename Derived>
+		void to_file( boost::string_view file_name, json_link<Derived> const &obj, bool overwrite ) {
+
+			// obj.to_file( file_name, overwrite );
+		}
+
+		template<typename Derived>
+		std::ostream &operator<<( std::ostream &os, json_link<Derived> const &data ) {
+			os << data.to_json_string( );
+			return os;
+		}
+
+		template<typename Derived>
+		std::istream &operator>>( std::istream &is, json_link<Derived> &data ) {
+			data = Derived::from_json_value( parse_json(
+			    std::string{std::istreambuf_iterator<char>{is}, std::istreambuf_iterator<char>{}} ) );
+			return is;
+		}
+
+	} // namespace json
 } // namespace daw
 
 #define json_link_integer( name, member_name )                                                                         \
@@ -422,7 +520,9 @@ namespace daw {
 
 #define json_link_object( name, member_name )                                                                          \
 	json_link_object_fn( name, []( auto const &obj ) { return obj.member_name; },                                      \
-	                     []( auto &obj, auto const &value ) { json_link<decltype( obj )>::from_json_object( obj.member_name, value ); } );
+	                     []( auto &obj, auto const &value ) {                                                          \
+		                     json_link<decltype( obj )>::from_json_object( obj.member_name, value );                   \
+	                     } );
 
 #define json_link_integer_array( name, member_name )                                                                   \
 	json_link_integer_array_fn(                                                                                        \
@@ -471,3 +571,4 @@ namespace daw {
 #define json_link_string( name, member_name )                                                                          \
 	json_link_string_fn( name, []( auto const &obj ) { return obj.member_name; },                                      \
 	                     []( auto &obj, auto const &value ) { obj.member_name = value; } );
+

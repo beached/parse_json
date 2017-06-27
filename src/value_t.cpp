@@ -126,28 +126,28 @@ namespace daw {
 			value_t::~value_t( ) {}
 
 			bool const &value_t::get_boolean( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::boolean );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::boolean, "Unexpected value type(" + to_string( m_value_type ) + "), expected boolean" );
 				using namespace boost;
 				using namespace daw;
 				return get<bool>( m_value );
 			}
 
 			bool &value_t::get_boolean( ) {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::boolean );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::boolean, "Unexpected value type(" + to_string( m_value_type ) + "),expected boolean" );
 				using namespace boost;
 				using namespace daw;
 				return get<bool>( m_value );
 			}
 
 			value_t::integer_t value_t::get_integer( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::integer );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::integer, "Unexpected value type(" + to_string( m_value_type ) + "),expected integer" );
 				using namespace boost;
 				using namespace daw;
 				return get<integer_t>( m_value );
 			}
 
 			value_t::real_t value_t::get_real( ) const {
-				daw::exception::daw_throw_on_false( is_numeric( ) );
+				daw::exception::daw_throw_on_false( is_numeric( ), "Unexpected value type(" + to_string( m_value_type ) + "),expected numeric" );
 				using namespace boost;
 				using namespace daw;
 				if( m_value_type == value_types::integer ) {
@@ -161,15 +161,15 @@ namespace daw {
 			}
 
 			std::string value_t::get_string( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::string );
-				daw::exception::daw_throw_on_false( !m_value.empty( ) );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::string, "Unexpected value type(" + to_string( m_value_type ) + "),expected string" );
+				daw::exception::daw_throw_on_true( m_value.empty( ), "Unexpected empty string" );
 				// return to_string( *this );
 				return get<string_value>( m_value ).to_string( );
 			}
 
 			string_value value_t::get_string_value( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::string );
-				daw::exception::daw_throw_on_false( !m_value.empty( ) );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::string, "Unexpected value type(" + to_string( m_value_type ) + "),expected string" );
+				daw::exception::daw_throw_on_true( m_value.empty( ), "Unexpected empty string" );
 				using namespace boost;
 				using namespace daw;
 				return get<string_value>( m_value );
@@ -208,28 +208,28 @@ namespace daw {
 			}
 
 			object_value const &value_t::get_object( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::object );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::object, "Unexpected value type(" + to_string( m_value_type ) + "),expected object" );
 				using namespace boost;
 				using namespace daw;
 				return get<object_value>( m_value );
 			}
 
 			object_value &value_t::get_object( ) {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::object );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::object, "Unexpected value type(" + to_string( m_value_type ) + "),expected object" );
 				using namespace boost;
 				using namespace daw;
 				return get<object_value>( m_value );
 			}
 
 			array_value const &value_t::get_array( ) const {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::array );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::array, "Unexpected value type(" + to_string( m_value_type ) + "),expected array" );
 				using namespace boost;
 				using namespace daw;
 				return get<array_value>( m_value );
 			}
 
 			array_value &value_t::get_array( ) {
-				daw::exception::daw_throw_on_false( m_value_type == value_types::array );
+				daw::exception::daw_throw_on_false( m_value_type == value_types::array, "Unexpected value type(" + to_string( m_value_type ) + "),expected array" );
 				using namespace boost;
 				using namespace daw;
 				return get<array_value>( m_value );
