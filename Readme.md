@@ -34,7 +34,7 @@ int main( int argc, char ** argv ) {
 		config = daw::json::from_file<config_t>( argv[1] );
 	} else {
 		std::string path = argv[0] + ".json";
-		daw::json::to_file<config_t>( path );
+		daw::json::to_file<config_t>( path, config, true );
 	}
 
 	return 0;
