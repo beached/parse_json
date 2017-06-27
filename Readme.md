@@ -3,8 +3,10 @@
 This is mainly a serialization/deserializatio library that allows your to easily use json as the transport medium.
 
 ```
-#include <daw/json/daw_json_link.h>
+#include <cstdlib>
 #include <string>
+
+#include <daw/json/daw_json_link.h>
 
 struct config_t : public daw::json::json_link<config_t> {
 	int port;
@@ -14,8 +16,9 @@ struct config_t : public daw::json::json_link<config_t> {
 
 	config_t( config_t const &other ) = default;
 	config_t( config_t &&other ) = default;
-	config_t &operator=( config_t const & ) = default config_t
-	                                          & operator=( config_t && ) = default ~config_t( ) = default;
+	config_t &operator=( config_t const & ) = default;
+	config_t &operator=( config_t && ) = default;
+	~config_t( ) = default;
 
 	static void map_to_json( ) {
 		link_integer( "port", port );
@@ -32,7 +35,7 @@ int main( int argc, char **argv ) {
 		daw::json::to_file<config_t>( path );
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 ```
 
