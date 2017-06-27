@@ -2,7 +2,7 @@
 
 This is mainly a serialization/deserializatio library that allows your to easily use json as the transport medium.
 
-```
+```c++
 #include <cstdlib>
 #include <string>
 
