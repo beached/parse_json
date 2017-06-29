@@ -95,6 +95,7 @@ namespace daw {
 			using array_value = std::vector<value_t>;
 
 			struct value_t {
+				using null_t = nullptr_t;
 				using integer_t = intmax_t;
 				using real_t = double;
 				using string_t = string_value;
@@ -102,18 +103,15 @@ namespace daw {
 				using array_t = array_value;
 				using object_t = object_value;
 
-				enum class value_types { integer, real, string, boolean, null, array, object };
-
 			  private:
-				boost::variant<integer_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
-				value_types m_value_type;
+				boost::variant<null_t, integer_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
 
 			  public:
 				value_t( );
 
-				explicit value_t( integer_t const &value );
+				explicit value_t( integer_t value );
 
-				explicit value_t( real_t const &value );
+				explicit value_t( real_t value );
 
 				value_t( boost::string_view value );
 
@@ -121,7 +119,7 @@ namespace daw {
 
 				explicit value_t( boolean_t value );
 
-				explicit value_t( std::nullptr_t value );
+				explicit value_t( null_t value );
 
 				explicit value_t( array_t value );
 
@@ -146,7 +144,7 @@ namespace daw {
 
 				value_t &operator=( value_t::boolean_t rhs );
 
-				value_t &operator=( std::nullptr_t rhs );
+				value_t &operator=( value_t::null_t rhs );
 
 				value_t &operator=( value_t::array_t rhs );
 
@@ -172,7 +170,7 @@ namespace daw {
 
 				array_t &get_array( );
 
-				value_types type( ) const;
+				std::type_index type( ) const noexcept;
 
 				void cleanup( );
 
@@ -193,9 +191,20 @@ namespace daw {
 				bool is_object( ) const;
 
 				int compare( value_t const &rhs ) const;
+
+				template<typename Visitor>
+				decltype( auto ) apply_visitor( Visitor && visitor ) {
+					return boost::apply_visitor( std::forward<Visitor>( visitor ), m_value );
+				}
+
+				template<typename Visitor>
+				decltype( auto ) apply_visitor( Visitor &&visitor ) const {
+					return boost::apply_visitor( std::forward<Visitor>( visitor ), m_value );
+				}
+				std::string to_string( ) const;
 			}; // value_t
 
-			std::string to_string( value_t::value_types type ) noexcept;
+			std::string to_string( std::type_index const &ti );
 			using value_opt_t = boost::optional<value_t>;
 
 			std::string to_string( value_t const &value );

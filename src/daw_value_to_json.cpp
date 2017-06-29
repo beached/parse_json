@@ -55,24 +55,18 @@ namespace daw {
 			// value_t
 			std::string value_to_json( boost::string_view name, ::daw::json::impl::value_t const &value ) {
 				using ::daw::json::impl::value_t;
-				switch( value.type( ) ) {
-				case value_t::value_types::array:
-					return value_to_json( name, value.get_array( ) );
-				case value_t::value_types::object:
-					return value_to_json_object( name, value.get_object( ) );
-				case value_t::value_types::boolean:
-					return value_to_json( name, value.get_boolean( ) );
-				case value_t::value_types::integer:
-					return value_to_json( name, value.get_integer( ) );
-				case value_t::value_types::real:
-					return value_to_json( name, value.get_real( ) );
-				case value_t::value_types::string:
-					return value_to_json( name, value.get_string( ) );
-				case value_t::value_types::null:
-					return value_to_json( name );
-				default:
-					throw std::logic_error( "Unrecognized value_t type" );
-				}
+				struct get_json_string_t {
+					boost::string_view value_name;
+					get_json_string_t( boost::string_view n ): value_name{ std::move( n ) } { }
+					std::string operator( )( value_t::array_t const & v ) const { return value_to_json( value_name, v ); }
+					std::string operator( )( value_t::object_t const & v ) const { return value_to_json( value_name, v ); }
+					std::string operator( )( value_t::boolean_t const & v ) const { return value_to_json( value_name, v ); }
+					std::string operator( )( value_t::integer_t const & v ) const { return value_to_json( value_name, v ); }
+					std::string operator( )( value_t::real_t const & v ) const { return value_to_json( value_name, v ); }
+					std::string operator( )( value_t::string_t const & v ) const { return value_to_json( value_name, v ); }
+					std::string operator( )( value_t::null_t ) const { return value_to_json( value_name ); }
+				};	// get_json_string_t
+				return value.apply_visitor( get_json_string_t{ std::move( name ) } );
 			}
 
 			std::string value_to_json_value( impl::string_value name, ::daw::json::impl::value_t const &value ) {

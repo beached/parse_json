@@ -44,12 +44,12 @@ namespace daw {
 			template<typename D>
 			void from_json_object( D &, impl::object_value const & );
 
-			std::string to_json_integer( int64_t i ) {
+			std::string to_json_integer( value_t::integer_t i ) {
 				using std::to_string;
 				return to_string( i );
 			}
 
-			std::string to_json_real( double d ) {
+			std::string to_json_real( value_t::real_t d ) {
 				using std::to_string;
 				return to_string( d );
 			}
@@ -74,25 +74,22 @@ namespace daw {
 			template<typename Derived>
 			std::string to_json_object( json_link<Derived> const & );
 
-			template<typename T>
-			std::string to_json_value( T const &value, impl::value_t::value_types t ) {
-				switch( t ) {
-				case value_t::value_types::integer:
-					return to_json_integer( value );
-				case value_t::value_types::real:
-					return to_json_real( value );
-				case value_t::value_types::string:
-					return to_json_string( value );
-				case value_t::value_types::boolean:
-					return to_json_boolean( value );
-				case value_t::value_types::null:
-					return to_json_null( );
-				case value_t::value_types::array:
-					return to_json_array( value );
-				case value_t::value_types::object:
-					return to_json_object( value );
-				}
-			}
+/*			template<typename T>
+			std::string to_json_value( T const &value ) {
+				struct to_json_value_t final {
+					std::string operator( )( value_t::integer_t const & v ) const { return to_json_integer( v ); }
+					std::string operator( )( value_t::real_t const & v ) const { return to_json_real( v ); }
+					std::string operator( )( value_t::boolean_t const & v ) const { return to_json_boolean( v ); }
+					std::string operator( )( value_t::string_t const & v ) const {
+						using namespace std::string_literals;
+						return "\""s + v.to_string( ) + "\""s;
+					}
+					std::string operator( )( value_t::null_t ) const { return to_json_null( ); }
+					std::string operator( )( value_t::array_t const & v ) const { return to_json_array( v ); }
+					std::string operator( )( value_t::object_t const & v ) const { return to_json_object( v ); }
+				};	// to_json_value_t
+				return value.apply_visitor( to_json_value_t{ } );
+			}*/
 			namespace impl {
 				decltype( auto ) add_appender( std::string &str ) {
 					return daw::make_function_iterator( [&str]( auto const &val ) { str += val; } );
@@ -437,7 +434,7 @@ namespace daw {
 		std::vector<Derived> array_from_json_value( daw::json::impl::value_t const & json_value, bool use_default_on_error ) {
 			std::vector<Derived> result;
 			daw::exception::daw_throw_on_false( json_value.is_array( ), "Value expected to be json array.  It was as " +
-			                                                                to_string( json_value.type( ) ) );
+			                                                                daw::json::impl::to_string( json_value.type( ) ) );
 			for( auto const &d : json_value.get_array( ) ) {
 				daw::exception::dbg_throw_on_false( d.is_object( ), "Expected a json object" );
 				try {
