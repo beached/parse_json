@@ -114,26 +114,26 @@ namespace daw {
 
 		namespace parse {
 			// String
-			void json_to_value( std::string &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( std::string &to, daw::json::json_value_t const &from ) {
 				to = from.get_string( );
 			}
 
 			// Boolean
-			void json_to_value( bool &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( bool &to, daw::json::json_value_t const &from ) {
 				to = from.get_boolean( );
 			}
 
 			// Number, integer
-			void json_to_value( int64_t &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( int64_t &to, daw::json::json_value_t const &from ) {
 				to = from.get_integer( );
 			}
 
 			// Number, real
-			void json_to_value( double &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( double &to, daw::json::json_value_t const &from ) {
 				to = from.get_real( );
 			}
 
-			void json_to_value( float &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( float &to, daw::json::json_value_t const &from ) {
 				to = static_cast<float>( from.get_real( ) );
 			}
 		} // namespace parse

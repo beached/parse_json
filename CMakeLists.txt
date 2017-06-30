@@ -75,20 +75,18 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw_json_interface.h
 	${HEADER_FOLDER}/daw_json_link.h
 	${HEADER_FOLDER}/daw_json_parser.h
+	${HEADER_FOLDER}/daw_json_value_t.h
 	${HEADER_FOLDER}/daw_value_to_json.h
-	${HEADER_FOLDER}/value_t.h
 )
 
 set( SOURCE_FILES
 	${SOURCE_FOLDER}/daw_json.cpp
-	${SOURCE_FOLDER}/daw_json_link.cpp
 	${SOURCE_FOLDER}/daw_json_parser.cpp
+	${SOURCE_FOLDER}/daw_json_value_t.cpp
 	${SOURCE_FOLDER}/daw_value_to_json.cpp
-	${SOURCE_FOLDER}/value_t.cpp
 )
 
 set( HEADER_FILES_v2
-	${HEADER_FOLDER}/daw_json_link_v2.h
 	${HEADER_FOLDER}/daw_json_link_binding.h
 	${HEADER_FOLDER}/daw_json_parser_v2.h
 	${HEADER_FOLDER}/daw_json_parser_exception.h
@@ -98,7 +96,6 @@ set( HEADER_FILES_v2
 set( SOURCE_FILES_v2
 	${SOURCE_FOLDER}/daw_json_parser_v2.cpp
 	${SOURCE_FOLDER}/daw_json_parser_v2_state.cpp
-	${SOURCE_FOLDER}/daw_json_link_v2.cpp
 	${SOURCE_FOLDER}/daw_json_parser_exception.cpp
 )
 

@@ -24,7 +24,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "daw_json_link_v2.h"
+#include "daw_json_link.h"
 
 struct test_t final : public daw::json::json_link<test_t> {
 	std::vector<int> a;
@@ -98,7 +98,7 @@ int main( int, char ** ) {
 
 		auto const f = daw::json::array_from_file<test2_t>( "test.json", true );
 
-		for( auto const & item: f ) {
+		for( auto const &item : f ) {
 			std::cout << item.to_json_string( ) << '\n';
 		}
 	} catch( std::exception const &ex ) {

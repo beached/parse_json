@@ -28,7 +28,7 @@
 namespace daw {
 	namespace json {
 		namespace generate {
-			using namespace ::daw::json::details;
+			using namespace daw::json::details;
 
 			std::string undefined_value_to_json( boost::string_view ) noexcept {
 				return {};
@@ -39,7 +39,7 @@ namespace daw {
 				return json_name( name ) + "null";
 			}
 
-			std::string value_to_json( impl::string_value name ) {
+			std::string value_to_json( json_string_value name ) {
 				return value_to_json( to_string_view( name ) );
 			}
 
@@ -48,36 +48,50 @@ namespace daw {
 				return json_name( name ) + ( value ? "true" : "false" );
 			}
 
-			std::string value_to_json( impl::string_value name, bool value ) {
+			std::string value_to_json( json_string_value name, bool value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
-			// value_t
-			std::string value_to_json( boost::string_view name, ::daw::json::impl::value_t const &value ) {
-				using ::daw::json::impl::value_t;
+			// json_value_t
+			std::string value_to_json( boost::string_view name, daw::json::json_value_t const &value ) {
+				using daw::json::json_value_t;
 				struct get_json_string_t {
 					boost::string_view value_name;
-					get_json_string_t( boost::string_view n ): value_name{ std::move( n ) } { }
-					std::string operator( )( value_t::array_t const & v ) const { return value_to_json( value_name, v ); }
-					std::string operator( )( value_t::object_t const & v ) const { return value_to_json( value_name, v ); }
-					std::string operator( )( value_t::boolean_t const & v ) const { return value_to_json( value_name, v ); }
-					std::string operator( )( value_t::integer_t const & v ) const { return value_to_json( value_name, v ); }
-					std::string operator( )( value_t::real_t const & v ) const { return value_to_json( value_name, v ); }
-					std::string operator( )( value_t::string_t const & v ) const { return value_to_json( value_name, v ); }
-					std::string operator( )( value_t::null_t ) const { return value_to_json( value_name ); }
-				};	// get_json_string_t
-				return value.apply_visitor( get_json_string_t{ std::move( name ) } );
+					get_json_string_t( boost::string_view n ) : value_name{std::move( n )} {}
+					std::string operator( )( json_value_t::array_t const &v ) const {
+						return value_to_json( value_name, v );
+					}
+					std::string operator( )( json_value_t::object_t const &v ) const {
+						return value_to_json( value_name, v );
+					}
+					std::string operator( )( json_value_t::boolean_t const &v ) const {
+						return value_to_json( value_name, v );
+					}
+					std::string operator( )( json_value_t::integer_t const &v ) const {
+						return value_to_json( value_name, v );
+					}
+					std::string operator( )( json_value_t::real_t const &v ) const {
+						return value_to_json( value_name, v );
+					}
+					std::string operator( )( json_value_t::string_t const &v ) const {
+						return value_to_json( value_name, v );
+					}
+					std::string operator( )( json_value_t::null_t ) const {
+						return value_to_json( value_name );
+					}
+				}; // get_json_string_t
+				return value.apply_visitor( get_json_string_t{std::move( name )} );
 			}
 
-			std::string value_to_json_value( impl::string_value name, ::daw::json::impl::value_t const &value ) {
+			std::string value_to_json_value( json_string_value name, daw::json::json_value_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
-			// object_value
-			std::string value_to_json_object( boost::string_view name, ::daw::json::impl::object_value const &object ) {
+			// json_object_value
+			std::string value_to_json_object( boost::string_view name, daw::json::json_object_value const &object ) {
 				std::stringstream result;
 				result << json_name( name ) << "{";
-				auto range = ::daw::range::make_range( object.members_v.begin( ), object.members_v.end( ) );
+				auto range = daw::range::make_range( object.members_v.begin( ), object.members_v.end( ) );
 				if( !range.empty( ) ) {
 					result << value_to_json_value( range.front( ).first, range.front( ).second );
 					range.move_next( );
@@ -90,7 +104,7 @@ namespace daw {
 				return result.str( );
 			}
 
-			std::string value_to_json( impl::string_value name, ::daw::json::impl::object_value const &object ) {
+			std::string value_to_json( json_string_value name, daw::json::json_object_value const &object ) {
 				return value_to_json( to_string_view( name ), object );
 			}
 
@@ -99,7 +113,7 @@ namespace daw {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, double const &value ) {
+			std::string value_to_json( json_string_value name, double const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
@@ -108,7 +122,7 @@ namespace daw {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, int32_t const &value ) {
+			std::string value_to_json( json_string_value name, int32_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
@@ -117,7 +131,7 @@ namespace daw {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, int64_t const &value ) {
+			std::string value_to_json( json_string_value name, int64_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
@@ -126,7 +140,7 @@ namespace daw {
 				return json_name( name ) + enquote( value );
 			}
 
-			std::string value_to_json( impl::string_value name, std::string const &value ) {
+			std::string value_to_json( json_string_value name, std::string const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
@@ -135,7 +149,7 @@ namespace daw {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, uint32_t const &value ) {
+			std::string value_to_json( json_string_value name, uint32_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
@@ -144,10 +158,9 @@ namespace daw {
 				return value_to_json_number( name, value );
 			}
 
-			std::string value_to_json( impl::string_value name, uint64_t const &value ) {
+			std::string value_to_json( json_string_value name, uint64_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 		} // namespace generate
 	}     // namespace json
 } // namespace daw
-

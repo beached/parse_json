@@ -34,35 +34,34 @@ namespace daw {
 		namespace generate {
 			std::string undefined_value_to_json( boost::string_view name ) noexcept;
 			std::string value_to_json( boost::string_view name );
-			std::string value_to_json( impl::string_value name );
+			std::string value_to_json( json_string_value name );
 
 			std::string value_to_json( boost::string_view name, bool value );
-			std::string value_to_json( impl::string_value name, bool value );
+			std::string value_to_json( json_string_value name, bool value );
 
-			std::string value_to_json( boost::string_view name, ::daw::json::impl::value_t const &value );
-			std::string value_to_json_value( impl::string_value name, ::daw::json::impl::value_t const &value );
+			std::string value_to_json( boost::string_view name, ::daw::json::json_value_t const &value );
+			std::string value_to_json_value( json_string_value name, ::daw::json::json_value_t const &value );
 
-			std::string value_to_json_object( boost::string_view name, ::daw::json::impl::object_value const &object );
-			std::string value_to_json( impl::string_value name, ::daw::json::impl::object_value const &object );
+			std::string value_to_json_object( boost::string_view name, ::daw::json::json_object_value const &object );
+			std::string value_to_json( json_string_value name, ::daw::json::json_object_value const &object );
 
 			std::string value_to_json( boost::string_view name, double const &value );
-			std::string value_to_json( impl::string_value name, double const &value );
+			std::string value_to_json( json_string_value name, double const &value );
 
 			std::string value_to_json( boost::string_view name, int32_t const &value );
-			std::string value_to_json( impl::string_value name, int32_t const &value );
+			std::string value_to_json( json_string_value name, int32_t const &value );
 
 			std::string value_to_json( boost::string_view name, int64_t const &value );
-			std::string value_to_json( impl::string_value name, int64_t const &value );
+			std::string value_to_json( json_string_value name, int64_t const &value );
 
 			std::string value_to_json( boost::string_view name, std::string const &value );
-			std::string value_to_json( impl::string_value name, std::string const &value );
+			std::string value_to_json( json_string_value name, std::string const &value );
 
 			std::string value_to_json( boost::string_view name, uint32_t const &value );
-			std::string value_to_json( impl::string_value name, uint32_t const &value );
+			std::string value_to_json( json_string_value name, uint32_t const &value );
 
 			std::string value_to_json( boost::string_view name, uint64_t const &value );
-			std::string value_to_json( impl::string_value name, uint64_t const &value );
-
+			std::string value_to_json( json_string_value name, uint64_t const &value );
 
 			template<typename Container,
 			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long> = 0>
@@ -175,4 +174,3 @@ namespace daw {
 		} // namespace generate
 	}     // namespace json
 } // namespace daw
-

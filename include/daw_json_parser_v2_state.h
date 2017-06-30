@@ -62,7 +62,7 @@ namespace daw {
 				state_in_object_name_t &operator=( state_in_object_name_t const & ) = default;
 				state_in_object_name_t &operator=( state_in_object_name_t && ) noexcept = default;
 
-				~state_in_object_name_t( );
+				~state_in_object_name_t( ) override;
 				std::string to_string( ) const override;
 				void on_string( boost::string_view value ) override;
 				void on_object_end( ) override;
@@ -75,7 +75,7 @@ namespace daw {
 				state_in_object_value_t &operator=( state_in_object_value_t const & ) = default;
 				state_in_object_value_t &operator=( state_in_object_value_t && ) noexcept = default;
 
-				~state_in_object_value_t( );
+				~state_in_object_value_t( ) override;
 
 				std::string to_string( ) const override;
 				void on_object_begin( ) override;
@@ -95,7 +95,7 @@ namespace daw {
 				state_in_array_t &operator=( state_in_array_t const & ) = default;
 				state_in_array_t &operator=( state_in_array_t && ) noexcept = default;
 
-				~state_in_array_t( );
+				~state_in_array_t( ) override;
 
 				std::string to_string( ) const override;
 				void on_object_begin( ) override;
@@ -115,7 +115,7 @@ namespace daw {
 				state_none_t &operator=( state_none_t const & ) = default;
 				state_none_t &operator=( state_none_t && ) noexcept = default;
 
-				~state_none_t( );
+				~state_none_t( ) override;
 
 				std::string to_string( ) const override;
 				void on_object_begin( ) override;

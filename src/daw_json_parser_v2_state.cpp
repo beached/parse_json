@@ -106,14 +106,14 @@ namespace daw {
 			}
 
 			void state_in_object_name_t::on_string( boost::string_view value ) {
-				// value_t name{ value };
+				// json_value_t name{ value };
 
-				// Set current object name value_t
+				// Set current object name json_value_t
 				set_next_state( current_state_t::in_object_value );
 			}
 
 			void state_in_object_name_t::on_object_end( ) {
-				// Save value_t
+				// Save json_value_t
 				// Assumes state is not empty
 				pop_state( );
 			}
@@ -126,13 +126,13 @@ namespace daw {
 
 			void state_in_object_value_t::on_object_begin( ) {
 				// Save data
-				// push_and_set_next_value( value_t{ } );
+				// push_and_set_next_value( json_value_t{ } );
 				set_next_state( current_state_t::in_object_name );
 				push_and_set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_array_begin( ) {
-				// push_and_set_next_value( value_t{ } );
+				// push_and_set_next_value( json_value_t{ } );
 				set_next_state( current_state_t::in_object_name );
 				push_and_set_next_state( current_state_t::in_array );
 			}
@@ -148,25 +148,25 @@ namespace daw {
 
 			void state_in_object_value_t::on_integer( boost::string_view value ) {
 				// Save data
-				// current_value( ) = value_t{ to_integer( value ) };
+				// current_value( ) = json_value_t{ to_integer( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_real( boost::string_view value ) {
 				// Save data
-				// current_value( ) = value_t{ to_real( value ) };
+				// current_value( ) = json_value_t{ to_real( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_string( boost::string_view value ) {
 				// Save data
-				// current_value( ) = value_t{ value.to_string( ) };
+				// current_value( ) = json_value_t{ value.to_string( ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
 			void state_in_object_value_t::on_boolean( bool value ) {
 				// Save data
-				// current_value( ) = value_t{ value };
+				// current_value( ) = json_value_t{ value };
 				set_next_state( current_state_t::in_object_name );
 			}
 

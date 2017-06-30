@@ -36,7 +36,7 @@
 using namespace daw::json;
 
 template<typename String>
-bool path_begins_with( boost::filesystem::path const &p, String const & str ) {
+bool path_begins_with( boost::filesystem::path const &p, String const &str ) {
 	auto const &fname = p.filename( ).string( );
 	return 0 == fname.find( str );
 }

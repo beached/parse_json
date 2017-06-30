@@ -64,6 +64,7 @@ std::ostream &operator<<( std::ostream &os, Streamable const &value ) {
 	os << value.a;
 	return os;
 }
+/*
 
 struct A : public daw::json::JsonLink<A> {
 	int integer_01;
@@ -181,8 +182,10 @@ struct empty : public daw::json::JsonLink<empty> {
 };
 
 empty::~empty( ) = default;
+*/
 
 int main( int, char ** ) {
+	/*
 	B obj_b_01;
 	obj_b_01.object_01.integer_01 = 12345;
 	auto const obj_b_01_str = obj_b_01.to_string( );
@@ -199,5 +202,6 @@ int main( int, char ** ) {
 	std::cout << "sizeof( empty )->" << sizeof( empty ) << '\n';
 	std::cout << "sizeof( B )->" << sizeof( B ) << '\n';
 	std::cout << obj_b_03.object_01.streamable_01.a << std::endl;
+	*/
 	return EXIT_SUCCESS;
 }
