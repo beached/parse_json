@@ -42,7 +42,7 @@ namespace daw {
 		std::string ts_to_string( std::time_t const &timestamp, std::string format ) {
 			char buffer[200];
 			std::tm tm = {};
-			::daw::localtime_s( &timestamp, &tm );
+			daw::localtime_s( &timestamp, &tm );
 			auto count = std::strftime( buffer, 200, format.c_str( ), &tm );
 			daw::exception::daw_throw_on_false( count < 200 );
 			return std::string( buffer, buffer + count + 1 );

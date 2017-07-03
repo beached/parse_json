@@ -92,8 +92,10 @@ namespace daw {
 
 		using json_array_value = std::vector<json_value_t>;
 
+		struct json_null_t final { };
+
 		struct json_value_t {
-			using null_t = std::nullptr_t;
+			using null_t = json_null_t;
 			using integer_t = intmax_t;
 			using real_t = double;
 			using string_t = json_string_value;

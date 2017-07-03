@@ -39,11 +39,11 @@ namespace daw {
 			std::string value_to_json( boost::string_view name, bool value );
 			std::string value_to_json( json_string_value name, bool value );
 
-			std::string value_to_json( boost::string_view name, ::daw::json::json_value_t const &value );
-			std::string value_to_json_value( json_string_value name, ::daw::json::json_value_t const &value );
+			std::string value_to_json( boost::string_view name, daw::json::json_value_t const &value );
+			std::string value_to_json_value( json_string_value name, daw::json::json_value_t const &value );
 
-			std::string value_to_json_object( boost::string_view name, ::daw::json::json_object_value const &object );
-			std::string value_to_json( json_string_value name, ::daw::json::json_object_value const &object );
+			std::string value_to_json_object( boost::string_view name, daw::json::json_object_value const &object );
+			std::string value_to_json( json_string_value name, daw::json::json_object_value const &object );
 
 			std::string value_to_json( boost::string_view name, double const &value );
 			std::string value_to_json( json_string_value name, double const &value );
@@ -96,7 +96,7 @@ namespace daw {
 			std::string value_to_json( boost::string_view name, Container const &values ) {
 				boost::string_view const empty_str{""};
 				std::stringstream result;
-				result << ::daw::json::details::json_name( name ) << "[ ";
+				result << daw::json::details::json_name( name ) << "[ ";
 				{
 					auto values_range = daw::range::make_range( values.begin( ), values.end( ) );
 					if( !values_range.empty( ) ) {
@@ -127,14 +127,14 @@ namespace daw {
 			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
 			std::string value_to_json_number( boost::string_view name, Number const &value ) {
 				std::stringstream ss;
-				ss << ::daw::json::details::json_name( name );
+				ss << daw::json::details::json_name( name );
 				ss << std::setprecision( std::numeric_limits<Number>::max_digits10 ) << value;
 				return ss.str( );
 			}
 
 			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int>>
 			std::string value_to_json_number( boost::string_view name, Number const &value ) {
-				return ::daw::json::details::json_name( name ) + std::to_string( value );
+				return daw::json::details::json_name( name ) + std::to_string( value );
 			}
 
 			template<typename T>

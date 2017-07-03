@@ -37,6 +37,9 @@
 
 namespace daw {
 	namespace json {
+		json_object_value_item make_object_value_item( json_string_value first, json_value_t second ) {
+			return std::make_pair<json_string_value, json_value_t>( std::move( first ), std::move( second ) );
+		}
 		std::string to_string( json_value_t const &v ) {
 			return v.to_string( );
 		}
@@ -67,7 +70,7 @@ namespace daw {
 			daw::exception::daw_throw( "Invalid type passed to to string, not valid for json_value_t" );
 		}
 
-		json_value_t::json_value_t( ) : m_value{nullptr} {}
+		json_value_t::json_value_t( ) : m_value{null_t{ }} {}
 
 		json_value_t::json_value_t( json_value_t::integer_t value ) : m_value{std::move( value )} {}
 
@@ -79,7 +82,7 @@ namespace daw {
 
 		json_value_t::json_value_t( json_value_t::boolean_t value ) : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::null_t ) : m_value{nullptr} {}
+		json_value_t::json_value_t( json_value_t::null_t ) : m_value{null_t{ }} {}
 
 		json_value_t::json_value_t( json_value_t::array_t value )
 		    : m_value{json_value_t::array_t{std::move( value )}} {}
@@ -126,7 +129,7 @@ namespace daw {
 		}
 
 		json_value_t &json_value_t::operator=( json_value_t::null_t ) {
-			m_value = nullptr;
+			m_value = null_t{ };
 			return *this;
 		}
 
@@ -337,10 +340,6 @@ namespace daw {
 
 		json_object_value::~json_object_value( ) {}
 
-		json_object_value_item make_object_value_item( json_string_value first, json_value_t second ) {
-			return std::make_pair<json_string_value, json_value_t>( std::move( first ), std::move( second ) );
-		}
-
 		json_object_value::iterator json_object_value::find( boost::string_view key ) {
 			auto const k = key.to_string( );
 			return std::find_if( members_v.begin( ), members_v.end( ), [&]( json_object_value_item const &item ) {
@@ -374,8 +373,7 @@ namespace daw {
 		json_object_value::mapped_type &json_object_value::operator[]( boost::string_view key ) {
 			auto pos = find( key );
 			if( end( ) == pos ) {
-				pos = insert( pos, std::make_pair<json_string_value, json_value_t>( range::create_char_range( key ),
-				                                                                    json_value_t{nullptr} ) );
+				pos = insert( pos, make_object_value_item( range::create_char_range( key ), json_value_t{} ) );
 			}
 			return pos->second;
 		}
@@ -429,7 +427,7 @@ namespace daw {
 
 		template<>
 		json_value_t::null_t get<json_value_t::null_t>( daw::json::json_value_t const & ) {
-			return nullptr;
+			return json_value_t::null_t{ };
 		}
 
 

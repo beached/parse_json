@@ -52,9 +52,15 @@ constexpr auto const expected_size = sizeof( int32_t ) + sizeof( int64_t ) + siz
 
 struct test2_t : public daw::json::json_link<test2_t> {
 	test_t a;
+	std::vector<double> b;
+	std::vector<std::string> c;
+	//std::vector<bool> d;
 
 	static void map_to_json( ) {
 		json_link_object( "a", a );
+		json_link_real_array( "b", b );
+		json_link_string_array( "c", c );
+		//json_link_boolean_array( "d", d );
 	}
 }; // test2_t
 

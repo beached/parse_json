@@ -22,16 +22,10 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/utility/string_view.hpp>
-#include <cstdint>
-#include <iterator>
-#include <string>
-#include <type_traits>
-#include <utility>
+
+#include <daw/daw_range.h>
 
 #include "daw_json_interface.h"
-#include "daw_json_parser.h"
-#include <daw/char_range/daw_char_range.h>
-#include <daw/daw_range.h>
 
 namespace daw {
 	namespace json {
@@ -48,23 +42,23 @@ namespace daw {
 				return std::find( first, last, key ) != last;
 			}
 
-			bool is_ws( range::UTFValType val ) {
-				size_t result1 = static_cast<range::UTFValType>( 0x0009 ) - val == 0;
-				size_t result2 = static_cast<range::UTFValType>( 0x000A ) - val == 0;
-				size_t result3 = static_cast<range::UTFValType>( 0x000D ) - val == 0;
-				size_t result4 = static_cast<range::UTFValType>( 0x0020 ) - val == 0;
-				return result1 + result2 + result3 + result4 > 0;
+			constexpr bool is_ws( range::UTFValType val ) noexcept {
+				auto const result1 = static_cast<range::UTFValType>( 0x0009 ) - val == 0;
+				auto const result2 = static_cast<range::UTFValType>( 0x000A ) - val == 0;
+				auto const result3 = static_cast<range::UTFValType>( 0x000D ) - val == 0;
+				auto const result4 = static_cast<range::UTFValType>( 0x0020 ) - val == 0;
+				return result1 || result2 || result3 || result4;
 			}
 
-			range::UTFValType ascii_lower_case( range::UTFValType val ) {
+			constexpr range::UTFValType ascii_lower_case( range::UTFValType val ) noexcept {
 				return val | static_cast<range::UTFValType>( ' ' );
 			}
 
-			bool is_equal( range::UTFIterator it, range::UTFValType val ) {
+			bool is_equal( range::UTFIterator it, range::UTFValType val ) noexcept {
 				return *it == val;
 			}
 
-			bool is_equal_nc( range::UTFIterator it, range::UTFValType val ) {
+			bool is_equal_nc( range::UTFIterator it, range::UTFValType val ) noexcept {
 				return ascii_lower_case( *it ) == ascii_lower_case( val );
 			}
 
@@ -91,7 +85,7 @@ namespace daw {
 				}
 			}
 
-			bool move_range_forward_if_equal( range::CharRange &range, boost::string_view const value ) {
+			bool move_range_forward_if_equal( range::CharRange &range, boost::string_view value ) {
 				auto const value_size = static_cast<size_t>( std::distance( value.begin( ), value.end( ) ) );
 				auto result = std::equal( value.begin( ), value.end( ), range.begin( ) );
 				if( result ) {
@@ -143,7 +137,7 @@ namespace daw {
 				if( !move_range_forward_if_equal( range, "null" ) ) {
 					throw JsonParserException( "Not a valid JSON null" );
 				}
-				return json_value_t( nullptr );
+				return json_value_t{ };
 			}
 
 			bool is_digit( range::UTFIterator it ) {
@@ -187,7 +181,6 @@ namespace daw {
 				                } );
 				if( is_float ) {
 					try {
-
 						auto result = json_value_t( boost::lexical_cast<double>( number_range.get( ), number_range_size ) );
 						return result;
 					} catch( boost::bad_lexical_cast const & ) {
@@ -210,7 +203,7 @@ namespace daw {
 				}
 				skip_ws( ++range );
 				auto value = parse_value( range );
-				auto result = std::make_pair( std::move( label ), std::move( value ) );
+				auto result = make_object_value_item( std::move( label ), std::move( value ) );
 				return result;
 			}
 
@@ -302,10 +295,10 @@ namespace daw {
 				range::UTFIterator it_end( End );
 				range::CharRange range{it_begin, it_end};
 				return impl::parse_value( range );
-			} catch( JsonParserException const & ) { return ::daw::json::json_value_t( nullptr ); }
+			} catch( JsonParserException const & ) { return daw::json::json_value_t{ }; }
 		}
 
-		json_obj parse_json( boost::string_view const json_text ) {
+		json_obj parse_json( boost::string_view json_text ) {
 			return parse_json( json_text.begin( ), json_text.end( ) );
 		}
 

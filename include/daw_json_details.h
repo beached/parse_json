@@ -51,7 +51,7 @@ namespace daw {
 				auto const &source_array = from.get_array( );
 				to.clear( );
 				std::transform( std::begin( source_array ), std::end( source_array ), std::back_inserter( to ),
-				                [](::daw::json::json_value_t const &value ) {
+				                []( daw::json::json_value_t const &value ) {
 					                typename Container::value_type tmp;
 					                json_to_value( tmp, value );
 					                return tmp;
@@ -83,7 +83,7 @@ namespace daw {
 				auto const &source_array = from.get_array( );
 				to.clear( );
 				std::transform( std::begin( source_array ), std::end( source_array ),
-				                std::inserter( to, std::end( to ) ), [](::daw::json::json_value_t const &value ) {
+				                std::inserter( to, std::end( to ) ), []( daw::json::json_value_t const &value ) {
 					                using key_t = typename std::decay<typename MapContainer::key_type>::type;
 					                using value_t = typename std::decay<typename MapContainer::mapped_type>::type;
 					                std::pair<key_t, value_t> tmp;
