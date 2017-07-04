@@ -92,7 +92,7 @@ namespace daw {
 
 		using json_array_value = std::vector<json_value_t>;
 
-		struct json_null_t final { };
+		struct json_null_t final {};
 
 		struct json_value_t {
 			using null_t = json_null_t;
@@ -107,23 +107,23 @@ namespace daw {
 			boost::variant<null_t, integer_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
 
 		  public:
-			json_value_t( );
+			json_value_t( ) noexcept;
 
-			explicit json_value_t( integer_t value );
+			explicit json_value_t( integer_t value ) noexcept;
 
-			explicit json_value_t( real_t value );
+			explicit json_value_t( real_t value ) noexcept;
 
 			json_value_t( boost::string_view value );
 
-			explicit json_value_t( string_t value );
+			explicit json_value_t( string_t value ) noexcept;
 
-			explicit json_value_t( boolean_t value );
+			explicit json_value_t( boolean_t value ) noexcept;
 
-			explicit json_value_t( null_t value );
+			explicit json_value_t( null_t value ) noexcept;
 
-			explicit json_value_t( array_t value );
+			explicit json_value_t( array_t value ) noexcept;
 
-			explicit json_value_t( object_t value );
+			explicit json_value_t( object_t value ) noexcept;
 
 			~json_value_t( );
 
@@ -134,21 +134,21 @@ namespace daw {
 
 			json_value_t &operator=( json_value_t const &rhs );
 
-			json_value_t &operator=( json_value_t::integer_t rhs );
+			json_value_t &operator=( json_value_t::integer_t rhs ) noexcept;
 
-			json_value_t &operator=( json_value_t::real_t rhs );
+			json_value_t &operator=( json_value_t::real_t rhs ) noexcept;
 
-			json_value_t &operator=( boost::string_view rhs );
+			json_value_t &operator=( boost::string_view rhs ) noexcept;
 
-			json_value_t &operator=( json_value_t::string_t rhs );
+			json_value_t &operator=( json_value_t::string_t rhs ) noexcept;
 
-			json_value_t &operator=( json_value_t::boolean_t rhs );
+			json_value_t &operator=( json_value_t::boolean_t rhs ) noexcept;
 
-			json_value_t &operator=( json_value_t::null_t rhs );
+			json_value_t &operator=( json_value_t::null_t rhs ) noexcept;
 
-			json_value_t &operator=( json_value_t::array_t rhs );
+			json_value_t &operator=( json_value_t::array_t rhs ) noexcept;
 
-			json_value_t &operator=( json_value_t::object_t rhs );
+			json_value_t &operator=( json_value_t::object_t rhs ) noexcept;
 
 			integer_t get_integer( ) const;
 
@@ -174,21 +174,14 @@ namespace daw {
 
 			void cleanup( );
 
-			bool is_integer( ) const;
-
-			bool is_real( ) const;
-
-			bool is_numeric( ) const;
-
-			bool is_string( ) const;
-
-			bool is_boolean( ) const;
-
-			bool is_null( ) const;
-
-			bool is_array( ) const;
-
-			bool is_object( ) const;
+			bool is_integer( ) const noexcept;
+			bool is_real( ) const noexcept;
+			bool is_numeric( ) const noexcept;
+			bool is_string( ) const noexcept;
+			bool is_boolean( ) const noexcept;
+			bool is_null( ) const noexcept;
+			bool is_array( ) const noexcept;
+			bool is_object( ) const noexcept;
 
 			int compare( json_value_t const &rhs ) const;
 

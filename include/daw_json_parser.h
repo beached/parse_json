@@ -40,18 +40,14 @@ namespace daw {
 		struct JsonParserException final {
 			std::string message;
 
-			JsonParserException( ) = default;
+			JsonParserException( std::string msg ) noexcept;
+			~JsonParserException( ); 
 
-			JsonParserException( std::string msg );
-
-			~JsonParserException( ) = default;
-
+			JsonParserException( ) noexcept = default;
 			JsonParserException( JsonParserException const & ) = default;
-
 			JsonParserException( JsonParserException && ) noexcept = default;
 			JsonParserException &operator=( JsonParserException && ) noexcept = default;
-
-			JsonParserException &operator=( JsonParserException const &rhs );
+			JsonParserException &operator=( JsonParserException const &rhs ) = default;
 		}; // struct JsonParserException
 
 		using json_obj = json_value_t;

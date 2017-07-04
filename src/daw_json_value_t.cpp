@@ -70,25 +70,25 @@ namespace daw {
 			daw::exception::daw_throw( "Invalid type passed to to string, not valid for json_value_t" );
 		}
 
-		json_value_t::json_value_t( ) : m_value{null_t{ }} {}
+		json_value_t::json_value_t( ) noexcept : m_value{null_t{}} {}
 
-		json_value_t::json_value_t( json_value_t::integer_t value ) : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::integer_t value ) noexcept : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::real_t value ) : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::real_t value ) noexcept : m_value{std::move( value )} {}
 
 		json_value_t::json_value_t( boost::string_view value ) : m_value{string_t{value}} {}
 
-		json_value_t::json_value_t( json_value_t::string_t value ) : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::string_t value ) noexcept : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::boolean_t value ) : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::boolean_t value ) noexcept : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::null_t ) : m_value{null_t{ }} {}
+		json_value_t::json_value_t( json_value_t::null_t ) noexcept : m_value{null_t{}} {}
 
 		json_value_t::json_value_t( json_value_t::array_t value )
-		    : m_value{json_value_t::array_t{std::move( value )}} {}
+		    noexcept: m_value{json_value_t::array_t{std::move( value )}} {}
 
 		json_value_t::json_value_t( json_value_t::object_t value )
-		    : m_value{json_value_t::object_t{std::move( value )}} {}
+		    noexcept: m_value{json_value_t::object_t{std::move( value )}} {}
 
 		json_value_t::json_value_t( json_value_t const &other ) : m_value{other.m_value} {}
 
@@ -103,42 +103,42 @@ namespace daw {
 			return *this = json_value_t{rhs};
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::integer_t rhs ) {
+		json_value_t &json_value_t::operator=( json_value_t::integer_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::real_t rhs ) {
+		json_value_t &json_value_t::operator=( json_value_t::real_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( boost::string_view rhs ) {
+		json_value_t &json_value_t::operator=( boost::string_view rhs ) noexcept {
 			m_value = json_string_value{rhs};
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::string_t rhs ) {
+		json_value_t &json_value_t::operator=( json_value_t::string_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::boolean_t rhs ) {
+		json_value_t &json_value_t::operator=( json_value_t::boolean_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::null_t ) {
+		json_value_t &json_value_t::operator=( json_value_t::null_t ) noexcept {
 			m_value = null_t{ };
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::array_t rhs ) {
+		json_value_t &json_value_t::operator=( json_value_t::array_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::object_t rhs ) {
+		json_value_t &json_value_t::operator=( json_value_t::object_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
@@ -218,35 +218,35 @@ namespace daw {
 			return boost::get<string_t>( m_value );
 		}
 
-		bool json_value_t::is_integer( ) const {
+		bool json_value_t::is_integer( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( integer_t ) );
 		}
 
-		bool json_value_t::is_real( ) const {
+		bool json_value_t::is_real( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( real_t ) );
 		}
 
-		bool json_value_t::is_numeric( ) const {
+		bool json_value_t::is_numeric( ) const noexcept {
 			return is_real( ) || is_integer( );
 		}
 
-		bool json_value_t::is_string( ) const {
+		bool json_value_t::is_string( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( string_t ) );
 		}
 
-		bool json_value_t::is_boolean( ) const {
+		bool json_value_t::is_boolean( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( boolean_t ) );
 		}
 
-		bool json_value_t::is_null( ) const {
+		bool json_value_t::is_null( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( null_t ) );
 		}
 
-		bool json_value_t::is_array( ) const {
+		bool json_value_t::is_array( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( array_t ) );
 		}
 
-		bool json_value_t::is_object( ) const {
+		bool json_value_t::is_object( ) const noexcept {
 			return std::type_index( m_value.type( ) ) == std::type_index( typeid( object_t ) );
 		}
 

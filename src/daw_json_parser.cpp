@@ -29,16 +29,13 @@
 
 namespace daw {
 	namespace json {
-		JsonParserException::JsonParserException( std::string msg ) : message( std::move( msg ) ) {}
-
-		JsonParserException &JsonParserException::operator=( JsonParserException const &rhs ) {
-			return *this = JsonParserException{rhs};
-		}
+		JsonParserException::JsonParserException( std::string msg ) noexcept: message( std::move( msg ) ) {}
+		JsonParserException::~JsonParserException( ) { }
 
 		namespace impl {
 			template<typename Iterator>
-			bool contains( Iterator first, Iterator last,
-			               typename std::iterator_traits<Iterator>::value_type const &key ) {
+			constexpr bool contains( Iterator first, Iterator last,
+			               typename std::iterator_traits<Iterator>::value_type const &key ) noexcept {
 				return std::find( first, last, key ) != last;
 			}
 
@@ -47,7 +44,7 @@ namespace daw {
 				auto const result2 = static_cast<range::UTFValType>( 0x000A ) - val == 0;
 				auto const result3 = static_cast<range::UTFValType>( 0x000D ) - val == 0;
 				auto const result4 = static_cast<range::UTFValType>( 0x0020 ) - val == 0;
-				return result1 || result2 || result3 || result4;
+				return result1 | result2 | result3 | result4;
 			}
 
 			constexpr range::UTFValType ascii_lower_case( range::UTFValType val ) noexcept {
