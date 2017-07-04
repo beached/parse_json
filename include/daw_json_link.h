@@ -23,9 +23,9 @@
 #pragma once
 
 #include <boost/utility/string_view_fwd.hpp>
-#include <unordered_map>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include <daw/daw_function_iterator.h>
@@ -48,10 +48,11 @@ namespace daw {
 			template<typename T, typename Dest>
 			constexpr bool can_dereference_to_v = can_dereference_to_t<T, Dest>::value;
 
-			std::string to_json_integer( json_value_t::integer_t i ) {
-				using std::to_string;
-				return to_string( i );
-			}
+			std::string to_json_integer( json_value_t::integer_t i );
+			std::string to_json_real( json_value_t::real_t d );
+			std::string to_json_string( boost::string_view s );
+			std::string to_json_boolean( bool b );
+			std::string to_json_null( );
 
 			template<typename T, std::enable_if_t<can_dereference_to_v<T, json_value_t::integer_t>>>
 			std::string to_json_integer( T const &value ) {
@@ -62,49 +63,14 @@ namespace daw {
 			template<typename D>
 			void from_json_object( D &, json_object_value const & );
 
-			std::string to_json_real( json_value_t::real_t d ) {
-				using std::to_string;
-				return to_string( d );
-			}
-
-			std::string to_json_string( boost::string_view s ) {
-				std::string result;
-				result = "\"" + s.to_string( ) + "\"";
-				return result;
-			}
-
-			std::string to_json_boolean( bool b ) {
-				return b ? "true" : "false";
-			}
-
-			std::string to_json_null( ) {
-				using namespace std::string_literals;
-				return "null"s;
-			}
-
 			template<typename Container>
 			std::string to_json_array( Container const & );
 
 			template<typename Derived>
 			std::string to_json_object( json_link<Derived> const & );
 
-			/*			template<typename T>
-			            std::string to_json_value( T const &value ) {
-			                struct to_json_value_t final {
-			                    std::string operator( )( json_value_t::integer_t const & v ) const { return
-			   to_json_integer( v ); } std::string operator( )( json_value_t::real_t const & v ) const { return
-			   to_json_real( v ); } std::string operator( )( json_value_t::boolean_t const & v ) const { return
-			   to_json_boolean( v ); } std::string operator( )( json_value_t::string_t const & v ) const { using
-			   namespace std::string_literals; return "\""s + v.to_string( ) + "\""s;
-			                    }
-			                    std::string operator( )( json_value_t::null_t ) const { return to_json_null( ); }
-			                    std::string operator( )( json_value_t::array_t const & v ) const { return to_json_array(
-			   v ); } std::string operator( )( json_value_t::object_t const & v ) const { return to_json_object( v ); }
-			                };	// to_json_value_t
-			                return value.apply_visitor( to_json_value_t{ } );
-			            }*/
 			namespace impl {
-				decltype( auto ) add_appender( std::string &str ) {
+				inline decltype( auto ) add_appender( std::string &str ) {
 					return daw::make_function_iterator( [&str]( auto const &val ) { str += val; } );
 				}
 
@@ -160,8 +126,7 @@ namespace daw {
 			std::string to_json_string_array( Container const &container ) {
 				using std::begin;
 				using value_t = std::decay_t<decltype( *begin( container ) )>;
-				static_assert( std::is_convertible<value_t, std::string>::value,
-				               "Must supply an string type" );
+				static_assert( std::is_convertible<value_t, std::string>::value, "Must supply an string type" );
 				return impl::to_json_array( container,
 				                            []( value_t const &v ) -> std::string { return to_json_string( v ); } );
 			}
@@ -245,13 +210,14 @@ namespace daw {
 				get_map( )[name.to_string( )] = std::move( m );
 			}
 
-			Derived & this_as_derived( ) {
+			Derived &this_as_derived( ) {
 				return *static_cast<Derived *>( this );
 			}
 
-			Derived const & this_as_derived( ) const {
+			Derived const &this_as_derived( ) const {
 				return *static_cast<Derived const *>( this );
 			}
+
 		  protected:
 			json_link( ) = default;
 

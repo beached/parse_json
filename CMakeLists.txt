@@ -85,6 +85,7 @@ set( HEADER_FILES
 
 set( SOURCE_FILES
 	${SOURCE_FOLDER}/daw_json.cpp
+	${SOURCE_FOLDER}/daw_json_link.cpp
 	${SOURCE_FOLDER}/daw_json_parser.cpp
 	${SOURCE_FOLDER}/daw_json_value_t.cpp
 	${SOURCE_FOLDER}/daw_value_to_json.cpp
