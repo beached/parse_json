@@ -22,19 +22,14 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/utility/string_view.hpp>
-#include <cstdint>
-#include <iterator>
-#include <string>
-#include <type_traits>
-#include <utility>
+
+#include <daw/daw_range.h>
 
 #include "daw_json_interface.h"
-#include "daw_json_parser.h"
-#include <daw/char_range/daw_char_range.h>
-#include <daw/daw_range.h>
 
 namespace daw {
 	namespace json {
+<<<<<<< HEAD
 		JsonParserException::JsonParserException( std::string msg ) : message( std::move( msg ) ) {}
 
 		namespace impl {
@@ -53,14 +48,35 @@ namespace daw {
 			}
 
 			range::UTFValType ascii_lower_case( range::UTFValType val ) {
+=======
+		JsonParserException::JsonParserException( std::string msg ) noexcept: message( std::move( msg ) ) {}
+		JsonParserException::~JsonParserException( ) { }
+
+		namespace impl {
+			template<typename Iterator>
+			constexpr bool contains( Iterator first, Iterator last,
+			               typename std::iterator_traits<Iterator>::value_type const &key ) noexcept {
+				return std::find( first, last, key ) != last;
+			}
+
+			constexpr bool is_ws( range::UTFValType val ) noexcept {
+				auto const result1 = static_cast<range::UTFValType>( 0x0009 ) - val == 0;
+				auto const result2 = static_cast<range::UTFValType>( 0x000A ) - val == 0;
+				auto const result3 = static_cast<range::UTFValType>( 0x000D ) - val == 0;
+				auto const result4 = static_cast<range::UTFValType>( 0x0020 ) - val == 0;
+				return result1 | result2 | result3 | result4;
+			}
+
+			constexpr range::UTFValType ascii_lower_case( range::UTFValType val ) noexcept {
+>>>>>>> v2
 				return val | static_cast<range::UTFValType>( ' ' );
 			}
 
-			bool is_equal( range::UTFIterator it, range::UTFValType val ) {
+			bool is_equal( range::UTFIterator it, range::UTFValType val ) noexcept {
 				return *it == val;
 			}
 
-			bool is_equal_nc( range::UTFIterator it, range::UTFValType val ) {
+			bool is_equal_nc( range::UTFIterator it, range::UTFValType val ) noexcept {
 				return ascii_lower_case( *it ) == ascii_lower_case( val );
 			}
 
@@ -87,7 +103,11 @@ namespace daw {
 				}
 			}
 
+<<<<<<< HEAD
 			bool move_range_forward_if_equal( range::CharRange &range, boost::string_view const value ) {
+=======
+			bool move_range_forward_if_equal( range::CharRange &range, boost::string_view value ) {
+>>>>>>> v2
 				auto const value_size = static_cast<size_t>( std::distance( value.begin( ), value.end( ) ) );
 				auto result = std::equal( value.begin( ), value.end( ), range.begin( ) );
 				if( result ) {
@@ -112,7 +132,11 @@ namespace daw {
 			}
 
 			// Strings are parsed here :)
+<<<<<<< HEAD
 			value_t parse_string( range::CharRange &range ) {
+=======
+			json_value_t parse_string( range::CharRange &range ) {
+>>>>>>> v2
 				if( !is_equal( range.begin( ), '"' ) ) {
 					throw JsonParserException( "Not a valid JSON string" );
 				}
@@ -121,25 +145,37 @@ namespace daw {
 				move_to_quote( range );
 				auto const tmp = range::create_char_range( it_first, range.begin( ) );
 				auto sv = tmp.to_string_view( );
+<<<<<<< HEAD
 				value_t result{std::move( sv )};
+=======
+				json_value_t result{std::move( sv )};
+>>>>>>> v2
 				++range;
 				return result;
 			}
 
+<<<<<<< HEAD
 			value_t parse_bool( range::CharRange &range ) {
+=======
+			json_value_t parse_bool( range::CharRange &range ) {
+>>>>>>> v2
 				if( move_range_forward_if_equal( range, "true" ) ) {
-					return value_t( true );
+					return json_value_t( true );
 				} else if( move_range_forward_if_equal( range, "false" ) ) {
-					return value_t( false );
+					return json_value_t( false );
 				}
 				throw JsonParserException( "Not a valid JSON bool" );
 			}
 
+<<<<<<< HEAD
 			value_t parse_null( range::CharRange &range ) {
+=======
+			json_value_t parse_null( range::CharRange &range ) {
+>>>>>>> v2
 				if( !move_range_forward_if_equal( range, "null" ) ) {
 					throw JsonParserException( "Not a valid JSON null" );
 				}
-				return value_t( nullptr );
+				return json_value_t{ };
 			}
 
 			bool is_digit( range::UTFIterator it ) {
@@ -147,7 +183,11 @@ namespace daw {
 				return '0' <= test && test <= '9';
 			}
 
+<<<<<<< HEAD
 			value_t parse_number( range::CharRange &range ) {
+=======
+			json_value_t parse_number( range::CharRange &range ) {
+>>>>>>> v2
 				auto const first = range.begin( );
 				auto const first_range_size = range.size( );
 				move_range_forward_if_equal( range, "-" );
@@ -183,22 +223,27 @@ namespace daw {
 				                } );
 				if( is_float ) {
 					try {
-
-						auto result = value_t( boost::lexical_cast<double>( number_range.get( ), number_range_size ) );
+						auto result = json_value_t( boost::lexical_cast<double>( number_range.get( ), number_range_size ) );
 						return result;
 					} catch( boost::bad_lexical_cast const & ) {
 						throw JsonParserException( "Not a valid JSON number" );
 					}
 				}
 				try {
-					auto result = value_t( boost::lexical_cast<int64_t>( number_range.get( ), number_range_size ) );
+					auto result = json_value_t( boost::lexical_cast<int64_t>( number_range.get( ), number_range_size ) );
 					return result;
 				} catch( boost::bad_lexical_cast const & ) { throw JsonParserException( "Not a valid JSON number" ); }
 			}
 
+<<<<<<< HEAD
 			value_t parse_value( range::CharRange &range );
 
 			object_value_item parse_object_item( range::CharRange &range ) {
+=======
+			json_value_t parse_value( range::CharRange &range );
+
+			json_object_value_item parse_object_item( range::CharRange &range ) {
+>>>>>>> v2
 				auto label = parse_string( range ).get_string_value( );
 				skip_ws( range );
 				if( !is_equal( range.begin( ), U':' ) ) {
@@ -206,16 +251,20 @@ namespace daw {
 				}
 				skip_ws( ++range );
 				auto value = parse_value( range );
-				auto result = std::make_pair( std::move( label ), std::move( value ) );
+				auto result = make_object_value_item( std::move( label ), std::move( value ) );
 				return result;
 			}
 
+<<<<<<< HEAD
 			value_t parse_object( range::CharRange &range ) {
+=======
+			json_value_t parse_object( range::CharRange &range ) {
+>>>>>>> v2
 				if( !is_equal( range.begin( ), U'{' ) ) {
 					throw JsonParserException( "Not a valid JSON object" );
 				}
 				++range;
-				object_value result;
+				json_object_value result;
 				do {
 					skip_ws( range );
 					if( is_equal( range.begin( ), U'"' ) ) {
@@ -235,15 +284,19 @@ namespace daw {
 				}
 				++range;
 				result.shrink_to_fit( );
-				return value_t( std::move( result ) );
+				return json_value_t( std::move( result ) );
 			}
 
+<<<<<<< HEAD
 			value_t parse_array( range::CharRange &range ) {
+=======
+			json_value_t parse_array( range::CharRange &range ) {
+>>>>>>> v2
 				if( !is_equal( range.begin( ), U'[' ) ) {
 					throw JsonParserException( "Not a valid JSON array" );
 				}
 				++range;
-				array_value results;
+				json_array_value results;
 				do {
 					skip_ws( range );
 					if( !is_equal( range.begin( ), U']' ) ) {
@@ -260,11 +313,16 @@ namespace daw {
 				}
 				++range;
 				results.shrink_to_fit( );
-				return value_t( results );
+				return json_value_t( results );
 			}
 
+<<<<<<< HEAD
 			value_t parse_value( range::CharRange &range ) {
 				value_t result;
+=======
+			json_value_t parse_value( range::CharRange &range ) {
+				json_value_t result;
+>>>>>>> v2
 				skip_ws( range );
 				switch( *range.begin( ) ) {
 				case U'{':
@@ -298,13 +356,18 @@ namespace daw {
 				range::UTFIterator it_end( End );
 				range::CharRange range{it_begin, it_end};
 				return impl::parse_value( range );
+<<<<<<< HEAD
 			} catch( JsonParserException const & ) { return ::daw::json::impl::value_t( nullptr ); }
+=======
+			} catch( JsonParserException const & ) { return daw::json::json_value_t{ }; }
+>>>>>>> v2
 		}
 
-		json_obj parse_json( boost::string_view const json_text ) {
+		json_obj parse_json( boost::string_view json_text ) {
 			return parse_json( json_text.begin( ), json_text.end( ) );
 		}
 
+<<<<<<< HEAD
 		template<>
 		int64_t get<int64_t>(::daw::json::impl::value_t const &val ) {
 			return val.get_integral( );
@@ -338,3 +401,7 @@ namespace daw {
 	} // namespace json
 } // namespace daw
 
+=======
+	} // namespace json
+} // namespace daw
+>>>>>>> v2

@@ -33,21 +33,24 @@
 #include <daw/daw_common_mixins.h>
 #include <daw/daw_variant.h>
 
-#include "value_t.h"
+#include "daw_json_value_t.h"
 
 namespace daw {
 	namespace json {
 		struct JsonParserException final {
 			std::string message;
 
-			JsonParserException( ) = default;
+			JsonParserException( std::string msg ) noexcept;
+			~JsonParserException( ); 
 
-			JsonParserException( std::string msg );
-
-			~JsonParserException( ) = default;
-
+			JsonParserException( ) noexcept = default;
 			JsonParserException( JsonParserException const & ) = default;
+			JsonParserException( JsonParserException && ) noexcept = default;
+			JsonParserException &operator=( JsonParserException && ) noexcept = default;
+			JsonParserException &operator=( JsonParserException const &rhs ) = default;
+		}; // struct JsonParserException
 
+<<<<<<< HEAD
 			JsonParserException( JsonParserException && ) = default;
 
 			JsonParserException &operator=( JsonParserException const & ) = default;
@@ -56,10 +59,14 @@ namespace daw {
 		}; // struct JsonParserException
 
 		using json_obj = impl::value_t;
+=======
+		using json_obj = json_value_t;
+>>>>>>> v2
 
 		json_obj parse_json( char const *Begin, char const *End );
 
 		json_obj parse_json( boost::string_view const json_text );
+<<<<<<< HEAD
 
 		template<typename T>
 		T get( impl::value_t const & ); /*
@@ -83,5 +90,7 @@ namespace daw {
 
 		template<>
 		impl::array_value get<impl::array_value>( impl::value_t const &val );
+=======
+>>>>>>> v2
 	} // namespace json
 } // namespace daw

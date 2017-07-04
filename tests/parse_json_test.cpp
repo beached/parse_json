@@ -59,6 +59,10 @@ std::ostream &operator<<( std::ostream &os, Streamable const &value ) {
 	return os;
 }
 
+<<<<<<< HEAD
+=======
+/*
+>>>>>>> v2
 struct A : public daw::json::JsonLink<A> {
 	int a;
 	int b;
@@ -74,8 +78,8 @@ struct A : public daw::json::JsonLink<A> {
 	~A( );
 
 	void set_jsonlinks( ) {
-		link_integral( "a", a );
-		link_integral( "b", b );
+		link_integer( "a", a );
+		link_integer( "b", b );
 		link_real( "c", c );
 		link_array( "d", d );
 		link_boolean( "e", e );
@@ -135,7 +139,11 @@ struct C : public daw::json::JsonLink<C> {
 	~C( );
 
 	void set_jsonlinks( ) {
+<<<<<<< HEAD
 		link_integral( "a", a );
+=======
+		link_integer( "a", a );
+>>>>>>> v2
 	}
 };
 
@@ -155,6 +163,7 @@ auto fsize( Stream &stream ) -> decltype( stream.tellg( ) ) {
 	return result;
 }
 
+<<<<<<< HEAD
 // BOOST_AUTO_TEST_CASE( SimpleTest ) {
 //	B b;
 //	auto enc = b.to_string( );
@@ -174,6 +183,27 @@ auto fsize( Stream &stream ) -> decltype( stream.tellg( ) ) {
 //	BOOST_REQUIRE( test_umap == test_umap2 );
 //}
 //
+=======
+ BOOST_AUTO_TEST_CASE( SimpleTest ) {
+	B b;
+	auto enc = b.to_string( );
+	auto parsed = daw::json::parse_json( enc );
+	B c;
+	c.from_json_obj( parsed );
+	BOOST_CHECK_EQUAL( b, c );
+}
+
+ BOOST_AUTO_TEST_CASE( MapValues ) {
+	std::unordered_map<std::string, B> test_umap;
+	test_umap["a"] = B( );
+	auto enc = daw::json::generate::value_to_json( "test_umap", test_umap );
+	auto parsed = daw::json::parse_json( enc );
+	std::unordered_map<std::string, B> test_umap2;
+	daw::json::parse::json_to_value( test_umap2, *parsed );
+	BOOST_REQUIRE( test_umap == test_umap2 );
+}
+
+>>>>>>> v2
 struct Test : public daw::json::JsonLink<Test> {
 	int b;
 	double c;
@@ -182,7 +212,7 @@ struct Test : public daw::json::JsonLink<Test> {
 
   private:
 	void link_values( ) {
-		link_integral( "b", b );
+		link_integer( "b", b );
 		link_real( "c", c );
 		link_string( "d", d );
 		link_string( "e", e );
@@ -248,9 +278,14 @@ struct Test : public daw::json::JsonLink<Test> {
 };
 
 Test::~Test( ) {}
+<<<<<<< HEAD
+=======
+*/
+>>>>>>> v2
 
 int main( int, char ** ) {
-	C ccls;
+/*
+ 	C ccls;
 	std::cout << ccls.to_string( ) << std::endl;
 	ccls.a = 1;
 	std::cout << ccls.to_string( ) << std::endl;
@@ -282,6 +317,6 @@ int main( int, char ** ) {
 	} else {
 		auto g = from_file<Test>( "file.json" );
 	}
+	*/
 	return EXIT_SUCCESS;
 }
-

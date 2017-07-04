@@ -3,14 +3,14 @@
 // Copyright (c) 2014-2017 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -39,12 +39,14 @@ namespace daw {
 	}
 
 	namespace json {
-		using namespace generate;
-
 		std::string ts_to_string( std::time_t const &timestamp, std::string format ) {
 			char buffer[200];
 			std::tm tm = {};
+<<<<<<< HEAD
 			::daw::localtime_s( &timestamp, &tm );
+=======
+			daw::localtime_s( &timestamp, &tm );
+>>>>>>> v2
 			auto count = std::strftime( buffer, 200, format.c_str( ), &tm );
 			daw::exception::daw_throw_on_false( count < 200 );
 			return std::string( buffer, buffer + count + 1 );
@@ -113,6 +115,7 @@ namespace daw {
 				return "{ " + json_value.to_string( ) + " }";
 			}
 		} // namespace details
+<<<<<<< HEAD
 
 		namespace generate {
 			using namespace ::daw::json::details;
@@ -235,32 +238,41 @@ namespace daw {
 			//			}
 
 		} // namespace generate
+=======
+>>>>>>> v2
 
 		namespace parse {
 			// String
-			void json_to_value( std::string &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( std::string &to, daw::json::json_value_t const &from ) {
 				to = from.get_string( );
 			}
 
 			// Boolean
-			void json_to_value( bool &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( bool &to, daw::json::json_value_t const &from ) {
 				to = from.get_boolean( );
 			}
 
 			// Number, integer
-			void json_to_value( int64_t &to, ::daw::json::impl::value_t const &from ) {
-				to = from.get_integral( );
+			void json_to_value( int64_t &to, daw::json::json_value_t const &from ) {
+				to = from.get_integer( );
 			}
 
 			// Number, real
-			void json_to_value( double &to, ::daw::json::impl::value_t const &from ) {
+			void json_to_value( double &to, daw::json::json_value_t const &from ) {
 				to = from.get_real( );
 			}
 
+<<<<<<< HEAD
 			void json_to_value( float &to, ::daw::json::impl::value_t const &from ) {
+=======
+			void json_to_value( float &to, daw::json::json_value_t const &from ) {
+>>>>>>> v2
 				to = static_cast<float>( from.get_real( ) );
 			}
 		} // namespace parse
 	}     // namespace json
 } // namespace daw
+<<<<<<< HEAD
 
+=======
+>>>>>>> v2

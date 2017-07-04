@@ -11,12 +11,23 @@ find_package( Boost 1.60.0 COMPONENTS system filesystem regex iostreams unit_tes
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 /std:c++latest ) 
 else( )
+<<<<<<< HEAD
 	enable_testing( )
 	add_definitions( -DBOOST_TEST_DYN_LINK ) 
 	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
 		add_compile_options(-std=c++14 -Weverything -pthread -Wno-c++98-compat -g -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
 	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
 		add_compile_options(-std=c++14 -g -Wall -pthread -Wno-deprecated-declarations)
+=======
+	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" )
+		add_compile_options(-std=c++14 -pthread -Weverything -Wno-c++98-compat -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
+		add_compile_options(-std=c++14 -pthread -Wall -Wno-deprecated-declarations)
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+>>>>>>> v2
 	endif( )
 endif( )
 
@@ -76,23 +87,47 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw_json_interface.h
 	${HEADER_FOLDER}/daw_json_link.h
 	${HEADER_FOLDER}/daw_json_parser.h
+<<<<<<< HEAD
 	${HEADER_FOLDER}/value_t.h
+=======
+	${HEADER_FOLDER}/daw_json_value_t.h
+	${HEADER_FOLDER}/daw_value_to_json.h
+>>>>>>> v2
 )
 
 set( SOURCE_FILES
 	${SOURCE_FOLDER}/daw_json.cpp
-	${SOURCE_FOLDER}/daw_json_link.cpp
 	${SOURCE_FOLDER}/daw_json_parser.cpp
-	${SOURCE_FOLDER}/value_t.cpp
+	${SOURCE_FOLDER}/daw_json_value_t.cpp
+	${SOURCE_FOLDER}/daw_value_to_json.cpp
+)
+
+set( HEADER_FILES_v2
+	${HEADER_FOLDER}/daw_json_link_binding.h
+	${HEADER_FOLDER}/daw_json_parser_v2.h
+	${HEADER_FOLDER}/daw_json_parser_exception.h
+	${HEADER_FOLDER}/daw_json_parser_impl.h
+)
+
+set( SOURCE_FILES_v2
+	${SOURCE_FOLDER}/daw_json_parser_v2.cpp
+	${SOURCE_FOLDER}/daw_json_parser_v2_state.cpp
+	${SOURCE_FOLDER}/daw_json_parser_exception.cpp
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json header_libraries_prj char_range_prj date_prj )
 target_link_libraries( parse_json char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
+add_library ( parse_json_v2 STATIC ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
+add_dependencies( parse_json_v2 header_libraries_prj char_range_prj date_prj )
+target_link_libraries( parse_json_v2 char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+
 install( TARGETS parse_json DESTINATION lib )
+install( TARGETS parse_json_v2 DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
+<<<<<<< HEAD
 if( NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test.cpp )
 	add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj date_prj )
@@ -109,3 +144,30 @@ if( NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	target_link_libraries( json_link_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 	add_test( json_link_test json_link_test_bin )
 endif( )
+=======
+add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test.cpp )
+add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj date_prj )
+target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( parse_json_test parse_json_test_bin )
+
+add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${HEADER_FILES_v2} ${TEST_FOLDER}/parse_json_test_v2.cpp )
+add_dependencies( parse_json_test_v2_bin header_libraries_prj  )
+target_link_libraries( parse_json_test_v2_bin parse_json_v2 ${Boost_LIBRARIES} )
+add_test( parse_json_test_v2 parse_json_test_v2_bin )
+
+add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
+add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj date_prj )
+target_link_libraries( json_file_parser_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( json_file_parser_test json_file_parser_test_bin )
+
+add_executable( daw_json_link_v2_test_bin ${HEADER_FILES_v2} ${TEST_FOLDER}/daw_json_link_v2_test.cpp )
+add_dependencies( daw_json_link_v2_test_bin header_libraries_prj char_range_prj date_prj )
+target_link_libraries( daw_json_link_v2_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( daw_json_link_v2_test daw_json_link_v2_test_bin )
+
+add_executable( json_link_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_link_test.cpp )
+add_dependencies( json_link_test_bin header_libraries_prj char_range_prj date_prj )
+target_link_libraries( json_link_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( json_link_test json_link_test_bin )
+
+>>>>>>> v2
