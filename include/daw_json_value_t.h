@@ -92,7 +92,9 @@ namespace daw {
 
 		using json_array_value = std::vector<json_value_t>;
 
-		struct json_null_t final {};
+		struct json_null_t final {
+			constexpr json_null_t( ) noexcept { }
+		};
 
 		struct json_value_t {
 			using null_t = json_null_t;
