@@ -48,72 +48,6 @@ namespace daw {
 
 		std::string enquote( boost::string_view value );
 
-<<<<<<< HEAD
-		namespace generate {
-			//////////////////////////////////////////////////////////////////////////
-			/// Summary: Convert an optionally named value to a json string
-
-			std::string value_to_json( boost::string_view name, std::string const &value );
-
-			std::string value_to_json( boost::string_view name, bool value );
-
-			std::string value_to_json( boost::string_view name );           // Null
-			std::string undefined_value_to_json( boost::string_view name ); // undefined
-			std::string value_to_json( boost::string_view name, double const &value );
-
-			std::string value_to_json( boost::string_view name, int32_t const &value );
-
-			std::string value_to_json( boost::string_view name, uint32_t const &value );
-
-			std::string value_to_json( boost::string_view name, int64_t const &value );
-
-			std::string value_to_json( boost::string_view name, uint64_t const &value );
-
-			std::string value_to_json_object( boost::string_view name, ::daw::json::impl::object_value const &object );
-
-			std::string value_to_json( boost::string_view name, ::daw::json::impl::value_t const &value );
-
-			// Template value_to_json Declarations
-			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long> = 0>
-			std::string value_to_json( boost::string_view name, Container const &values );
-
-			template<typename First, typename Second>
-			std::string value_to_json( boost::string_view name, std::pair<First, Second> const &value );
-
-			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int> = 0>
-			std::string value_to_json_number( boost::string_view name, Number const &value );
-
-			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int> = 0>
-			std::string value_to_json_number( boost::string_view name, Number const &value );
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, boost::optional<T> const &value );
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional<T> const &value );
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional_poly<T> const &value );
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::shared_ptr<T> const &value );
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::weak_ptr<T> const &value );
-		} // namespace generate
-
-		namespace parse {
-			void json_to_value( bool &to, ::daw::json::impl::value_t const &from );
-
-			void json_to_value( double &to, ::daw::json::impl::value_t const &from );
-
-			void json_to_value( float &to, ::daw::json::impl::value_t const &from );
-
-			void json_to_value( int64_t &to, ::daw::json::impl::value_t const &from );
-
-			void json_to_value( std::string &to, ::daw::json::impl::value_t const &from );
-=======
 		namespace parse {
 			void json_to_value( bool &to, daw::json::json_value_t const &from );
 
@@ -124,31 +58,10 @@ namespace daw {
 			void json_to_value( int64_t &to, daw::json::json_value_t const &from );
 
 			void json_to_value( std::string &to, daw::json::json_value_t const &from );
->>>>>>> v2
 
 			// Template json_to_value declarations
 			template<typename Container,
 			         typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long> = 0>
-<<<<<<< HEAD
-			void json_to_value( Container &to, ::daw::json::impl::value_t const &from );
-
-			template<typename Key, typename Value>
-			void json_to_value( std::pair<Key, Value> &to, ::daw::json::impl::value_t const &from );
-
-			template<typename MapContainer,
-			         typename std::enable_if_t<daw::traits::is_map_like<MapContainer>::value, long> = 0>
-			void json_to_value( MapContainer &to, ::daw::json::impl::value_t const &from );
-
-			template<typename T, typename std::enable_if_t<
-			                         std::is_integral<T>::value && !std::is_same<T, int64_t>::value, long> = 0>
-			void json_to_value( T &to, ::daw::json::impl::value_t const &from );
-
-			template<typename T>
-			void json_to_value( boost::optional<T> &to, ::daw::json::impl::value_t const &from );
-
-			template<typename T>
-			void json_to_value( std::shared_ptr<T> &to, ::daw::json::impl::value_t const &from );
-=======
 			void json_to_value( Container &to, daw::json::json_value_t const &from );
 
 			template<typename Key, typename Value>
@@ -167,7 +80,6 @@ namespace daw {
 
 			template<typename T>
 			void json_to_value( std::shared_ptr<T> &to, daw::json::json_value_t const &from );
->>>>>>> v2
 
 			GENERATE_HAS_MEMBER_FUNCTION_TRAIT( decode );
 

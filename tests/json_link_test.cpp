@@ -67,13 +67,8 @@ std::ostream &operator<<( std::ostream &os, Streamable const &value ) {
 /*
 
 struct A : public daw::json::JsonLink<A> {
-<<<<<<< HEAD
-	int integral_01;
-	boost::optional<int> integral_02;
-=======
 	int integer_01;
 	boost::optional<int> integer_02;
->>>>>>> v2
 	double real_01;
 	boost::optional<double> real_02;
 	std::vector<int> array_01;
@@ -94,13 +89,8 @@ struct A : public daw::json::JsonLink<A> {
 
 	A( )
 	    : JsonLink<A>{}
-<<<<<<< HEAD
-	    , integral_01{}
-	    , integral_02{}
-=======
 	    , integer_01{}
 	    , integer_02{}
->>>>>>> v2
 	    , real_01{}
 	    , real_02{}
 	    , array_01{}
@@ -160,11 +150,7 @@ struct A : public daw::json::JsonLink<A> {
 	}
 }; // A
 
-<<<<<<< HEAD
-A::~A( ) {}
-=======
 A::~A( ) = default;
->>>>>>> v2
 
 struct B : public daw::json::JsonLink<B> {
 	A object_01;
@@ -175,11 +161,7 @@ struct B : public daw::json::JsonLink<B> {
 		set_jsonlinks( );
 	}
 
-<<<<<<< HEAD
-	~B( );
-=======
 	~B( ) final;
->>>>>>> v2
 
 	void set_jsonlinks( ) {
 		link_object( "object_01", object_01 );
@@ -187,11 +169,7 @@ struct B : public daw::json::JsonLink<B> {
 	}
 }; // B
 
-<<<<<<< HEAD
-B::~B( ) {}
-=======
 B::~B( ) = default;
->>>>>>> v2
 
 struct empty : public daw::json::JsonLink<empty> {
 	empty( ) : daw::json::JsonLink<empty>{} {}
@@ -203,12 +181,8 @@ struct empty : public daw::json::JsonLink<empty> {
 	~empty( ) final;
 };
 
-<<<<<<< HEAD
-empty::~empty( ) {}
-=======
 empty::~empty( ) = default;
 */
->>>>>>> v2
 
 int main( int, char ** ) {
 	/*
@@ -228,9 +202,6 @@ int main( int, char ** ) {
 	std::cout << "sizeof( empty )->" << sizeof( empty ) << '\n';
 	std::cout << "sizeof( B )->" << sizeof( B ) << '\n';
 	std::cout << obj_b_03.object_01.streamable_01.a << std::endl;
-<<<<<<< HEAD
-=======
 	*/
->>>>>>> v2
 	return EXIT_SUCCESS;
 }

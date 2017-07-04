@@ -42,115 +42,16 @@
 
 namespace daw {
 	namespace json {
-<<<<<<< HEAD
-		namespace generate {
-			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long>>
-
-			std::string value_to_json( boost::string_view name, Container const &values ) {
-				boost::string_view const empty_str{""};
-				std::stringstream result;
-				result << ::daw::json::details::json_name( name ) << "[ ";
-				{
-					auto values_range = daw::range::make_range( values.begin( ), values.end( ) );
-					if( !values_range.empty( ) ) {
-						result << value_to_json( empty_str, *values_range.begin( ) );
-						values_range.move_next( );
-						for( auto item : values_range ) {
-							result << "," << value_to_json( empty_str, item );
-						}
-					}
-				}
-				result << " ]";
-				return result.str( );
-			}
-
-			template<typename First, typename Second>
-			std::string value_to_json( boost::string_view name, std::pair<First, Second> const &value ) {
-				std::string result = daw::json::details::json_name( name ) + "{ ";
-				result += value_to_json( "key", value.first ) + ", ";
-				result += value_to_json( "value", value.second ) + " }";
-				return result;
-			}
-
-			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
-			std::string value_to_json_number( boost::string_view name, Number const &value ) {
-				std::stringstream ss;
-				ss << ::daw::json::details::json_name( name );
-				ss << std::setprecision( std::numeric_limits<Number>::max_digits10 ) << value;
-				return ss.str( );
-			}
-
-			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int>>
-
-			std::string value_to_json_number( boost::string_view name, Number const &value ) {
-				return ::daw::json::details::json_name( name ) + std::to_string( value );
-			}
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, boost::optional<T> const &value ) {
-				if( value ) {
-					return value_to_json( name, *value );
-				}
-				return value_to_json( name );
-			}
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional<T> const &value ) {
-				if( value ) {
-					return value_to_json( name, *value );
-				}
-				return value_to_json( name );
-			}
-
-			template<typename T>
-			std::string value_to_json( boost::string_view name, daw::optional_poly<T> const &value ) {
-				if( value ) {
-					return value_to_json( name, *value );
-				}
-				return value_to_json( name );
-			}
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::shared_ptr<T> const &value ) {
-				if( !value ) {
-					value_to_json( name );
-				}
-				value_to_json( name, *value );
-			}
-
-			template<typename T>
-			void value_to_json( boost::string_view name, std::weak_ptr<T> const &value ) {
-				if( !value.expired( ) ) {
-					auto const shared_value = value.lock( );
-					if( !shared_value ) {
-						value_to_json( name );
-					}
-					value_to_json( name, *shared_value );
-				}
-			}
-		} // namespace generate
-
-		namespace parse {
-			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long>>
-			void json_to_value( Container &to, ::daw::json::impl::value_t const &from ) {
-=======
 		namespace parse {
 			template<typename Container,
 			         typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long>>
 			void json_to_value( Container &to, daw::json::json_value_t const &from ) {
->>>>>>> v2
 				static_assert( !std::is_const<Container>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_array( ) );
 				auto const &source_array = from.get_array( );
 				to.clear( );
 				std::transform( std::begin( source_array ), std::end( source_array ), std::back_inserter( to ),
-<<<<<<< HEAD
-				                [](::daw::json::impl::value_t const &value ) {
-=======
 				                []( daw::json::json_value_t const &value ) {
->>>>>>> v2
 					                typename Container::value_type tmp;
 					                json_to_value( tmp, value );
 					                return tmp;
@@ -158,11 +59,7 @@ namespace daw {
 			}
 
 			template<typename Key, typename Value>
-<<<<<<< HEAD
-			void json_to_value( std::pair<Key, Value> &to, ::daw::json::impl::value_t const &from ) {
-=======
 			void json_to_value( std::pair<Key, Value> &to, daw::json::json_value_t const &from ) {
->>>>>>> v2
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_object( ) );
 
@@ -180,21 +77,13 @@ namespace daw {
 
 			template<typename MapContainer,
 			         typename std::enable_if_t<daw::traits::is_map_like<MapContainer>::value, long>>
-<<<<<<< HEAD
-			void json_to_value( MapContainer &to, ::daw::json::impl::value_t const &from ) {
-=======
 			void json_to_value( MapContainer &to, daw::json::json_value_t const &from ) {
->>>>>>> v2
 				static_assert( !std::is_const<MapContainer>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_array( ) );
 				auto const &source_array = from.get_array( );
 				to.clear( );
 				std::transform( std::begin( source_array ), std::end( source_array ),
-<<<<<<< HEAD
-				                std::inserter( to, std::end( to ) ), [](::daw::json::impl::value_t const &value ) {
-=======
 				                std::inserter( to, std::end( to ) ), []( daw::json::json_value_t const &value ) {
->>>>>>> v2
 					                using key_t = typename std::decay<typename MapContainer::key_type>::type;
 					                using value_t = typename std::decay<typename MapContainer::mapped_type>::type;
 					                std::pair<key_t, value_t> tmp;
@@ -204,15 +93,6 @@ namespace daw {
 			}
 
 			template<typename T,
-<<<<<<< HEAD
-			         typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, int64_t>::value, long>>
-			void json_to_value( T &to, ::daw::json::impl::value_t const &from ) {
-				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
-				daw::exception::daw_throw_on_false( from.is_integral( ) );
-				auto result = get<int64_t>( from );
-				daw::exception::daw_throw_on_false( static_cast<int64_t>( std::numeric_limits<T>::max( ) ) >= result );
-				daw::exception::daw_throw_on_false( static_cast<int64_t>( std::numeric_limits<T>::min( ) ) <= result );
-=======
 			         typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, json_value_t::integer_t>::value, long>>
 			void json_to_value( T &to, daw::json::json_value_t const &from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
@@ -220,16 +100,11 @@ namespace daw {
 				auto result = from.get_integer( );
 				daw::exception::daw_throw_on_false( static_cast<json_value_t::integer_t >( std::numeric_limits<T>::max( ) ) >= result );
 				daw::exception::daw_throw_on_false( static_cast<json_value_t::integer_t>( std::numeric_limits<T>::min( ) ) <= result );
->>>>>>> v2
 				to = static_cast<T>( result );
 			}
 
 			template<typename T>
-<<<<<<< HEAD
-			void json_to_value( boost::optional<T> &to, ::daw::json::impl::value_t const &from ) {
-=======
 			void json_to_value( boost::optional<T> &to, daw::json::json_value_t const &from ) {
->>>>>>> v2
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
 				if( from.is_null( ) ) {
 					to.reset( );
@@ -241,11 +116,7 @@ namespace daw {
 			}
 
 			template<typename T>
-<<<<<<< HEAD
-			void json_to_value( std::shared_ptr<T> &to, ::daw::json::impl::value_t const &from ) {
-=======
 			void json_to_value( std::shared_ptr<T> &to, daw::json::json_value_t const &from ) {
->>>>>>> v2
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( to );
 				if( from.is_null( ) ) {

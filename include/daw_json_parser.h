@@ -50,47 +50,10 @@ namespace daw {
 			JsonParserException &operator=( JsonParserException const &rhs ) = default;
 		}; // struct JsonParserException
 
-<<<<<<< HEAD
-			JsonParserException( JsonParserException && ) = default;
-
-			JsonParserException &operator=( JsonParserException const & ) = default;
-
-			JsonParserException &operator=( JsonParserException && ) = default;
-		}; // struct JsonParserException
-
-		using json_obj = impl::value_t;
-=======
 		using json_obj = json_value_t;
->>>>>>> v2
 
 		json_obj parse_json( char const *Begin, char const *End );
 
 		json_obj parse_json( boost::string_view const json_text );
-<<<<<<< HEAD
-
-		template<typename T>
-		T get( impl::value_t const & ); /*
-		                                        static_assert(false, "Unsupported get type called");
-		                                        }*/
-
-		template<>
-		int64_t get<int64_t>( impl::value_t const &val );
-
-		template<>
-		double get<double>( impl::value_t const &val );
-
-		template<>
-		std::string get<std::string>( impl::value_t const &val );
-
-		template<>
-		bool get<bool>( impl::value_t const &val );
-
-		template<>
-		impl::object_value get<impl::object_value>( impl::value_t const &val );
-
-		template<>
-		impl::array_value get<impl::array_value>( impl::value_t const &val );
-=======
->>>>>>> v2
 	} // namespace json
 } // namespace daw

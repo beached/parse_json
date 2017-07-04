@@ -3,10 +3,7 @@
 This is mainly a serialization/deserializatio library that allows your to easily use json as the transport medium.
 
 ```c++
-<<<<<<< HEAD
-=======
 #include <cstdlib>
->>>>>>> v2
 #include <string>
 
 #include <daw/json/daw_json_link.h>

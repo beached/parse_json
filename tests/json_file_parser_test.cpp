@@ -35,12 +35,8 @@
 
 using namespace daw::json;
 
-<<<<<<< HEAD
-bool path_begins_with( boost::filesystem::path const &p, std::string str ) {
-=======
 template<typename String>
 bool path_begins_with( boost::filesystem::path const &p, String const &str ) {
->>>>>>> v2
 	auto const &fname = p.filename( ).string( );
 	return 0 == fname.find( str );
 }
@@ -54,11 +50,7 @@ BOOST_AUTO_TEST_CASE( test_files ) {
 		std::cout << "Testing: " << path.stem( ) << '\n';
 		bool success = false;
 		try {
-<<<<<<< HEAD
-			daw::filesystem::MemoryMappedFile<char> json_file{path.string( )};
-=======
 			auto json_file = daw::filesystem::MemoryMappedFile<char>( path );
->>>>>>> v2
 			if( json_file ) {
 				volatile auto const json_obj = daw::json::parse_json( json_file.cbegin( ), json_file.cend( ) );
 				success = true;
