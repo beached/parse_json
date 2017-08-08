@@ -445,7 +445,7 @@ namespace daw {
 				}
 				throw std::runtime_error( "file not found" );
 			}
-			daw::filesystem::MemoryMappedFile<char> in_file{file_name};
+			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
 			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
 
 			auto const json_value = parse_json( in_file.begin( ), in_file.end( ) );
@@ -484,7 +484,7 @@ namespace daw {
 				}
 				throw std::runtime_error( "file not found" );
 			}
-			daw::filesystem::MemoryMappedFile<char> in_file{file_name};
+			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
 			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
 			json_value_t json_value;
 			try {
@@ -504,7 +504,7 @@ namespace daw {
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
 		Derived from_file( boost::string_view file_name ) {
-			daw::filesystem::MemoryMappedFile<char> in_file{file_name};
+			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
 			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
 
 			auto const json_value = parse_json( in_file.begin( ), in_file.end( ) );
