@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include <boost/utility/string_view_fwd.hpp>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -30,6 +29,7 @@
 
 #include <daw/daw_function_iterator.h>
 #include <daw/daw_memory_mapped_file.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 #include <daw/daw_utility.h>
 
@@ -50,7 +50,7 @@ namespace daw {
 
 			std::string to_json_integer( json_value_t::integer_t i );
 			std::string to_json_real( json_value_t::real_t d );
-			std::string to_json_string( boost::string_view s );
+			std::string to_json_string( daw::string_view s );
 			std::string to_json_boolean( bool b );
 			std::string to_json_null( );
 
@@ -206,7 +206,7 @@ namespace daw {
 				}
 			}
 
-			static void add_json_map( boost::string_view name, mapping_functions_t m ) {
+			static void add_json_map( daw::string_view name, mapping_functions_t m ) {
 				get_map( )[name.to_string( )] = std::move( m );
 			}
 
@@ -222,7 +222,7 @@ namespace daw {
 			json_link( ) = default;
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_integer_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_integer_fn( daw::string_view name, GetFunction get_function,
 			                                  SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -240,8 +240,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_real_fn( boost::string_view name, GetFunction get_function,
-			                               SetFunction set_function ) {
+			static void json_link_real_fn( daw::string_view name, GetFunction get_function, SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
 					return impl::to_json_real( get_function( obj ) );
@@ -256,7 +255,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_string_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_string_fn( daw::string_view name, GetFunction get_function,
 			                                 SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -272,7 +271,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_boolean_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_boolean_fn( daw::string_view name, GetFunction get_function,
 			                                  SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -288,7 +287,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_integer_array_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_integer_array_fn( daw::string_view name, GetFunction get_function,
 			                                        SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -303,7 +302,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_real_array_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_real_array_fn( daw::string_view name, GetFunction get_function,
 			                                     SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -318,7 +317,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_boolean_array_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_boolean_array_fn( daw::string_view name, GetFunction get_function,
 			                                        SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -333,7 +332,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_string_array_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_string_array_fn( daw::string_view name, GetFunction get_function,
 			                                       SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
@@ -348,7 +347,7 @@ namespace daw {
 			}
 
 			template<typename GetFunction, typename SetFunction>
-			static void json_link_object_fn( boost::string_view name, GetFunction get_function,
+			static void json_link_object_fn( daw::string_view name, GetFunction get_function,
 			                                 SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 
@@ -390,7 +389,7 @@ namespace daw {
 				return ss.str( );
 			}
 
-			static bool has_key( boost::string_view name ) {
+			static bool has_key( daw::string_view name ) {
 				return get_json_maps( ).count( name.to_string( ) ) > 0;
 			}
 
@@ -414,7 +413,7 @@ namespace daw {
 				return result;
 			}
 
-			static Derived from_json_string( boost::string_view json_string ) {
+			static Derived from_json_string( daw::string_view json_string ) {
 				auto const json_value = parse_json( json_string );
 				daw::exception::daw_throw_on_false( json_value.is_object( ), "Only JsonObjects can be deserialized" );
 				return from_json_value( json_value );
@@ -438,7 +437,7 @@ namespace daw {
 		}; // json_link
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
-		Derived from_file( boost::string_view file_name, bool use_default_on_error ) {
+		Derived from_file( daw::string_view file_name, bool use_default_on_error ) {
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
 					return Derived{};
@@ -472,12 +471,12 @@ namespace daw {
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
-		std::vector<Derived> array_from_string( boost::string_view data, bool use_default_on_error ) {
+		std::vector<Derived> array_from_string( daw::string_view data, bool use_default_on_error ) {
 			return array_from_json_value<Derived>( parse_json( data ) );
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
-		std::vector<Derived> array_from_file( boost::string_view file_name, bool use_default_on_error ) {
+		std::vector<Derived> array_from_file( daw::string_view file_name, bool use_default_on_error ) {
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
 					return std::vector<Derived>{};
@@ -503,7 +502,7 @@ namespace daw {
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<json_link<Derived>, Derived>::value>>
-		Derived from_file( boost::string_view file_name ) {
+		Derived from_file( daw::string_view file_name ) {
 			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
 			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
 
@@ -512,7 +511,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		void to_file( boost::string_view file_name, json_link<Derived> const &obj, bool overwrite ) {
+		void to_file( daw::string_view file_name, json_link<Derived> const &obj, bool overwrite ) {
 
 			// obj.to_file( file_name, overwrite );
 		}

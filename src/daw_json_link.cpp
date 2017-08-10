@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <daw/daw_string_view.h>
+
 #include "daw_json_link.h"
 
 namespace daw {
@@ -35,7 +37,7 @@ namespace daw {
 				return to_string( d );
 			}
 
-			std::string to_json_string( boost::string_view s ) {
+			std::string to_json_string( daw::string_view s ) {
 				std::string result;
 				result = "\"" + s.to_string( ) + "\"";
 				return result;
@@ -52,4 +54,3 @@ namespace daw {
 		} // namespace impl
 	}     // namespace json
 } // namespace daw
-

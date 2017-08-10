@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 #include <cstdint>
 #include <iterator>
 #include <string>
@@ -32,6 +31,7 @@
 #include <daw/daw_exception.h>
 #include <daw/daw_operators.h>
 #include <daw/daw_range.h>
+#include <daw/daw_string_view.h>
 
 #include "daw_json_value_t.h"
 
@@ -76,7 +76,7 @@ namespace daw {
 
 		json_value_t::json_value_t( json_value_t::real_t value ) noexcept : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( boost::string_view value ) : m_value{string_t{value}} {}
+		json_value_t::json_value_t( daw::string_view value ) : m_value{string_t{value}} {}
 
 		json_value_t::json_value_t( json_value_t::string_t value ) noexcept : m_value{std::move( value )} {}
 
@@ -84,11 +84,11 @@ namespace daw {
 
 		json_value_t::json_value_t( json_value_t::null_t ) noexcept : m_value{null_t{}} {}
 
-		json_value_t::json_value_t( json_value_t::array_t value )
-		    noexcept: m_value{json_value_t::array_t{std::move( value )}} {}
+		json_value_t::json_value_t( json_value_t::array_t value ) noexcept
+		    : m_value{json_value_t::array_t{std::move( value )}} {}
 
-		json_value_t::json_value_t( json_value_t::object_t value )
-		    noexcept: m_value{json_value_t::object_t{std::move( value )}} {}
+		json_value_t::json_value_t( json_value_t::object_t value ) noexcept
+		    : m_value{json_value_t::object_t{std::move( value )}} {}
 
 		json_value_t::json_value_t( json_value_t const &other ) : m_value{other.m_value} {}
 
@@ -113,7 +113,7 @@ namespace daw {
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( boost::string_view rhs ) noexcept {
+		json_value_t &json_value_t::operator=( daw::string_view rhs ) noexcept {
 			m_value = json_string_value{rhs};
 			return *this;
 		}
@@ -129,7 +129,7 @@ namespace daw {
 		}
 
 		json_value_t &json_value_t::operator=( json_value_t::null_t ) noexcept {
-			m_value = null_t{ };
+			m_value = null_t{};
 			return *this;
 		}
 
@@ -146,30 +146,26 @@ namespace daw {
 		json_value_t::~json_value_t( ) {}
 
 		bool const &json_value_t::get_boolean( ) const {
-			daw::exception::daw_throw_on_false( is_boolean( ), "Unexpected value type(" +
-			                                                       daw::json::to_string( type( ) ) +
-			                                                       "), expected boolean" );
+			daw::exception::daw_throw_on_false(
+			    is_boolean( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "), expected boolean" );
 			return boost::get<boolean_t>( m_value );
 		}
 
 		bool &json_value_t::get_boolean( ) {
-			daw::exception::daw_throw_on_false( is_boolean( ), "Unexpected value type(" +
-			                                                       daw::json::to_string( type( ) ) +
-			                                                       "), expected boolean" );
+			daw::exception::daw_throw_on_false(
+			    is_boolean( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "), expected boolean" );
 			return boost::get<boolean_t>( m_value );
 		}
 
 		json_value_t::integer_t json_value_t::get_integer( ) const {
-			daw::exception::daw_throw_on_false( is_integer( ), "Unexpected value type(" +
-			                                                       daw::json::to_string( type( ) ) +
-			                                                       "),expected integer" );
+			daw::exception::daw_throw_on_false(
+			    is_integer( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected integer" );
 			return boost::get<integer_t>( m_value );
 		}
 
 		json_value_t::real_t json_value_t::get_real( ) const {
-			daw::exception::daw_throw_on_false( is_numeric( ), "Unexpected value type(" +
-			                                                       daw::json::to_string( type( ) ) +
-			                                                       "),expected numeric" );
+			daw::exception::daw_throw_on_false(
+			    is_numeric( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected numeric" );
 			using namespace boost;
 			using namespace daw;
 			struct get_real_t final {
@@ -198,7 +194,7 @@ namespace daw {
 			return apply_visitor( get_real_t{} );
 		}
 
-		std::string to_string( boost::string_view const &str ) {
+		std::string to_string( daw::string_view const &str ) {
 			return str.to_string( );
 		}
 
@@ -263,14 +259,14 @@ namespace daw {
 		}
 
 		json_array_value const &json_value_t::get_array( ) const {
-			daw::exception::daw_throw_on_false(
-			    is_array( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected array" );
+			daw::exception::daw_throw_on_false( is_array( ), "Unexpected value type(" +
+			                                                     daw::json::to_string( type( ) ) + "),expected array" );
 			return boost::get<json_array_value>( m_value );
 		}
 
 		json_array_value &json_value_t::get_array( ) {
-			daw::exception::daw_throw_on_false(
-			    is_array( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected array" );
+			daw::exception::daw_throw_on_false( is_array( ), "Unexpected value type(" +
+			                                                     daw::json::to_string( type( ) ) + "),expected array" );
 			return boost::get<json_array_value>( m_value );
 		}
 
@@ -340,7 +336,7 @@ namespace daw {
 
 		json_object_value::~json_object_value( ) {}
 
-		json_object_value::iterator json_object_value::find( boost::string_view key ) {
+		json_object_value::iterator json_object_value::find( daw::string_view key ) {
 			auto const k = key.to_string( );
 			return std::find_if( members_v.begin( ), members_v.end( ), [&]( json_object_value_item const &item ) {
 				// hack be here
@@ -349,7 +345,7 @@ namespace daw {
 			} );
 		}
 
-		json_object_value::const_iterator json_object_value::find( boost::string_view key ) const {
+		json_object_value::const_iterator json_object_value::find( daw::string_view key ) const {
 			auto const k = key.to_string( );
 			return std::find_if( members_v.begin( ), members_v.end( ), [&]( json_object_value_item const &item ) {
 				// hack be here
@@ -358,11 +354,11 @@ namespace daw {
 			} );
 		}
 
-		bool json_object_value::has_member( boost::string_view key ) const {
+		bool json_object_value::has_member( daw::string_view key ) const {
 			return find( key ) != end( );
 		}
 
-		boost::optional<json_value_t> json_object_value::operator( )( boost::string_view key ) const {
+		boost::optional<json_value_t> json_object_value::operator( )( daw::string_view key ) const {
 			auto it = find( key );
 			if( it != end( ) ) {
 				return boost::optional<json_value_t>{it->second};
@@ -370,7 +366,7 @@ namespace daw {
 			return {};
 		}
 
-		json_object_value::mapped_type &json_object_value::operator[]( boost::string_view key ) {
+		json_object_value::mapped_type &json_object_value::operator[]( daw::string_view key ) {
 			auto pos = find( key );
 			if( end( ) == pos ) {
 				pos = insert( pos, make_object_value_item( range::create_char_range( key ), json_value_t{} ) );
@@ -378,7 +374,7 @@ namespace daw {
 			return pos->second;
 		}
 
-		json_object_value::mapped_type const &json_object_value::operator[]( boost::string_view key ) const {
+		json_object_value::mapped_type const &json_object_value::operator[]( daw::string_view key ) const {
 			auto pos = find( key );
 			if( end( ) == pos ) {
 				throw std::out_of_range( "Attempt to access an undefined value in a const object" );
@@ -427,11 +423,8 @@ namespace daw {
 
 		template<>
 		json_value_t::null_t get<json_value_t::null_t>( daw::json::json_value_t const & ) {
-			return json_value_t::null_t{ };
+			return json_value_t::null_t{};
 		}
-
-
-
 
 		create_comparison_operators( json_value_t );
 	} // namespace json

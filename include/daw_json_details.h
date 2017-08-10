@@ -23,7 +23,6 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/utility/string_view.hpp>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -35,6 +34,7 @@
 #include <daw/daw_optional.h>
 #include <daw/daw_optional_poly.h>
 #include <daw/daw_range.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
 #include "daw_json_interface.h"
@@ -93,13 +93,16 @@ namespace daw {
 			}
 
 			template<typename T,
-			         typename std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, json_value_t::integer_t>::value, long>>
+			         typename std::enable_if_t<
+			             std::is_integral<T>::value && !std::is_same<T, json_value_t::integer_t>::value, long>>
 			void json_to_value( T &to, daw::json::json_value_t const &from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_integer( ) );
 				auto result = from.get_integer( );
-				daw::exception::daw_throw_on_false( static_cast<json_value_t::integer_t >( std::numeric_limits<T>::max( ) ) >= result );
-				daw::exception::daw_throw_on_false( static_cast<json_value_t::integer_t>( std::numeric_limits<T>::min( ) ) <= result );
+				daw::exception::daw_throw_on_false(
+				    static_cast<json_value_t::integer_t>( std::numeric_limits<T>::max( ) ) >= result );
+				daw::exception::daw_throw_on_false(
+				    static_cast<json_value_t::integer_t>( std::numeric_limits<T>::min( ) ) <= result );
 				to = static_cast<T>( result );
 			}
 
@@ -129,7 +132,7 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<has_decode_member<T>::value, long>>
-			T decode_to_new( boost::string_view json_values ) {
+			T decode_to_new( daw::string_view json_values ) {
 				T result;
 				result.decode( json_values );
 				return result;

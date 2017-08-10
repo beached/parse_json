@@ -23,7 +23,6 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/variant.hpp>
 #include <cstdint>
 #include <memory>
@@ -32,6 +31,7 @@
 
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_common_mixins.h>
+#include <daw/daw_string_view.h>
 #include <typeindex>
 
 namespace daw {
@@ -68,20 +68,20 @@ namespace daw {
 				return members_v;
 			}
 
-			boost::optional<json_value_t> operator( )( boost::string_view key ) const;
+			boost::optional<json_value_t> operator( )( daw::string_view key ) const;
 
 			using key_type = std::string;
 			using mapped_type = json_value_t;
 
-			iterator find( boost::string_view key );
+			iterator find( daw::string_view key );
 
-			const_iterator find( boost::string_view key ) const;
+			const_iterator find( daw::string_view key ) const;
 
-			bool has_member( boost::string_view key ) const;
+			bool has_member( daw::string_view key ) const;
 
-			mapped_type &operator[]( boost::string_view key );
+			mapped_type &operator[]( daw::string_view key );
 
-			mapped_type const &operator[]( boost::string_view key ) const;
+			mapped_type const &operator[]( daw::string_view key ) const;
 
 			inline void shrink_to_fit( ) {
 				members_v.shrink_to_fit( );
@@ -93,7 +93,7 @@ namespace daw {
 		using json_array_value = std::vector<json_value_t>;
 
 		struct json_null_t final {
-			constexpr json_null_t( ) noexcept { }
+			constexpr json_null_t( ) noexcept {}
 		};
 
 		struct json_value_t {
@@ -115,7 +115,7 @@ namespace daw {
 
 			explicit json_value_t( real_t value ) noexcept;
 
-			json_value_t( boost::string_view value );
+			json_value_t( daw::string_view value );
 
 			explicit json_value_t( string_t value ) noexcept;
 
@@ -140,7 +140,7 @@ namespace daw {
 
 			json_value_t &operator=( json_value_t::real_t rhs ) noexcept;
 
-			json_value_t &operator=( boost::string_view rhs ) noexcept;
+			json_value_t &operator=( daw::string_view rhs ) noexcept;
 
 			json_value_t &operator=( json_value_t::string_t rhs ) noexcept;
 

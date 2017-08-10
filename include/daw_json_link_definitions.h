@@ -26,7 +26,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
-#include <boost/utility/string_view.hpp>
 #include <chrono>
 #include <date/date.h>
 #include <date/tz.h>
@@ -47,6 +46,7 @@
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_optional.h>
 #include <daw/daw_optional_poly.h>
+#include <daw/daw_string_view.h>
 
 #include "daw_json.h"
 #include "daw_json_parser.h"
@@ -60,7 +60,7 @@ namespace daw {
 				std::string name_copy;
 				GetFunction get_function;
 
-				standard_encoder_t( boost::string_view n, GetFunction func )
+				standard_encoder_t( daw::string_view n, GetFunction func )
 				    : name_copy{n.to_string( )}, get_function{std::move( func )} {}
 
 				standard_encoder_t( ) = delete;
@@ -78,13 +78,13 @@ namespace daw {
 			}; // standard_encoder_t
 
 			template<typename Derived, typename GetFunction>
-			standard_encoder_t<Derived, GetFunction> make_standard_encoder( boost::string_view name,
+			standard_encoder_t<Derived, GetFunction> make_standard_encoder( daw::string_view name,
 			                                                                GetFunction get_function ) {
 				return standard_encoder_t<Derived, GetFunction>{name, get_function};
 			}
 
 			template<typename Derived, typename GetFunction>
-			standard_encoder_t<Derived, GetFunction> make_standard_decoder( boost::string_view name,
+			standard_encoder_t<Derived, GetFunction> make_standard_decoder( daw::string_view name,
 			                                                                GetFunction get_function ) {
 				return standard_decoder_t<Derived, GetFunction>{name, get_function};
 			}
@@ -100,7 +100,7 @@ namespace daw {
 		void json_to_value( JsonLink<Derived> &to, json_value_t const &from );
 
 		template<typename Derived>
-		daw::json::json_value_t get_schema( boost::string_view name, JsonLink<Derived> const &obj );
+		daw::json::json_value_t get_schema( daw::string_view name, JsonLink<Derived> const &obj );
 
 		template<typename Derived>
 		impl::bind_functions_t<Derived>::bind_functions_t( ) : encode{nullptr}, decode{nullptr} {}
@@ -109,11 +109,11 @@ namespace daw {
 		impl::data_description_t<Derived>::data_description_t( ) : json_type{nullptr}, bind_functions{} {}
 
 		template<typename Derived>
-		impl::data_t<Derived>::data_t( boost::string_view name ) : m_name{name.to_string( )}, m_data_map{} {}
+		impl::data_t<Derived>::data_t( daw::string_view name ) : m_name{name.to_string( )}, m_data_map{} {}
 
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_value( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_value( daw::string_view name, GetFunction get_function ) {
 			using value_t = std::decay_t<decltype( std::declval<GetFunction>( )( std::declval<Derived>( ) ) )>;
 			value_t value;
 			set_name( value, name );
@@ -172,7 +172,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::from_json_string( boost::string_view const json_text ) {
+		void JsonLink<Derived>::from_json_string( daw::string_view const json_text ) {
 			auto tmp = parse_json( json_text );
 			from_json_obj( std::move( tmp ) );
 		}
@@ -184,7 +184,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::to_json_file( boost::string_view filename, bool overwrite ) const {
+		void JsonLink<Derived>::to_json_file( daw::string_view filename, bool overwrite ) const {
 			daw::exception::daw_throw_on_false( !filename.empty( ) );
 			auto fname = filename.to_string( );
 			if( !overwrite && boost::filesystem::exists( fname.c_str( ) ) ) {
@@ -202,7 +202,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::from_json_file( boost::string_view filename ) {
+		void JsonLink<Derived>::from_json_file( daw::string_view filename ) {
 			std::ifstream in_file;
 			in_file.open( filename.data( ) );
 			if( !in_file ) {
@@ -223,13 +223,13 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::set_name( JsonLink &obj, boost::string_view name ) {
+		void JsonLink<Derived>::set_name( JsonLink &obj, daw::string_view name ) {
 			obj.json_object_name( ) = name.to_string( );
 		}
 
 		template<typename Derived>
 		template<typename T>
-		T JsonLink<Derived>::decoder_helper( boost::string_view name, json_obj const &json_values ) {
+		T JsonLink<Derived>::decoder_helper( daw::string_view name, json_obj const &json_values ) {
 			auto obj = json_values.get_object( );
 			auto member = obj.find( name );
 			if( obj.end( ) == member ) {
@@ -248,7 +248,7 @@ namespace daw {
 
 		template<typename Derived>
 		template<typename T>
-		boost::optional<T> JsonLink<Derived>::nullable_decoder_helper( boost::string_view name,
+		boost::optional<T> JsonLink<Derived>::nullable_decoder_helper( daw::string_view name,
 		                                                               json_obj const &json_values ) {
 			auto obj = json_values.get_object( );
 			auto member = obj.find( name );
@@ -260,7 +260,7 @@ namespace daw {
 
 		template<typename Derived>
 		template<typename GetFunction>
-		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name,
+		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( daw::string_view name,
 		                                                                      GetFunction get_function ) {
 			return [ func = std::move( get_function ), name_copy = name.to_string( ) ]( Derived & derived_obj,
 			                                                                            json_obj json_values ) mutable {
@@ -326,7 +326,7 @@ namespace daw {
 			return result;
 		}
 
-		std::string unescape_string( boost::string_view src ) {
+		std::string unescape_string( daw::string_view src ) {
 			auto rng = daw::range::create_char_range( src.begin( ), src.begin( ) + src.size( ) );
 			std::string result;
 			auto last_it = rng.begin( );
@@ -380,7 +380,7 @@ namespace daw {
 
 		template<typename Derived>
 		template<typename GetFunction>
-		impl::decode_function_t<Derived> JsonLink<Derived>::string_decoder( boost::string_view name,
+		impl::decode_function_t<Derived> JsonLink<Derived>::string_decoder( daw::string_view name,
 		                                                                    GetFunction get_function ) {
 			auto name_copy = name.to_string( );
 			return [get_function, name_copy]( Derived &derived_obj, json_obj json_values ) mutable {
@@ -391,7 +391,7 @@ namespace daw {
 
 		/*
 		template<typename Derived> template<typename T, typename U>
-		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name,
+		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( daw::string_view name,
 		boost::optional<T> & value ) { auto value_ptr = &value; auto name_copy = name.to_string( ); return [value_ptr,
 		name_copy]( json_obj json_values ) mutable { daw::exception::daw_throw_on_false( value_ptr ); auto new_val =
 		nullable_decoder_helper<U>( name_copy, json_values ); *value_ptr = new_val;
@@ -399,7 +399,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T, typename U>
-		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name, daw::optional<T>
+		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( daw::string_view name, daw::optional<T>
 		& value ) { auto value_ptr = &value; auto name_copy = name.to_string( ); return [value_ptr, name_copy]( json_obj
 		json_values ) mutable { daw::exception::daw_throw_on_false( value_ptr ); auto new_val =
 		nullable_decoder_helper<U>( name_copy, json_values ); if( new_val ) { *value_ptr = std::move( new_val ); } else
@@ -409,7 +409,7 @@ namespace daw {
 		}
 
 		template<typename Derived> template<typename T, typename U>
-		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( boost::string_view name,
+		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder( daw::string_view name,
 		daw::optional_poly<T> & value ) { auto value_ptr = &value; auto name_copy = name.to_string( ); return
 		[value_ptr, name_copy]( json_obj json_values ) mutable { daw::exception::daw_throw_on_false( value_ptr ); auto
 		new_val = nullable_decoder_helper<U>( name_copy, json_values ); if( new_val ) { *value_ptr = std::move( new_val
@@ -420,7 +420,7 @@ namespace daw {
 		*/
 		template<typename Derived>
 		template<typename GetFunction>
-		impl::bind_functions_t<Derived> JsonLink<Derived>::standard_bind_functions( boost::string_view name,
+		impl::bind_functions_t<Derived> JsonLink<Derived>::standard_bind_functions( daw::string_view name,
 		                                                                            GetFunction get_function ) {
 			impl::bind_functions_t<Derived> bind_functions;
 			bind_functions.encode = impl::make_standard_encoder<Derived>( name, get_function );
@@ -429,7 +429,7 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::add_to_data_map( boost::string_view name, impl::data_description_t<Derived> desc ) {
+		void JsonLink<Derived>::add_to_data_map( daw::string_view name, impl::data_description_t<Derived> desc ) {
 			auto key = range::create_char_range( name );
 			daw::exception::daw_throw_on_false( m_data.m_data_map.count( key ) == 0 );
 			auto result = m_data.m_data_map.emplace( std::move( key ), std::move( desc ) );
@@ -448,15 +448,15 @@ namespace daw {
 
 		// DAW
 		template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<double, T>>>
-		static void json_link_real( boost::string_view name, get_function_t<Derived, T> get_function );
+		static void json_link_real( daw::string_view name, get_function_t<Derived, T> get_function );
 
-		static void json_link_real( boost::string_view name, get_function2_t<Derived, double> get_function,
+		static void json_link_real( daw::string_view name, get_function2_t<Derived, double> get_function,
 		                            set_function_t<Derived, double> set_function );
 
 		template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<std::string, T>>>
-		static void json_link_string( boost::string_view name, get_function_t<Derived, T> get_function );
+		static void json_link_string( daw::string_view name, get_function_t<Derived, T> get_function );
 
-		static void json_link_string( boost::string_view name, get_function2_t<Derived, std::string> get_function,
+		static void json_link_string( daw::string_view name, get_function2_t<Derived, std::string> get_function,
 		                              set_function_t<Derived, std::string> set_function );
 
 		template<typename T, typename = std::enable_if_t<can_use_for_jsonlink_v<std::bool, T>>>
@@ -480,19 +480,19 @@ namespace daw {
 		// DAW
 		template<typename Derived>
 		template<typename T>
-		void JsonLink<Derived>::json_link_integer( boost::string_view name, get_function_t<Derived, T> get_function ) {
+		void JsonLink<Derived>::json_link_integer( daw::string_view name, get_function_t<Derived, T> get_function ) {
 			impl::data_description_t<Derived> data_description;
 			using namespace daw::json::impl::schema;
 			data_description.json_type = get_schema<Derived>( name, get_function );
 		}
 
 		tempalte<typename Derived> template<typename T>
-		void json_link_integer( boost::string_view name, Derived T::*data_ptr ) {
+		void json_link_integer( daw::string_view name, Derived T::*data_ptr ) {
 			json_link_integer( name, [data_ptr]( Derived &obj ) { return obj.*data_ptr; } );
 		}
 
 		template<typename Derived>
-		void JsonLink<Derived>::json_link_integer( boost::string_view name,
+		void JsonLink<Derived>::json_link_integer( daw::string_view name,
 		                                           get_function2_t<Derived, int64_t> get_function,
 		                                           set_function_t<Derived, int64_t> set_function ) {}
 
@@ -501,7 +501,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_integer( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_integer( daw::string_view name, GetFunction get_function ) {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using namespace daw::json::impl::schema;
@@ -528,7 +528,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_real( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_real( daw::string_view name, GetFunction get_function ) {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using daw::json::impl::schema::get_schema;
@@ -550,7 +550,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_string( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_string( daw::string_view name, GetFunction get_function ) {
 			json_link_value<is_optional>( name, get_function );
 		}
 
@@ -559,7 +559,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_boolean( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_boolean( daw::string_view name, GetFunction get_function ) {
 			json_link_value<is_optional>( name, get_function );
 		}
 
@@ -568,7 +568,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_object( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_object( daw::string_view name, GetFunction get_function ) {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using obj_t = decltype( get_function( std::declval<Derived>( ) ) );
@@ -602,7 +602,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_array( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_array( daw::string_view name, GetFunction get_function ) {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using daw::json::impl::schema::get_schema;
@@ -638,7 +638,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_map( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_map( daw::string_view name, GetFunction get_function ) {
 			set_name( get_function, name.to_string( ) );
 			impl::data_description_t<Derived> data_description;
 			using daw::json::impl::schema::get_schema;
@@ -673,7 +673,7 @@ namespace daw {
 		/// \param get_function - a function returning a T, and taking a const ref to Derived
 		template<typename Derived>
 		template<typename GetFunction, bool is_optional>
-		void JsonLink<Derived>::json_link_streamable( boost::string_view name, GetFunction get_function ) {
+		void JsonLink<Derived>::json_link_streamable( daw::string_view name, GetFunction get_function ) {
 			set_name( get_function, name );
 			impl::data_description_t<Derived> data_description;
 			using daw::json::impl::schema::get_schema;
@@ -719,12 +719,12 @@ namespace daw {
 		}
 
 		template<typename Derived>
-		daw::json::json_value_t get_schema( boost::string_view name, JsonLink<Derived> const &obj ) {
+		daw::json::json_value_t get_schema( daw::string_view name, JsonLink<Derived> const &obj ) {
 			return obj.get_schema_obj( );
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-		auto from_file( boost::string_view file_name, bool use_default_on_error ) {
+		auto from_file( daw::string_view file_name, bool use_default_on_error ) {
 			Derived result;
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
@@ -737,7 +737,7 @@ namespace daw {
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-		auto array_from_json_string( boost::string_view data, bool use_default_on_error ) {
+		auto array_from_json_string( daw::string_view data, bool use_default_on_error ) {
 			std::vector<Derived> result;
 			auto json = parse_json( data );
 			if( !json.is_array( ) ) {
@@ -752,7 +752,7 @@ namespace daw {
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-		auto array_from_file( boost::string_view file_name, bool use_default_on_error ) {
+		auto array_from_file( daw::string_view file_name, bool use_default_on_error ) {
 			std::vector<Derived> result;
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
@@ -771,17 +771,17 @@ namespace daw {
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-		auto from_file( boost::string_view file_name ) {
+		auto from_file( daw::string_view file_name ) {
 			return from_file<Derived>( file_name, false );
 		}
 
 		template<typename Derived, typename = std::enable_if<std::is_base_of<JsonLink<Derived>, Derived>::value>>
-		auto array_from_file( boost::string_view file_name ) {
+		auto array_from_file( daw::string_view file_name ) {
 			return array_from_file<Derived>( file_name, false );
 		}
 
 		template<typename Derived>
-		void to_file( boost::string_view file_name, JsonLink<Derived> const &obj, bool overwrite ) {
+		void to_file( daw::string_view file_name, JsonLink<Derived> const &obj, bool overwrite ) {
 			obj.to_file( file_name, overwrite );
 		}
 

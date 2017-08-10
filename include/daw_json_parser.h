@@ -23,7 +23,6 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/utility/string_view.hpp>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -31,6 +30,7 @@
 
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_common_mixins.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_variant.h>
 
 #include "daw_json_value_t.h"
@@ -41,7 +41,7 @@ namespace daw {
 			std::string message;
 
 			JsonParserException( std::string msg ) noexcept;
-			~JsonParserException( ); 
+			~JsonParserException( );
 
 			JsonParserException( ) noexcept = default;
 			JsonParserException( JsonParserException const & ) = default;
@@ -54,6 +54,6 @@ namespace daw {
 
 		json_obj parse_json( char const *Begin, char const *End );
 
-		json_obj parse_json( boost::string_view const json_text );
+		json_obj parse_json( daw::string_view const json_text );
 	} // namespace json
 } // namespace daw

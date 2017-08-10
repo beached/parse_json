@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/utility/string_view.hpp>
 #include <exception>
 #include <string>
 #include <vector>
 
 #include <daw/daw_exception.h>
+#include <daw/daw_string_view.h>
 
 #include "daw_json_parser_v2_state.h"
 
@@ -50,15 +50,15 @@ namespace daw {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_end" );
 			}
 
-			void state_t::on_string( boost::string_view ) {
+			void state_t::on_string( daw::string_view ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_string" );
 			}
 
-			void state_t::on_integer( boost::string_view ) {
+			void state_t::on_integer( daw::string_view ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integer" );
 			}
 
-			void state_t::on_real( boost::string_view ) {
+			void state_t::on_real( daw::string_view ) {
 				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_real" );
 			}
 
@@ -105,7 +105,7 @@ namespace daw {
 				return "state_in_object_name";
 			}
 
-			void state_in_object_name_t::on_string( boost::string_view value ) {
+			void state_in_object_name_t::on_string( daw::string_view value ) {
 				// json_value_t name{ value };
 
 				// Set current object name json_value_t
@@ -146,19 +146,19 @@ namespace daw {
 			// state_in_object_value
 			//
 
-			void state_in_object_value_t::on_integer( boost::string_view value ) {
+			void state_in_object_value_t::on_integer( daw::string_view value ) {
 				// Save data
 				// current_value( ) = json_value_t{ to_integer( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
-			void state_in_object_value_t::on_real( boost::string_view value ) {
+			void state_in_object_value_t::on_real( daw::string_view value ) {
 				// Save data
 				// current_value( ) = json_value_t{ to_real( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
-			void state_in_object_value_t::on_string( boost::string_view value ) {
+			void state_in_object_value_t::on_string( daw::string_view value ) {
 				// Save data
 				// current_value( ) = json_value_t{ value.to_string( ) };
 				set_next_state( current_state_t::in_object_name );
@@ -198,15 +198,15 @@ namespace daw {
 				// Save data
 			}
 
-			void state_in_array_t::on_integer( boost::string_view value ) {
+			void state_in_array_t::on_integer( daw::string_view value ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_real( boost::string_view value ) {
+			void state_in_array_t::on_real( daw::string_view value ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_string( boost::string_view value ) {
+			void state_in_array_t::on_string( daw::string_view value ) {
 				// Save data
 			}
 
@@ -238,15 +238,15 @@ namespace daw {
 				// Save data
 			}
 
-			void state_none_t::on_integer( boost::string_view value ) {
+			void state_none_t::on_integer( daw::string_view value ) {
 				// Save data
 			}
 
-			void state_none_t::on_real( boost::string_view value ) {
+			void state_none_t::on_real( daw::string_view value ) {
 				// Save data
 			}
 
-			void state_none_t::on_string( boost::string_view value ) {
+			void state_none_t::on_string( daw::string_view value ) {
 				// Save data
 			}
 
@@ -303,15 +303,15 @@ namespace daw {
 				daw::json::state::current_state( ).on_array_end( );
 			}
 
-			void state_control_t::on_string( boost::string_view value ) const {
+			void state_control_t::on_string( daw::string_view value ) const {
 				daw::json::state::current_state( ).on_string( value );
 			}
 
-			void state_control_t::on_integer( boost::string_view value ) const {
+			void state_control_t::on_integer( daw::string_view value ) const {
 				daw::json::state::current_state( ).on_integer( value );
 			}
 
-			void state_control_t::on_real( boost::string_view value ) const {
+			void state_control_t::on_real( daw::string_view value ) const {
 				daw::json::state::current_state( ).on_real( value );
 			}
 

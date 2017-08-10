@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include <boost/utility/string_view.hpp>
 #include <cctype>
 #include <exception>
 #include <functional>
@@ -30,6 +29,7 @@
 
 #include <daw/daw_exception.h>
 #include <daw/daw_parser_helper.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
 #include "daw_json_parser_exception.h"
@@ -62,7 +62,7 @@ namespace daw {
 
 			template<typename InputIterator>
 			void throw_at_end_of_stream( InputIterator const &pos, InputIterator const &last,
-			                             boost::string_view message ) {
+			                             daw::string_view message ) {
 				if( pos == last ) {
 					throw json_parser_exception{message.to_string( )};
 				}

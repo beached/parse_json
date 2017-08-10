@@ -21,21 +21,21 @@
 // SOFTWARE.
 
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 
 #include <daw/daw_range.h>
+#include <daw/daw_string_view.h>
 
 #include "daw_json_interface.h"
 
 namespace daw {
 	namespace json {
-		JsonParserException::JsonParserException( std::string msg ) noexcept: message( std::move( msg ) ) {}
-		JsonParserException::~JsonParserException( ) { }
+		JsonParserException::JsonParserException( std::string msg ) noexcept : message( std::move( msg ) ) {}
+		JsonParserException::~JsonParserException( ) {}
 
 		namespace impl {
 			template<typename Iterator>
 			constexpr bool contains( Iterator first, Iterator last,
-			               typename std::iterator_traits<Iterator>::value_type const &key ) noexcept {
+			                         typename std::iterator_traits<Iterator>::value_type const &key ) noexcept {
 				return std::find( first, last, key ) != last;
 			}
 
@@ -82,7 +82,7 @@ namespace daw {
 				}
 			}
 
-			bool move_range_forward_if_equal( range::CharRange &range, boost::string_view value ) {
+			bool move_range_forward_if_equal( range::CharRange &range, daw::string_view value ) {
 				auto const value_size = static_cast<size_t>( std::distance( value.begin( ), value.end( ) ) );
 				auto result = std::equal( value.begin( ), value.end( ), range.begin( ) );
 				if( result ) {
@@ -134,7 +134,7 @@ namespace daw {
 				if( !move_range_forward_if_equal( range, "null" ) ) {
 					throw JsonParserException( "Not a valid JSON null" );
 				}
-				return json_value_t{ };
+				return json_value_t{};
 			}
 
 			bool is_digit( range::UTFIterator it ) {
@@ -178,14 +178,16 @@ namespace daw {
 				                } );
 				if( is_float ) {
 					try {
-						auto result = json_value_t( boost::lexical_cast<double>( number_range.get( ), number_range_size ) );
+						auto result =
+						    json_value_t( boost::lexical_cast<double>( number_range.get( ), number_range_size ) );
 						return result;
 					} catch( boost::bad_lexical_cast const & ) {
 						throw JsonParserException( "Not a valid JSON number" );
 					}
 				}
 				try {
-					auto result = json_value_t( boost::lexical_cast<int64_t>( number_range.get( ), number_range_size ) );
+					auto result =
+					    json_value_t( boost::lexical_cast<int64_t>( number_range.get( ), number_range_size ) );
 					return result;
 				} catch( boost::bad_lexical_cast const & ) { throw JsonParserException( "Not a valid JSON number" ); }
 			}
@@ -292,10 +294,10 @@ namespace daw {
 				range::UTFIterator it_end( End );
 				range::CharRange range{it_begin, it_end};
 				return impl::parse_value( range );
-			} catch( JsonParserException const & ) { return daw::json::json_value_t{ }; }
+			} catch( JsonParserException const & ) { return daw::json::json_value_t{}; }
 		}
 
-		json_obj parse_json( boost::string_view json_text ) {
+		json_obj parse_json( daw::string_view json_text ) {
 			return parse_json( json_text.begin( ), json_text.end( ) );
 		}
 

@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/utility/string_view.hpp>
 #include <iomanip>
 #include <time.h>
 
 #include <daw/daw_exception.h>
+#include <daw/daw_string_view.h>
 
 #include "daw_json.h"
 #include "daw_json_parser.h"
@@ -53,7 +53,7 @@ namespace daw {
 		}
 		*/
 		namespace {
-			std::string escape_string( boost::string_view src ) {
+			std::string escape_string( daw::string_view src ) {
 				std::string result;
 				for( auto c : src ) {
 					static_assert( sizeof( c ) == 1, "Src is assumed to be made of of bytes" );
@@ -92,7 +92,7 @@ namespace daw {
 
 		} // namespace
 
-		std::string enquote( boost::string_view value ) {
+		std::string enquote( daw::string_view value ) {
 			if( value.empty( ) ) {
 				return "\"\"";
 			}
@@ -100,14 +100,14 @@ namespace daw {
 		}
 
 		namespace details {
-			std::string json_name( boost::string_view name ) {
+			std::string json_name( daw::string_view name ) {
 				if( !name.empty( ) ) {
 					return enquote( name ) + ": ";
 				}
 				return std::string( );
 			}
 
-			std::string enbrace( boost::string_view json_value ) {
+			std::string enbrace( daw::string_view json_value ) {
 				return "{ " + json_value.to_string( ) + " }";
 			}
 		} // namespace details

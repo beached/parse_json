@@ -23,7 +23,6 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <boost/utility/string_view.hpp>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -33,6 +32,7 @@
 
 #include <daw/daw_optional.h>
 #include <daw/daw_optional_poly.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
 #include "daw_json_parser.h"
@@ -42,11 +42,11 @@ namespace daw {
 
 	namespace json {
 		namespace details {
-			std::string json_name( boost::string_view name );
-			std::string enbrace( boost::string_view json_value );
+			std::string json_name( daw::string_view name );
+			std::string enbrace( daw::string_view json_value );
 		} // namespace details
 
-		std::string enquote( boost::string_view value );
+		std::string enquote( daw::string_view value );
 
 		namespace parse {
 			void json_to_value( bool &to, daw::json::json_value_t const &from );
@@ -84,7 +84,7 @@ namespace daw {
 			GENERATE_HAS_MEMBER_FUNCTION_TRAIT( decode );
 
 			template<typename T, typename std::enable_if_t<has_decode_member<T>::value, long> = 0>
-			T decode_to_new( boost::string_view json_values );
+			T decode_to_new( daw::string_view json_values );
 		} // namespace parse
 	}     // namespace json
 } // namespace daw

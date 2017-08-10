@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include <daw/daw_range.h>
+#include <daw/daw_string_view.h>
 
 #include "daw_json_interface.h"
 #include "daw_value_to_json.h"
@@ -30,12 +31,12 @@ namespace daw {
 		namespace generate {
 			using namespace daw::json::details;
 
-			std::string undefined_value_to_json( boost::string_view ) noexcept {
+			std::string undefined_value_to_json( daw::string_view ) noexcept {
 				return {};
 			}
 
 			// null
-			std::string value_to_json( boost::string_view name ) {
+			std::string value_to_json( daw::string_view name ) {
 				return json_name( name ) + "null";
 			}
 
@@ -44,7 +45,7 @@ namespace daw {
 			}
 
 			// bool
-			std::string value_to_json( boost::string_view name, bool value ) {
+			std::string value_to_json( daw::string_view name, bool value ) {
 				return json_name( name ) + ( value ? "true" : "false" );
 			}
 
@@ -53,11 +54,11 @@ namespace daw {
 			}
 
 			// json_value_t
-			std::string value_to_json( boost::string_view name, daw::json::json_value_t const &value ) {
+			std::string value_to_json( daw::string_view name, daw::json::json_value_t const &value ) {
 				using daw::json::json_value_t;
 				struct get_json_string_t {
-					boost::string_view value_name;
-					get_json_string_t( boost::string_view n ) : value_name{std::move( n )} {}
+					daw::string_view value_name;
+					get_json_string_t( daw::string_view n ) : value_name{std::move( n )} {}
 					std::string operator( )( json_value_t::array_t const &v ) const {
 						return value_to_json( value_name, v );
 					}
@@ -88,7 +89,7 @@ namespace daw {
 			}
 
 			// json_object_value
-			std::string value_to_json_object( boost::string_view name, daw::json::json_object_value const &object ) {
+			std::string value_to_json_object( daw::string_view name, daw::json::json_object_value const &object ) {
 				std::stringstream result;
 				result << json_name( name ) << "{";
 				auto range = daw::range::make_range( object.members_v.begin( ), object.members_v.end( ) );
@@ -109,7 +110,7 @@ namespace daw {
 			}
 
 			// double
-			std::string value_to_json( boost::string_view name, double const &value ) {
+			std::string value_to_json( daw::string_view name, double const &value ) {
 				return value_to_json_number( name, value );
 			}
 
@@ -118,7 +119,7 @@ namespace daw {
 			}
 
 			// int32_t
-			std::string value_to_json( boost::string_view name, int32_t const &value ) {
+			std::string value_to_json( daw::string_view name, int32_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
@@ -127,7 +128,7 @@ namespace daw {
 			}
 
 			// int64_t
-			std::string value_to_json( boost::string_view name, int64_t const &value ) {
+			std::string value_to_json( daw::string_view name, int64_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
@@ -136,7 +137,7 @@ namespace daw {
 			}
 
 			// string
-			std::string value_to_json( boost::string_view name, std::string const &value ) {
+			std::string value_to_json( daw::string_view name, std::string const &value ) {
 				return json_name( name ) + enquote( value );
 			}
 
@@ -145,7 +146,7 @@ namespace daw {
 			}
 
 			// uint32_t
-			std::string value_to_json( boost::string_view name, uint32_t const &value ) {
+			std::string value_to_json( daw::string_view name, uint32_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 
@@ -154,7 +155,7 @@ namespace daw {
 			}
 
 			// uint64_t
-			std::string value_to_json( boost::string_view name, uint64_t const &value ) {
+			std::string value_to_json( daw::string_view name, uint64_t const &value ) {
 				return value_to_json_number( name, value );
 			}
 

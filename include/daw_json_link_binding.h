@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include <boost/utility/string_view.hpp>
 #include <cstdlib>
 #include <functional>
 #include <string>
 
 #include <daw/daw_exception.h>
+#include <daw/daw_string_view.h>
 #include <daw/not_null.h>
 
 namespace daw {
@@ -50,7 +50,7 @@ namespace daw {
 		template<typename Derived>
 		struct json_binding_t {
 			using to_json_function_t = std::function<std::string( Derived const & )>;
-			using from_json_function_t = std::function<void( Derived &, boost::string_view )>;
+			using from_json_function_t = std::function<void( Derived &, daw::string_view )>;
 
 			types::expected_json_types expected_json_type;
 			bool is_optional;

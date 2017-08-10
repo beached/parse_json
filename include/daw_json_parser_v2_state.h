@@ -23,9 +23,10 @@
 #pragma once
 
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 #include <string>
 #include <vector>
+
+#include <daw/daw_string_view.h>
 
 #include "daw_json_parser_v2.h"
 
@@ -47,9 +48,9 @@ namespace daw {
 				virtual void on_object_end( );
 				virtual void on_array_begin( );
 				virtual void on_array_end( );
-				virtual void on_string( boost::string_view );
-				virtual void on_integer( boost::string_view );
-				virtual void on_real( boost::string_view );
+				virtual void on_string( daw::string_view );
+				virtual void on_integer( daw::string_view );
+				virtual void on_real( daw::string_view );
 				virtual void on_boolean( bool );
 				virtual void on_null( );
 				virtual std::string to_string( ) const = 0;
@@ -64,7 +65,7 @@ namespace daw {
 
 				~state_in_object_name_t( ) override;
 				std::string to_string( ) const override;
-				void on_string( boost::string_view value ) override;
+				void on_string( daw::string_view value ) override;
 				void on_object_end( ) override;
 			}; // state_in_object_name
 
@@ -82,9 +83,9 @@ namespace daw {
 				void on_array_begin( ) override;
 				void on_null( ) override;
 
-				void on_integer( boost::string_view value ) override;
-				void on_real( boost::string_view value ) override;
-				void on_string( boost::string_view value ) override;
+				void on_integer( daw::string_view value ) override;
+				void on_real( daw::string_view value ) override;
+				void on_string( daw::string_view value ) override;
 				void on_boolean( bool value ) override;
 			}; // state_in_object_value_t
 
@@ -102,9 +103,9 @@ namespace daw {
 				void on_array_begin( ) override;
 				void on_array_end( ) override;
 				void on_null( ) override;
-				void on_integer( boost::string_view value ) override;
-				void on_real( boost::string_view value ) override;
-				void on_string( boost::string_view value ) override;
+				void on_integer( daw::string_view value ) override;
+				void on_real( daw::string_view value ) override;
+				void on_string( daw::string_view value ) override;
 				void on_boolean( bool value ) override;
 			}; // state_in_array_t
 
@@ -121,9 +122,9 @@ namespace daw {
 				void on_object_begin( ) override;
 				void on_array_begin( ) override;
 				void on_null( ) override;
-				void on_integer( boost::string_view value ) override;
-				void on_real( boost::string_view value ) override;
-				void on_string( boost::string_view value ) override;
+				void on_integer( daw::string_view value ) override;
+				void on_real( daw::string_view value ) override;
+				void on_string( daw::string_view value ) override;
 				void on_boolean( bool value ) override;
 			}; // state_none_t
 
@@ -144,9 +145,9 @@ namespace daw {
 				void on_object_end( ) const;
 				void on_array_begin( ) const;
 				void on_array_end( ) const;
-				void on_string( boost::string_view value ) const;
-				void on_integer( boost::string_view value ) const;
-				void on_real( boost::string_view value ) const;
+				void on_string( daw::string_view value ) const;
+				void on_integer( daw::string_view value ) const;
+				void on_real( daw::string_view value ) const;
 				void on_boolean( bool value ) const;
 				void on_null( ) const;
 			};
