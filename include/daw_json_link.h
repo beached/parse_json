@@ -81,7 +81,7 @@ namespace daw {
 					std::string result = "[";
 					bool is_first = true;
 					std::transform( begin( container ), end( container ), add_appender( result ),
-					                [&is_first, func]( auto const &value ) {
+					                [func, &is_first]( auto const &value ) {
 						                if( !is_first ) {
 							                return "," + func( value );
 						                }

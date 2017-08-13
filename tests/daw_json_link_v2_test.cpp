@@ -28,10 +28,10 @@
 
 struct test_t final : public daw::json::json_link<test_t> {
 	std::vector<int> a;
-	int32_t b;
+	double e;
 	int64_t c;
 	std::string d;
-	double e;
+	int32_t b;
 	int16_t f;
 	bool g;
 
