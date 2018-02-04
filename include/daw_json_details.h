@@ -44,7 +44,7 @@ namespace daw {
 	namespace json {
 		namespace parse {
 			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long>>
+			         std::enable_if_t<daw::traits::is_vector_like_not_string_v<Container>, std::nullptr_t> = nullptr>
 			void json_to_value( Container &to, daw::json::json_value_t const &from ) {
 				static_assert( !std::is_const<Container>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_array( ) );
@@ -76,14 +76,14 @@ namespace daw {
 			}
 
 			template<typename MapContainer,
-			         typename std::enable_if_t<daw::traits::is_map_like<MapContainer>::value, long>>
+			         std::enable_if_t<daw::traits::is_map_like_v<MapContainer>, std::nullptr_t> = nullptr>
 			void json_to_value( MapContainer &to, daw::json::json_value_t const &from ) {
 				static_assert( !std::is_const<MapContainer>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_array( ) );
 				auto const &source_array = from.get_array( );
 				to.clear( );
-				std::transform( std::begin( source_array ), std::end( source_array ),
-				                std::inserter( to, std::end( to ) ), []( daw::json::json_value_t const &value ) {
+				std::transform( std::begin( source_array ), std::end( source_array ), std::inserter( to, std::end( to ) ),
+				                []( daw::json::json_value_t const &value ) {
 					                using key_t = typename std::decay<typename MapContainer::key_type>::type;
 					                using value_t = typename std::decay<typename MapContainer::mapped_type>::type;
 					                std::pair<key_t, value_t> tmp;
@@ -92,17 +92,16 @@ namespace daw {
 				                } );
 			}
 
-			template<typename T,
-			         typename std::enable_if_t<
-			             std::is_integral<T>::value && !std::is_same<T, json_value_t::integer_t>::value, long>>
+			template<typename T, typename std::enable_if_t<
+			                       std::is_integral<T>::value && !std::is_same<T, json_value_t::integer_t>::value, long>>
 			void json_to_value( T &to, daw::json::json_value_t const &from ) {
 				static_assert( !std::is_const<decltype( to )>::value, "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( from.is_integer( ) );
 				auto result = from.get_integer( );
-				daw::exception::daw_throw_on_false(
-				    static_cast<json_value_t::integer_t>( std::numeric_limits<T>::max( ) ) >= result );
-				daw::exception::daw_throw_on_false(
-				    static_cast<json_value_t::integer_t>( std::numeric_limits<T>::min( ) ) <= result );
+				daw::exception::daw_throw_on_false( static_cast<json_value_t::integer_t>( std::numeric_limits<T>::max( ) ) >=
+				                                    result );
+				daw::exception::daw_throw_on_false( static_cast<json_value_t::integer_t>( std::numeric_limits<T>::min( ) ) <=
+				                                    result );
 				to = static_cast<T>( result );
 			}
 
@@ -131,12 +130,12 @@ namespace daw {
 				}
 			}
 
-			template<typename T, typename std::enable_if_t<has_decode_member<T>::value, long>>
+			template<typename T, std::enable_if_t<has_decode_member_v<T>, std::nullptr_t>>
 			T decode_to_new( daw::string_view json_values ) {
 				T result;
 				result.decode( json_values );
 				return result;
 			}
 		} // namespace parse
-	}     // namespace json
+	}   // namespace json
 } // namespace daw

@@ -61,18 +61,18 @@ namespace daw {
 
 			// Template json_to_value declarations
 			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_vector_like_not_string<Container>::value, long> = 0>
+			         typename std::enable_if_t<daw::traits::is_vector_like_not_string_v<Container>, long> = 0>
 			void json_to_value( Container &to, daw::json::json_value_t const &from );
 
 			template<typename Key, typename Value>
 			void json_to_value( std::pair<Key, Value> &to, daw::json::json_value_t const &from );
 
 			template<typename MapContainer,
-			         typename std::enable_if_t<daw::traits::is_map_like<MapContainer>::value, long> = 0>
+			         typename std::enable_if_t<daw::traits::is_map_like_v<MapContainer>, long> = 0>
 			void json_to_value( MapContainer &to, daw::json::json_value_t const &from );
 
 			template<typename T, typename std::enable_if_t<
-			                         std::is_integral<T>::value && !std::is_same<T, int64_t>::value, long> = 0>
+			                         daw::is_integral_v<T> && !daw::is_same_v<T, int64_t>, long> = 0>
 			void json_to_value( T &to, daw::json::json_value_t const &from );
 
 			template<typename T>
@@ -81,9 +81,14 @@ namespace daw {
 			template<typename T>
 			void json_to_value( std::shared_ptr<T> &to, daw::json::json_value_t const &from );
 
-			GENERATE_HAS_MEMBER_FUNCTION_TRAIT( decode );
+			namespace impl {
+				template<typename T>
+				using has_decode_member = decltype( std::declval<T>( ).decode( std::declval<std::string>( ) ) );
+			}
+			template<typename T>
+			constexpr bool has_decode_member_v = daw::is_detected_v<impl::has_decode_member, T>;
 
-			template<typename T, typename std::enable_if_t<has_decode_member<T>::value, long> = 0>
+			template<typename T, std::enable_if_t<has_decode_member_v<T>, std::nullptr_t> = nullptr>
 			T decode_to_new( daw::string_view json_values );
 		} // namespace parse
 	}     // namespace json

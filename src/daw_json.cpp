@@ -96,7 +96,7 @@ namespace daw {
 			if( value.empty( ) ) {
 				return "\"\"";
 			}
-			return "\"" + escape_string( value.to_string( ) ) + "\"";
+			return "\"" + escape_string( value ) + "\"";
 		}
 
 		namespace details {

@@ -65,7 +65,7 @@ namespace daw {
 			std::string value_to_json( json_string_value name, uint64_t const &value );
 
 			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long> = 0>
+			         typename std::enable_if_t<daw::traits::is_container_not_string_v<Container>, long> = 0>
 			std::string value_to_json( daw::string_view name, Container const &values );
 
 			template<typename Derived>
@@ -74,10 +74,10 @@ namespace daw {
 			template<typename First, typename Second>
 			std::string value_to_json( daw::string_view name, std::pair<First, Second> const &value );
 
-			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int> = 0>
+			template<typename Number, typename std::enable_if_t<daw::is_floating_point_v<Number>, int> = 0>
 			std::string value_to_json_number( daw::string_view name, Number const &value );
 
-			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int> = 0>
+			template<typename Number, typename std::enable_if_t<daw::is_integral_v<Number>, int> = 0>
 			std::string value_to_json_number( daw::string_view name, Number const &value );
 
 			template<typename T>
@@ -93,7 +93,7 @@ namespace daw {
 			void value_to_json( daw::string_view name, std::weak_ptr<T> const &value );
 
 			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_container_not_string<Container>::value, long>>
+			         typename std::enable_if_t<daw::traits::is_container_not_string_v<Container>, long>>
 			std::string value_to_json( daw::string_view name, Container const &values ) {
 				daw::string_view const empty_str{""};
 				std::stringstream result;
@@ -125,7 +125,7 @@ namespace daw {
 				return result;
 			}
 
-			template<typename Number, typename std::enable_if_t<std::is_floating_point<Number>::value, int>>
+			template<typename Number, typename std::enable_if_t<daw::is_floating_point_v<Number>, int>>
 			std::string value_to_json_number( daw::string_view name, Number const &value ) {
 				std::stringstream ss;
 				ss << daw::json::details::json_name( name );
@@ -133,7 +133,7 @@ namespace daw {
 				return ss.str( );
 			}
 
-			template<typename Number, typename std::enable_if_t<std::is_integral<Number>::value, int>>
+			template<typename Number, typename std::enable_if_t<daw::is_integral_v<Number>, int>>
 			std::string value_to_json_number( daw::string_view name, Number const &value ) {
 				return daw::json::details::json_name( name ) + std::to_string( value );
 			}

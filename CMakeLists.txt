@@ -5,6 +5,7 @@ project( parse_json_prj )
 include( ExternalProject )
 
 find_package( Boost 1.60.0 COMPONENTS system filesystem regex iostreams unit_test_framework REQUIRED )
+find_package( CURL REQUIRED )
 
 enable_testing( )
 add_definitions( -DBOOST_TEST_DYN_LINK )
@@ -63,6 +64,7 @@ externalproject_add(
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
+include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
@@ -106,11 +108,11 @@ set( SOURCE_FILES_v2
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json header_libraries_prj char_range_prj date_prj )
-target_link_libraries( parse_json char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( parse_json char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
 add_library ( parse_json_v2 STATIC ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
 add_dependencies( parse_json_v2 header_libraries_prj char_range_prj date_prj )
-target_link_libraries( parse_json_v2 char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( parse_json_v2 char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_v2 DESTINATION lib )

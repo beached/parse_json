@@ -259,7 +259,8 @@ namespace daw {
 			                                 SetFunction set_function ) {
 				mapping_functions_t mapping_functions;
 				mapping_functions.serialize_function = [get_function]( Derived const &obj ) {
-					return impl::to_json_string( get_function( obj ) );
+					auto const tmp = get_function( obj );
+					return impl::to_json_string( tmp );
 				};
 
 				mapping_functions.deserialize_function = [set_function]( Derived &obj,
@@ -524,8 +525,8 @@ namespace daw {
 
 		template<typename Derived>
 		std::istream &operator>>( std::istream &is, json_link<Derived> &data ) {
-			data = Derived::from_json_value(
-			    parse_json( std::string{std::istreambuf_iterator<char>{is}, std::istreambuf_iterator<char>{}} ) );
+			auto const str = std::string{std::istreambuf_iterator<char>{is}, std::istreambuf_iterator<char>{}};
+			data = Derived::from_json_value( parse_json( str ) );
 			return is;
 		}
 
