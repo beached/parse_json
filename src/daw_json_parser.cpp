@@ -187,7 +187,7 @@ namespace daw {
 				}
 				try {
 					auto result =
-					    json_value_t( boost::lexical_cast<int64_t>( number_range.get( ), number_range_size ) );
+					    json_value_t{ boost::lexical_cast<intmax_t>( number_range.get( ), number_range_size ) };
 					return result;
 				} catch( boost::bad_lexical_cast const & ) { throw JsonParserException( "Not a valid JSON number" ); }
 			}

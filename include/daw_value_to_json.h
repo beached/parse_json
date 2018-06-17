@@ -55,6 +55,9 @@ namespace daw {
 			std::string value_to_json( daw::string_view name, int64_t const &value );
 			std::string value_to_json( json_string_value name, int64_t const &value );
 
+			std::string value_to_json( daw::string_view name, intmax_t const &value );
+			std::string value_to_json( json_string_value name, intmax_t const &value );
+
 			std::string value_to_json( daw::string_view name, std::string const &value );
 			std::string value_to_json( json_string_value name, std::string const &value );
 

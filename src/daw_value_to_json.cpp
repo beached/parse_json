@@ -136,6 +136,15 @@ namespace daw {
 				return value_to_json( to_string_view( name ), value );
 			}
 
+			// intmax_t
+			std::string value_to_json( daw::string_view name, intmax_t const &value ) {
+				return value_to_json_number( name, value );
+			}
+
+			std::string value_to_json( json_string_value name, intmax_t const &value ) {
+				return value_to_json( to_string_view( name ), value );
+			}
+
 			// string
 			std::string value_to_json( daw::string_view name, std::string const &value ) {
 				return json_name( name ) + enquote( value );
