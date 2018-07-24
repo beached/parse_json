@@ -1,16 +1,16 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -25,14 +25,16 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <cstdint>
+#include <ostream>
 #include <memory>
 #include <string>
+#include <typeindex>
+#include <utility>
 #include <vector>
 
 #include <daw/char_range/daw_char_range.h>
 #include <daw/daw_common_mixins.h>
 #include <daw/daw_string_view.h>
-#include <typeindex>
 
 namespace daw {
 	namespace json {
@@ -42,10 +44,12 @@ namespace daw {
 
 		using json_object_value_item = std::pair<json_string_value, json_value_t>;
 
-		json_object_value_item make_object_value_item( json_string_value first, json_value_t second );
+		json_object_value_item make_object_value_item( json_string_value first,
+		                                               json_value_t second );
 
 		struct json_object_value
-		    : public daw::mixins::VectorLikeProxy<json_object_value, std::vector<json_object_value_item>> {
+		  : public daw::mixins::VectorLikeProxy<
+		      json_object_value, std::vector<json_object_value_item>> {
 			std::vector<json_object_value_item> members_v;
 
 			json_object_value( ) = default;
@@ -105,10 +109,12 @@ namespace daw {
 			using array_t = json_array_value;
 			using object_t = json_object_value;
 
-		  private:
-			boost::variant<null_t, integer_t, real_t, string_t, boolean_t, array_t, object_t> m_value;
+		private:
+			boost::variant<null_t, integer_t, real_t, string_t, boolean_t, array_t,
+			               object_t>
+			  m_value;
 
-		  public:
+		public:
 			json_value_t( ) noexcept;
 
 			explicit json_value_t( integer_t value ) noexcept;
@@ -189,12 +195,14 @@ namespace daw {
 
 			template<typename Visitor>
 			decltype( auto ) apply_visitor( Visitor &&visitor ) {
-				return boost::apply_visitor( std::forward<Visitor>( visitor ), m_value );
+				return boost::apply_visitor( std::forward<Visitor>( visitor ),
+				                             m_value );
 			}
 
 			template<typename Visitor>
 			decltype( auto ) apply_visitor( Visitor &&visitor ) const {
-				return boost::apply_visitor( std::forward<Visitor>( visitor ), m_value );
+				return boost::apply_visitor( std::forward<Visitor>( visitor ),
+				                             m_value );
 			}
 			std::string to_string( ) const;
 		}; // json_value_t
@@ -206,11 +214,13 @@ namespace daw {
 
 		std::string to_string( std::shared_ptr<json_value_t> const &value );
 
-		std::string to_string( std::ostream &os, std::shared_ptr<json_value_t> const &value );
+		std::string to_string( std::ostream &os,
+		                       std::shared_ptr<json_value_t> const &value );
 
 		std::ostream &operator<<( std::ostream &os, json_value_t const &value );
 
-		std::ostream &operator<<( std::ostream &os, std::shared_ptr<json_value_t> const &value );
+		std::ostream &operator<<( std::ostream &os,
+		                          std::shared_ptr<json_value_t> const &value );
 
 		bool operator==( json_value_t const &lhs, json_value_t const &rhs );
 		bool operator!=( json_value_t const &lhs, json_value_t const &rhs );
@@ -223,28 +233,35 @@ namespace daw {
 		T get( json_value_t const & );
 
 		template<>
-		json_value_t::integer_t get<json_value_t::integer_t>( daw::json::json_value_t const &val );
+		json_value_t::integer_t
+		get<json_value_t::integer_t>( daw::json::json_value_t const &val );
 
 		template<>
-		json_value_t::real_t get<json_value_t::real_t>( daw::json::json_value_t const &val );
+		json_value_t::real_t
+		get<json_value_t::real_t>( daw::json::json_value_t const &val );
 
 		template<>
-		json_value_t::string_t get<json_value_t::string_t>( daw::json::json_value_t const &val );
+		json_value_t::string_t
+		get<json_value_t::string_t>( daw::json::json_value_t const &val );
 
 		template<>
 		std::string get<std::string>( daw::json::json_value_t const &val );
 
 		template<>
-		json_value_t::boolean_t get<json_value_t::boolean_t>( daw::json::json_value_t const &val );
+		json_value_t::boolean_t
+		get<json_value_t::boolean_t>( daw::json::json_value_t const &val );
 
 		template<>
-		json_value_t::object_t get<json_value_t::object_t>( daw::json::json_value_t const &val );
+		json_value_t::object_t
+		get<json_value_t::object_t>( daw::json::json_value_t const &val );
 
 		template<>
-		json_value_t::array_t get<json_value_t::array_t>( daw::json::json_value_t const &val );
+		json_value_t::array_t
+		get<json_value_t::array_t>( daw::json::json_value_t const &val );
 
 		template<>
-		json_value_t::null_t get<json_value_t::null_t>( daw::json::json_value_t const & );
+		json_value_t::null_t
+		get<json_value_t::null_t>( daw::json::json_value_t const & );
 	} // namespace json
 } // namespace daw
 

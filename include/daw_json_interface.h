@@ -1,16 +1,16 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -26,6 +26,7 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -57,45 +58,59 @@ namespace daw {
 
 			void json_to_value( int64_t &to, daw::json::json_value_t const &from );
 
-			void json_to_value( std::string &to, daw::json::json_value_t const &from );
+			void json_to_value( std::string &to,
+			                    daw::json::json_value_t const &from );
 
 			// Template json_to_value declarations
 			template<typename Container,
-			         typename std::enable_if_t<daw::traits::is_vector_like_not_string_v<Container>, long> = 0>
+			         typename std::enable_if_t<
+			           daw::traits::is_vector_like_not_string_v<Container>, long> = 0>
 			void json_to_value( Container &to, daw::json::json_value_t const &from );
 
 			template<typename Key, typename Value>
-			void json_to_value( std::pair<Key, Value> &to, daw::json::json_value_t const &from );
+			void json_to_value( std::pair<Key, Value> &to,
+			                    daw::json::json_value_t const &from );
 
 			template<typename MapContainer,
-			         typename std::enable_if_t<daw::traits::is_map_like_v<MapContainer>, long> = 0>
-			void json_to_value( MapContainer &to, daw::json::json_value_t const &from );
+			         typename std::enable_if_t<
+			           daw::traits::is_map_like_v<MapContainer>, long> = 0>
+			void json_to_value( MapContainer &to,
+			                    daw::json::json_value_t const &from );
 
-			template<typename T, typename std::enable_if_t<
-			                         daw::is_integral_v<T> && !daw::is_same_v<T, int64_t>, long> = 0>
+			template<
+			  typename T,
+			  typename std::enable_if_t<
+			    daw::is_integral_v<T> && !daw::is_same_v<T, int64_t>, long> = 0>
 			void json_to_value( T &to, daw::json::json_value_t const &from );
 
 			template<typename T>
-			void json_to_value( boost::optional<T> &to, daw::json::json_value_t const &from );
+			void json_to_value( boost::optional<T> &to,
+			                    daw::json::json_value_t const &from );
 
 			template<typename T>
-			void json_to_value( std::shared_ptr<T> &to, daw::json::json_value_t const &from );
+			void json_to_value( std::shared_ptr<T> &to,
+			                    daw::json::json_value_t const &from );
 
 			namespace impl {
 				template<typename T>
-				using has_decode_member = decltype( std::declval<T>( ).decode( std::declval<std::string>( ) ) );
+				using has_decode_member =
+				  decltype( std::declval<T>( ).decode( std::declval<std::string>( ) ) );
 			}
 			template<typename T>
-			constexpr bool has_decode_member_v = daw::is_detected_v<impl::has_decode_member, T>;
+			constexpr bool has_decode_member_v =
+			  daw::is_detected_v<impl::has_decode_member, T>;
 
-			template<typename T, std::enable_if_t<has_decode_member_v<T>, std::nullptr_t> = nullptr>
+			template<typename T, std::enable_if_t<has_decode_member_v<T>,
+			                                      std::nullptr_t> = nullptr>
 			T decode_to_new( daw::string_view json_values );
 		} // namespace parse
-	}     // namespace json
+	}   // namespace json
 } // namespace daw
 
-template<typename T, typename EnableIf = decltype( std::declval<T>( ).serialize_to_json( ) )>
+template<typename T, typename EnableIf =
+                       decltype( std::declval<T>( ).serialize_to_json( ) )>
 std::ostream &operator<<( std::ostream &os, T const &data ) {
 	os << data.serialize_to_json( );
 	return os;
 }
+

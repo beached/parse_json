@@ -2,8 +2,6 @@ cmake_minimum_required( VERSION 2.8.12 )
 
 project( parse_json_prj )
 
-include( ExternalProject )
-
 find_package( Boost 1.60.0 COMPONENTS system filesystem regex iostreams unit_test_framework REQUIRED )
 find_package( CURL REQUIRED )
 
@@ -24,47 +22,13 @@ else( )
 	endif( )
 endif( )
 
-externalproject_add(
-	header_libraries_prj
-	GIT_REPOSITORY "https://github.com/beached/header_libraries.git"
-	GIT_TAG "master"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/headlibs"
-	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
-	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
-)
-
-externalproject_add(
-	char_range_prj
-	GIT_REPOSITORY "https://github.com/beached/char_range.git"
-	GIT_TAG "master"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/deps/chrrng"
-	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
-	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
-)
-
-externalproject_add(
-	date_prj
-	GIT_REPOSITORY "https://github.com/beached/date.git"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/date"
-	GIT_TAG "master"
-	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
-	CMAKE_ARGS -DTZ_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
-)
-
-#externalproject_add(
-#	JSONTestSuite
-#	GIT_REPOSITORY "https://github.com/nst/JSONTestSuite.git"
-#	GIT_TAG "master"
-#	SOURCE_DIR "${CMAKE_BINARY_DIR}/tests"
-#	CONFIGURE_COMMAND ""
-#	INSTALL_COMMAND ""
-#	TEST_COMMAND ""
-#	BUILD_COMMAND ""
-#)
-
-include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
-link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
-include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
+if( EXISTS "${CMAKE_SOURCE_DIR}/dependent_projects/build" )
+	add_custom_target( dependency_stub )
+	include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/include" )
+	link_directories( "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/lib" )
+else( )
+	include( "${CMAKE_SOURCE_DIR}/dependent_projects/dependencies.txt" )
+endif( )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
@@ -107,11 +71,11 @@ set( SOURCE_FILES_v2
 )
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( parse_json header_libraries_prj char_range_prj date_prj )
+add_dependencies( parse_json dependency_stub )
 target_link_libraries( parse_json char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
 add_library ( parse_json_v2 STATIC ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
-add_dependencies( parse_json_v2 header_libraries_prj char_range_prj date_prj )
+add_dependencies( parse_json_v2 dependency_stub )
 target_link_libraries( parse_json_v2 char_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
@@ -119,27 +83,27 @@ install( TARGETS parse_json_v2 DESTINATION lib )
 install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
 add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test.cpp )
-add_dependencies( parse_json_test_bin header_libraries_prj char_range_prj date_prj )
+add_dependencies( parse_json_test_bin dependency_stub )
 target_link_libraries( parse_json_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
 
 add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${HEADER_FILES_v2} ${TEST_FOLDER}/parse_json_test_v2.cpp )
-add_dependencies( parse_json_test_v2_bin header_libraries_prj  )
+add_dependencies( parse_json_test_v2_bin dependency_stub )
 target_link_libraries( parse_json_test_v2_bin parse_json_v2 ${Boost_LIBRARIES} )
 add_test( parse_json_test_v2 parse_json_test_v2_bin )
 
 add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
-add_dependencies( json_file_parser_test_bin header_libraries_prj char_range_prj date_prj )
+add_dependencies( json_file_parser_test_bin dependency_stub )
 target_link_libraries( json_file_parser_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( json_file_parser_test json_file_parser_test_bin )
 
 add_executable( daw_json_link_v2_test_bin ${HEADER_FILES_v2} ${TEST_FOLDER}/daw_json_link_v2_test.cpp )
-add_dependencies( daw_json_link_v2_test_bin header_libraries_prj char_range_prj date_prj )
+add_dependencies( daw_json_link_v2_test_bin dependency_stub )
 target_link_libraries( daw_json_link_v2_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( daw_json_link_v2_test daw_json_link_v2_test_bin )
 
 add_executable( json_link_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_link_test.cpp )
-add_dependencies( json_link_test_bin header_libraries_prj char_range_prj date_prj )
+add_dependencies( json_link_test_bin dependency_stub )
 target_link_libraries( json_link_test_bin parse_json char_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( json_link_test json_link_test_bin )
 

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -39,7 +39,8 @@ namespace daw {
 	}
 
 	namespace json {
-		std::string ts_to_string( std::time_t const &timestamp, std::string format ) {
+		std::string ts_to_string( std::time_t const &timestamp,
+		                          std::string format ) {
 			char buffer[200];
 			std::tm tm = {};
 			daw::localtime_s( &timestamp, &tm );
@@ -56,7 +57,8 @@ namespace daw {
 			std::string escape_string( daw::string_view src ) {
 				std::string result;
 				for( auto c : src ) {
-					static_assert( sizeof( c ) == 1, "Src is assumed to be made of of bytes" );
+					static_assert( sizeof( c ) == 1,
+					               "Src is assumed to be made of of bytes" );
 					switch( c ) {
 					case '\b':
 						result += "\\b";
@@ -114,7 +116,8 @@ namespace daw {
 
 		namespace parse {
 			// String
-			void json_to_value( std::string &to, daw::json::json_value_t const &from ) {
+			void json_to_value( std::string &to,
+			                    daw::json::json_value_t const &from ) {
 				to = from.get_string( );
 			}
 
@@ -137,5 +140,5 @@ namespace daw {
 				to = static_cast<float>( from.get_real( ) );
 			}
 		} // namespace parse
-	}     // namespace json
+	}   // namespace json
 } // namespace daw

@@ -1,16 +1,16 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2017 Darrell Wright
+// Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 #include <exception>
+#include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -35,43 +37,53 @@ namespace daw {
 			state_t::~state_t( ) {}
 
 			void state_t::on_object_begin( ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_begin" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_object_begin" );
 			}
 
 			void state_t::on_object_end( ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_object_end" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_object_end" );
 			}
 
 			void state_t::on_array_begin( ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_begin" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_array_begin" );
 			}
 
 			void state_t::on_array_end( ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_array_end" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_array_end" );
 			}
 
 			void state_t::on_string( daw::string_view ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_string" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_string" );
 			}
 
 			void state_t::on_integer( daw::string_view ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_integer" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_integer" );
 			}
 
 			void state_t::on_real( daw::string_view ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_real" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_real" );
 			}
 
 			void state_t::on_boolean( bool ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_boolean" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_boolean" );
 			}
 
 			void state_t::on_null( ) {
-				throw std::runtime_error( this->to_string( ) + ": Unexpected state change: on_null" );
+				daw::exception::daw_throw<std::runtime_error>(
+				  this->to_string( ) + ": Unexpected state change: on_null" );
 			}
 
 			std::vector<state_t *> &state_stack( ) {
-				static std::vector<state_t *> result = {get_state_fn( current_state_t::none )};
+				static std::vector<state_t *> result = {
+				  get_state_fn( current_state_t::none )};
 				return result;
 			}
 
@@ -271,7 +283,7 @@ namespace daw {
 				case current_state_t::current_state_t_size:
 				default:
 					std::cerr << "Unknown state" << std::endl;
-					std::abort( );
+					std::terminate( );
 				}
 			}
 
@@ -323,5 +335,5 @@ namespace daw {
 				daw::json::state::current_state( ).on_null( );
 			}
 		} // namespace state
-	}     // namespace json
+	}   // namespace json
 } // namespace daw

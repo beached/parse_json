@@ -3,14 +3,14 @@
 // Copyright (c) 2014-2017 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -36,7 +36,8 @@ using namespace daw::json;
 struct Streamable {
 	std::string a;
 
-	Streamable( ) : a( "This is a test!" ) {}
+	Streamable( )
+	  : a( "This is a test!" ) {}
 
 	bool operator==( Streamable const &rhs ) const {
 		return a == rhs.a;
@@ -83,13 +84,13 @@ struct A : public daw::json::JsonLink<A> {
     }
 
     friend bool operator==( A const &lhs, A const &rhs ) {
-        return std::tie( lhs.a, lhs.b, lhs.c ) == std::tie( rhs.a, rhs.b, rhs.c ) &&
-               std::equal( lhs.d.begin( ), lhs.d.end( ), rhs.d.begin( ), rhs.d.end( ) );
+        return std::tie( lhs.a, lhs.b, lhs.c ) == std::tie( rhs.a, rhs.b, rhs.c
+) && std::equal( lhs.d.begin( ), lhs.d.end( ), rhs.d.begin( ), rhs.d.end( ) );
     }
 
     friend bool operator!=( A const &lhs, A const &rhs ) {
-        return std::tie( lhs.a, lhs.b, lhs.c ) != std::tie( rhs.a, rhs.b, rhs.c ) ||
-               !std::equal( lhs.d.begin( ), lhs.d.end( ), rhs.d.begin( ), rhs.d.end( ) );
+        return std::tie( lhs.a, lhs.b, lhs.c ) != std::tie( rhs.a, rhs.b, rhs.c
+) || !std::equal( lhs.d.begin( ), lhs.d.end( ), rhs.d.begin( ), rhs.d.end( ) );
     }
 };
 
@@ -116,11 +117,13 @@ struct B : public daw::json::JsonLink<B> {
     }
 
     friend bool operator==( B const &lhs, B const &rhs ) {
-        return std::tie( lhs.a, lhs.b, lhs.c ) == std::tie( rhs.a, rhs.b, rhs.c );
+        return std::tie( lhs.a, lhs.b, lhs.c ) == std::tie( rhs.a, rhs.b, rhs.c
+);
     }
 
     friend bool operator!=( B const &lhs, B const &rhs ) {
-        return std::tie( lhs.a, lhs.b, lhs.c ) != std::tie( rhs.a, rhs.b, rhs.c );
+        return std::tie( lhs.a, lhs.b, lhs.c ) != std::tie( rhs.a, rhs.b, rhs.c
+);
     }
 };
 
@@ -143,8 +146,9 @@ struct C : public daw::json::JsonLink<C> {
 C::~C( ) {}
 
 template<typename K, typename V>
-bool operator==( std::unordered_map<K, V> const &a, std::unordered_map<K, V> const &b ) {
-    return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ), b.begin( ), b.end( ) );
+bool operator==( std::unordered_map<K, V> const &a, std::unordered_map<K, V>
+const &b ) { return a.size( ) == a.size( ) && std::equal( a.begin( ), a.end( ),
+b.begin( ), b.end( ) );
 }
 
 template<typename Stream>
@@ -281,9 +285,8 @@ int main( int, char ** ) {
 	    std::cout << c.to_string( ) << std::endl;
 	    boost::filesystem::path f{"file.json"};
 	    if( !exists( f ) ) {
-	        std::cout << "Could not test from_file '" << f << "' does not exist\n";
-	    } else {
-	        auto g = from_file<Test>( "file.json" );
+	        std::cout << "Could not test from_file '" << f << "' does not
+	   exist\n"; } else { auto g = from_file<Test>( "file.json" );
 	    }
 	    */
 	return EXIT_SUCCESS;

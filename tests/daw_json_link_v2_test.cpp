@@ -3,14 +3,14 @@
 // Copyright (c) 2017 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,6 +23,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "daw_json_link.h"
 
@@ -38,8 +40,9 @@ struct test_t final : public daw::json::json_link<test_t> {
 	static void map_to_json( ) {
 		json_link_integer_array( "a", a );
 		json_link_integer( "b", b );
-		json_link_integer_fn( "c", []( test_t const &obj ) { return obj.c; },
-		                      []( test_t &obj, auto const &value ) { obj.c = value; } );
+		json_link_integer_fn(
+		  "c", []( test_t const &obj ) { return obj.c; },
+		  []( test_t &obj, auto const &value ) { obj.c = value; } );
 		json_link_string( "d", d );
 		json_link_real( "e", e );
 		json_link_integer( "f", f );
@@ -47,8 +50,10 @@ struct test_t final : public daw::json::json_link<test_t> {
 	}
 }; // test_t
 
-constexpr auto const expected_size = sizeof( int32_t ) + sizeof( int64_t ) + sizeof( std::string ) + sizeof( double ) +
-                                     sizeof( int16_t ) + sizeof( bool ) + sizeof( std::vector<int> );
+constexpr auto const expected_size = sizeof( int32_t ) + sizeof( int64_t ) +
+                                     sizeof( std::string ) + sizeof( double ) +
+                                     sizeof( int16_t ) + sizeof( bool ) +
+                                     sizeof( std::vector<int> );
 
 struct test2_t : public daw::json::json_link<test2_t> {
 	test_t a;
@@ -67,8 +72,10 @@ struct test2_t : public daw::json::json_link<test2_t> {
 int main( int, char ** ) {
 	try {
 		test2_t t;
-		std::cout << "size of test_t-> " << sizeof( test_t ) << " data member total sizes-> " << expected_size << '\n';
-		std::cout << "size of base->" << sizeof( daw::json::json_link<test_t> ) << '\n';
+		std::cout << "size of test_t-> " << sizeof( test_t )
+		          << " data member total sizes-> " << expected_size << '\n';
+		std::cout << "size of base->" << sizeof( daw::json::json_link<test_t> )
+		          << '\n';
 		t.a.a.push_back( 1 );
 		t.a.a.push_back( 2 );
 		t.a.a.push_back( 3 );

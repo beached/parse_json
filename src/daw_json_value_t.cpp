@@ -1,16 +1,16 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,11 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cstdint>
 #include <iterator>
+#include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <type_traits>
+#include <typeindex>
 #include <utility>
 
 #include <daw/char_range/daw_char_range.h>
@@ -37,8 +42,10 @@
 
 namespace daw {
 	namespace json {
-		json_object_value_item make_object_value_item( json_string_value first, json_value_t second ) {
-			return std::make_pair<json_string_value, json_value_t>( std::move( first ), std::move( second ) );
+		json_object_value_item make_object_value_item( json_string_value first,
+		                                               json_value_t second ) {
+			return std::make_pair<json_string_value, json_value_t>(
+			  std::move( first ), std::move( second ) );
 		}
 		std::string to_string( json_value_t const &v ) {
 			return v.to_string( );
@@ -67,32 +74,42 @@ namespace daw {
 			if( ti == std::type_index( typeid( json_value_t::object_t ) ) ) {
 				return "object"s;
 			}
-			daw::exception::daw_throw( "Invalid type passed to to string, not valid for json_value_t" );
+			daw::exception::daw_throw(
+			  "Invalid type passed to to string, not valid for json_value_t" );
 		}
 
-		json_value_t::json_value_t( ) noexcept : m_value{null_t{}} {}
+		json_value_t::json_value_t( ) noexcept
+		  : m_value{null_t{}} {}
 
-		json_value_t::json_value_t( json_value_t::integer_t value ) noexcept : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::integer_t value ) noexcept
+		  : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::real_t value ) noexcept : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::real_t value ) noexcept
+		  : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( daw::string_view value ) : m_value{string_t{value}} {}
+		json_value_t::json_value_t( daw::string_view value )
+		  : m_value{string_t{value}} {}
 
-		json_value_t::json_value_t( json_value_t::string_t value ) noexcept : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::string_t value ) noexcept
+		  : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::boolean_t value ) noexcept : m_value{std::move( value )} {}
+		json_value_t::json_value_t( json_value_t::boolean_t value ) noexcept
+		  : m_value{std::move( value )} {}
 
-		json_value_t::json_value_t( json_value_t::null_t ) noexcept : m_value{null_t{}} {}
+		json_value_t::json_value_t( json_value_t::null_t ) noexcept
+		  : m_value{null_t{}} {}
 
 		json_value_t::json_value_t( json_value_t::array_t value ) noexcept
-		    : m_value{json_value_t::array_t{std::move( value )}} {}
+		  : m_value{json_value_t::array_t{std::move( value )}} {}
 
 		json_value_t::json_value_t( json_value_t::object_t value ) noexcept
-		    : m_value{json_value_t::object_t{std::move( value )}} {}
+		  : m_value{json_value_t::object_t{std::move( value )}} {}
 
-		json_value_t::json_value_t( json_value_t const &other ) : m_value{other.m_value} {}
+		json_value_t::json_value_t( json_value_t const &other )
+		  : m_value{other.m_value} {}
 
-		json_value_t::json_value_t( json_value_t &&other ) noexcept : m_value{std::move( other.m_value )} {}
+		json_value_t::json_value_t( json_value_t &&other ) noexcept
+		  : m_value{std::move( other.m_value )} {}
 
 		json_value_t &json_value_t::operator=( json_value_t &&rhs ) noexcept {
 			m_value = std::move( rhs.m_value );
@@ -103,7 +120,8 @@ namespace daw {
 			return *this = json_value_t{rhs};
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::integer_t rhs ) noexcept {
+		json_value_t &json_value_t::
+		operator=( json_value_t::integer_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
@@ -118,12 +136,14 @@ namespace daw {
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::string_t rhs ) noexcept {
+		json_value_t &json_value_t::
+		operator=( json_value_t::string_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::boolean_t rhs ) noexcept {
+		json_value_t &json_value_t::
+		operator=( json_value_t::boolean_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
@@ -133,12 +153,14 @@ namespace daw {
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::array_t rhs ) noexcept {
+		json_value_t &json_value_t::
+		operator=( json_value_t::array_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::operator=( json_value_t::object_t rhs ) noexcept {
+		json_value_t &json_value_t::
+		operator=( json_value_t::object_t rhs ) noexcept {
 			m_value = std::move( rhs );
 			return *this;
 		}
@@ -146,48 +168,63 @@ namespace daw {
 		json_value_t::~json_value_t( ) {}
 
 		bool const &json_value_t::get_boolean( ) const {
-			daw::exception::daw_throw_on_false(
-			    is_boolean( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "), expected boolean" );
+			daw::exception::daw_throw_on_false( is_boolean( ),
+			                                    "Unexpected value type(" +
+			                                      daw::json::to_string( type( ) ) +
+			                                      "), expected boolean" );
 			return boost::get<boolean_t>( m_value );
 		}
 
 		bool &json_value_t::get_boolean( ) {
-			daw::exception::daw_throw_on_false(
-			    is_boolean( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "), expected boolean" );
+			daw::exception::daw_throw_on_false( is_boolean( ),
+			                                    "Unexpected value type(" +
+			                                      daw::json::to_string( type( ) ) +
+			                                      "), expected boolean" );
 			return boost::get<boolean_t>( m_value );
 		}
 
 		json_value_t::integer_t json_value_t::get_integer( ) const {
-			daw::exception::daw_throw_on_false(
-			    is_integer( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected integer" );
+			daw::exception::daw_throw_on_false( is_integer( ),
+			                                    "Unexpected value type(" +
+			                                      daw::json::to_string( type( ) ) +
+			                                      "),expected integer" );
 			return boost::get<integer_t>( m_value );
 		}
 
 		json_value_t::real_t json_value_t::get_real( ) const {
-			daw::exception::daw_throw_on_false(
-			    is_numeric( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected numeric" );
+			daw::exception::daw_throw_on_false( is_numeric( ),
+			                                    "Unexpected value type(" +
+			                                      daw::json::to_string( type( ) ) +
+			                                      "),expected numeric" );
 			using namespace boost;
 			using namespace daw;
 			struct get_real_t final {
 				json_value_t::real_t operator( )( json_value_t::null_t ) const {
-					daw::exception::daw_throw( "Unexpected value type(null), expected numeric" );
+					daw::exception::daw_throw(
+					  "Unexpected value type(null), expected numeric" );
 				}
 				json_value_t::real_t operator( )( json_value_t::string_t ) const {
-					daw::exception::daw_throw( "Unexpected value type(string), expected numeric" );
+					daw::exception::daw_throw(
+					  "Unexpected value type(string), expected numeric" );
 				}
 				json_value_t::real_t operator( )( json_value_t::boolean_t ) const {
-					daw::exception::daw_throw( "Unexpected value type(boolean), expected numeric" );
+					daw::exception::daw_throw(
+					  "Unexpected value type(boolean), expected numeric" );
 				}
 				json_value_t::real_t operator( )( json_value_t::array_t ) const {
-					daw::exception::daw_throw( "Unexpected value type(array), expected numeric" );
+					daw::exception::daw_throw(
+					  "Unexpected value type(array), expected numeric" );
 				}
 				json_value_t::real_t operator( )( json_value_t::object_t ) const {
-					daw::exception::daw_throw( "Unexpected value type(object), expected numeric" );
+					daw::exception::daw_throw(
+					  "Unexpected value type(object), expected numeric" );
 				}
-				json_value_t::real_t operator( )( json_value_t::integer_t const &value ) const {
+				json_value_t::real_t
+				operator( )( json_value_t::integer_t const &value ) const {
 					return static_cast<json_value_t::real_t>( value );
 				}
-				json_value_t::real_t operator( )( json_value_t::real_t const &value ) const {
+				json_value_t::real_t
+				operator( )( json_value_t::real_t const &value ) const {
 					return value;
 				}
 			}; // get_real_t
@@ -200,26 +237,32 @@ namespace daw {
 
 		std::string json_value_t::get_string( ) const {
 			daw::exception::daw_throw_on_false(
-			    is_string( ), "Unexpected value type" + daw::json::to_string( type( ) ) + "),expected string" );
-			daw::exception::daw_throw_on_true( m_value.empty( ), "Unexpected empty string" );
+			  is_string( ), "Unexpected value type" +
+			                  daw::json::to_string( type( ) ) + "),expected string" );
+			daw::exception::daw_throw_on_true( m_value.empty( ),
+			                                   "Unexpected empty string" );
 			return boost::get<string_t>( m_value ).to_string( );
 		}
 
 		json_string_value json_value_t::get_string_value( ) const {
 			daw::exception::daw_throw_on_false(
-			    is_string( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected string" );
-			daw::exception::daw_throw_on_true( m_value.empty( ), "Unexpected empty string" );
+			  is_string( ), "Unexpected value type(" +
+			                  daw::json::to_string( type( ) ) + "),expected string" );
+			daw::exception::daw_throw_on_true( m_value.empty( ),
+			                                   "Unexpected empty string" );
 			using namespace boost;
 			using namespace daw;
 			return boost::get<string_t>( m_value );
 		}
 
 		bool json_value_t::is_integer( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( integer_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( integer_t ) );
 		}
 
 		bool json_value_t::is_real( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( real_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( real_t ) );
 		}
 
 		bool json_value_t::is_numeric( ) const noexcept {
@@ -227,46 +270,55 @@ namespace daw {
 		}
 
 		bool json_value_t::is_string( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( string_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( string_t ) );
 		}
 
 		bool json_value_t::is_boolean( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( boolean_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( boolean_t ) );
 		}
 
 		bool json_value_t::is_null( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( null_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( null_t ) );
 		}
 
 		bool json_value_t::is_array( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( array_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( array_t ) );
 		}
 
 		bool json_value_t::is_object( ) const noexcept {
-			return std::type_index( m_value.type( ) ) == std::type_index( typeid( object_t ) );
+			return std::type_index( m_value.type( ) ) ==
+			       std::type_index( typeid( object_t ) );
 		}
 
 		json_object_value const &json_value_t::get_object( ) const {
 			daw::exception::daw_throw_on_false(
-			    is_object( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected object" );
+			  is_object( ), "Unexpected value type(" +
+			                  daw::json::to_string( type( ) ) + "),expected object" );
 			return boost::get<json_object_value>( m_value );
 		}
 
 		json_object_value &json_value_t::get_object( ) {
 			daw::exception::daw_throw_on_false(
-			    is_object( ), "Unexpected value type(" + daw::json::to_string( type( ) ) + "),expected object" );
+			  is_object( ), "Unexpected value type(" +
+			                  daw::json::to_string( type( ) ) + "),expected object" );
 			return boost::get<json_object_value>( m_value );
 		}
 
 		json_array_value const &json_value_t::get_array( ) const {
-			daw::exception::daw_throw_on_false( is_array( ), "Unexpected value type(" +
-			                                                     daw::json::to_string( type( ) ) + "),expected array" );
+			daw::exception::daw_throw_on_false(
+			  is_array( ), "Unexpected value type(" +
+			                 daw::json::to_string( type( ) ) + "),expected array" );
 			return boost::get<json_array_value>( m_value );
 		}
 
 		json_array_value &json_value_t::get_array( ) {
-			daw::exception::daw_throw_on_false( is_array( ), "Unexpected value type(" +
-			                                                     daw::json::to_string( type( ) ) + "),expected array" );
+			daw::exception::daw_throw_on_false(
+			  is_array( ), "Unexpected value type(" +
+			                 daw::json::to_string( type( ) ) + "),expected array" );
 			return boost::get<json_array_value>( m_value );
 		}
 
@@ -329,36 +381,42 @@ namespace daw {
 			return os;
 		}
 
-		std::ostream &operator<<( std::ostream &os, std::shared_ptr<json_value_t> const &value ) {
+		std::ostream &operator<<( std::ostream &os,
+		                          std::shared_ptr<json_value_t> const &value ) {
 			os << to_string( value );
 			return os;
 		}
 
 		json_object_value::~json_object_value( ) {}
 
-		json_object_value::iterator json_object_value::find( daw::string_view key ) {
+		json_object_value::iterator
+		json_object_value::find( daw::string_view key ) {
 			auto const k = key.to_string( );
-			return std::find_if( members_v.begin( ), members_v.end( ), [&]( json_object_value_item const &item ) {
-				// hack be here
-				auto const a = item.first.to_string( );
-				return a == k;
-			} );
+			return std::find_if( members_v.begin( ), members_v.end( ),
+			                     [&]( json_object_value_item const &item ) {
+				                     // hack be here
+				                     auto const a = item.first.to_string( );
+				                     return a == k;
+			                     } );
 		}
 
-		json_object_value::const_iterator json_object_value::find( daw::string_view key ) const {
+		json_object_value::const_iterator
+		json_object_value::find( daw::string_view key ) const {
 			auto const k = key.to_string( );
-			return std::find_if( members_v.begin( ), members_v.end( ), [&]( json_object_value_item const &item ) {
-				// hack be here
-				auto const a = item.first.to_string( );
-				return a == k;
-			} );
+			return std::find_if( members_v.begin( ), members_v.end( ),
+			                     [&]( json_object_value_item const &item ) {
+				                     // hack be here
+				                     auto const a = item.first.to_string( );
+				                     return a == k;
+			                     } );
 		}
 
 		bool json_object_value::has_member( daw::string_view key ) const {
 			return find( key ) != end( );
 		}
 
-		boost::optional<json_value_t> json_object_value::operator( )( daw::string_view key ) const {
+		boost::optional<json_value_t> json_object_value::
+		operator( )( daw::string_view key ) const {
 			auto it = find( key );
 			if( it != end( ) ) {
 				return boost::optional<json_value_t>{it->second};
@@ -366,18 +424,23 @@ namespace daw {
 			return {};
 		}
 
-		json_object_value::mapped_type &json_object_value::operator[]( daw::string_view key ) {
+		json_object_value::mapped_type &json_object_value::
+		operator[]( daw::string_view key ) {
 			auto pos = find( key );
 			if( end( ) == pos ) {
-				pos = insert( pos, make_object_value_item( range::create_char_range( key ), json_value_t{} ) );
+				pos =
+				  insert( pos, make_object_value_item( range::create_char_range( key ),
+				                                       json_value_t{} ) );
 			}
 			return pos->second;
 		}
 
-		json_object_value::mapped_type const &json_object_value::operator[]( daw::string_view key ) const {
+		json_object_value::mapped_type const &json_object_value::
+		operator[]( daw::string_view key ) const {
 			auto pos = find( key );
 			if( end( ) == pos ) {
-				throw std::out_of_range( "Attempt to access an undefined value in a const object" );
+				throw std::out_of_range(
+				  "Attempt to access an undefined value in a const object" );
 			}
 			return pos->second;
 		}
@@ -387,17 +450,20 @@ namespace daw {
 		}
 
 		template<>
-		json_value_t::integer_t get<json_value_t::integer_t>( daw::json::json_value_t const &val ) {
+		json_value_t::integer_t
+		get<json_value_t::integer_t>( daw::json::json_value_t const &val ) {
 			return val.get_integer( );
 		}
 
 		template<>
-		json_value_t::real_t get<json_value_t::real_t>( daw::json::json_value_t const &val ) {
+		json_value_t::real_t
+		get<json_value_t::real_t>( daw::json::json_value_t const &val ) {
 			return val.get_real( );
 		}
 
 		template<>
-		json_value_t::string_t get<json_value_t::string_t>( daw::json::json_value_t const &val ) {
+		json_value_t::string_t
+		get<json_value_t::string_t>( daw::json::json_value_t const &val ) {
 			return val.get_string_value( );
 		}
 
@@ -407,22 +473,26 @@ namespace daw {
 		}
 
 		template<>
-		json_value_t::boolean_t get<json_value_t::boolean_t>( daw::json::json_value_t const &val ) {
+		json_value_t::boolean_t
+		get<json_value_t::boolean_t>( daw::json::json_value_t const &val ) {
 			return val.get_boolean( );
 		}
 
 		template<>
-		json_value_t::object_t get<json_value_t::object_t>( daw::json::json_value_t const &val ) {
+		json_value_t::object_t
+		get<json_value_t::object_t>( daw::json::json_value_t const &val ) {
 			return val.get_object( );
 		}
 
 		template<>
-		json_value_t::array_t get<json_value_t::array_t>( daw::json::json_value_t const &val ) {
+		json_value_t::array_t
+		get<json_value_t::array_t>( daw::json::json_value_t const &val ) {
 			return val.get_array( );
 		}
 
 		template<>
-		json_value_t::null_t get<json_value_t::null_t>( daw::json::json_value_t const & ) {
+		json_value_t::null_t
+		get<json_value_t::null_t>( daw::json::json_value_t const & ) {
 			return json_value_t::null_t{};
 		}
 
@@ -444,3 +514,4 @@ namespace std {
 		return ss.str( );
 	}
 } // namespace std
+

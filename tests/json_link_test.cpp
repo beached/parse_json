@@ -3,14 +3,14 @@
 // Copyright (c) 2014-2017 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -42,7 +42,8 @@ using namespace std::chrono;
 struct Streamable {
 	std::string a;
 
-	Streamable( ) : a( "This is a test!" ) {}
+	Streamable( )
+	  : a( "This is a test!" ) {}
 
 	bool operator==( Streamable const &rhs ) const {
 		return a == rhs.a;
@@ -104,10 +105,10 @@ struct A : public daw::json::JsonLink<A> {
         , custom_01{{2, 4, 6}}
         , timestamp_01{}
         , timestamp_02{std::chrono::system_clock::now( )}
-        , hexstring_01{{0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536}}
-        , hexstring_02{{0xFF, 0x1111, 0xABCDEF, 0x12345}}
-        , hexstring_03{{0x11, 0xAA, 0xAB, 0xFF, 0x00, 0x01}}
-        , hexvalue_01{0x12345678} {
+        , hexstring_01{{0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048,
+4096, 8192, 16384, 32768, 65536}} , hexstring_02{{0xFF, 0x1111, 0xABCDEF,
+0x12345}} , hexstring_03{{0x11, 0xAA, 0xAB, 0xFF, 0x00, 0x01}} ,
+hexvalue_01{0x12345678} {
 
         set_jsonlinks( );
     }
@@ -130,16 +131,15 @@ struct A : public daw::json::JsonLink<A> {
         link_jsonstring( "custom_01", custom_01,
                          []( std::vector<int> const &v ) -> std::string {
                              std::stringstream result;
-                             std::copy( v.begin( ), v.end( ), std::ostream_iterator<int>{result, " "} );
-                             return result.str( );
+                             std::copy( v.begin( ), v.end( ),
+std::ostream_iterator<int>{result, " "} ); return result.str( );
                          },
                          []( std::string const &str ) -> std::vector<int> {
                              std::vector<int> result;
                              std::istringstream iss{str};
-                             std::copy( std::istream_iterator<int>{iss}, std::istream_iterator<int>{},
-                                        std::back_inserter( result ) );
-                             return result;
-                         } );
+                             std::copy( std::istream_iterator<int>{iss},
+std::istream_iterator<int>{}, std::back_inserter( result ) ); return result; }
+);
 
         link_iso8601_timestamp( "timestamp_01", timestamp_01 );
         link_epoch_milliseconds_timestamp( "timestamp_02", timestamp_02 );

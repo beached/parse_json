@@ -1,16 +1,16 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2017 Darrell Wright
+// Copyright (c) 2014-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,7 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
 
 #include <daw/daw_range.h>
 #include <daw/daw_string_view.h>
@@ -29,25 +34,33 @@
 
 namespace daw {
 	namespace json {
-		JsonParserException::JsonParserException( std::string msg ) noexcept : message( std::move( msg ) ) {}
+		JsonParserException::JsonParserException( std::string msg ) noexcept
+		  : message( std::move( msg ) ) {}
 		JsonParserException::~JsonParserException( ) {}
 
 		namespace impl {
 			template<typename Iterator>
-			constexpr bool contains( Iterator first, Iterator last,
-			                         typename std::iterator_traits<Iterator>::value_type const &key ) noexcept {
+			constexpr bool
+			contains( Iterator first, Iterator last,
+			          typename std::iterator_traits<Iterator>::value_type const
+			            &key ) noexcept {
 				return std::find( first, last, key ) != last;
 			}
 
 			constexpr bool is_ws( range::UTFValType val ) noexcept {
-				auto const result1 = static_cast<range::UTFValType>( 0x0009 ) - val == 0;
-				auto const result2 = static_cast<range::UTFValType>( 0x000A ) - val == 0;
-				auto const result3 = static_cast<range::UTFValType>( 0x000D ) - val == 0;
-				auto const result4 = static_cast<range::UTFValType>( 0x0020 ) - val == 0;
+				auto const result1 =
+				  static_cast<range::UTFValType>( 0x0009 ) - val == 0;
+				auto const result2 =
+				  static_cast<range::UTFValType>( 0x000A ) - val == 0;
+				auto const result3 =
+				  static_cast<range::UTFValType>( 0x000D ) - val == 0;
+				auto const result4 =
+				  static_cast<range::UTFValType>( 0x0020 ) - val == 0;
 				return result1 | result2 | result3 | result4;
 			}
 
-			constexpr range::UTFValType ascii_lower_case( range::UTFValType val ) noexcept {
+			constexpr range::UTFValType
+			ascii_lower_case( range::UTFValType val ) noexcept {
 				return val | static_cast<range::UTFValType>( ' ' );
 			}
 
@@ -55,7 +68,8 @@ namespace daw {
 				return *it == val;
 			}
 
-			bool is_equal_nc( range::UTFIterator it, range::UTFValType val ) noexcept {
+			bool is_equal_nc( range::UTFIterator it,
+			                  range::UTFValType val ) noexcept {
 				return ascii_lower_case( *it ) == ascii_lower_case( val );
 			}
 
@@ -82,9 +96,12 @@ namespace daw {
 				}
 			}
 
-			bool move_range_forward_if_equal( range::CharRange &range, daw::string_view value ) {
-				auto const value_size = static_cast<size_t>( std::distance( value.begin( ), value.end( ) ) );
-				auto result = std::equal( value.begin( ), value.end( ), range.begin( ) );
+			bool move_range_forward_if_equal( range::CharRange &range,
+			                                  daw::string_view value ) {
+				auto const value_size =
+				  static_cast<size_t>( std::distance( value.begin( ), value.end( ) ) );
+				auto result =
+				  std::equal( value.begin( ), value.end( ), range.begin( ) );
 				if( result ) {
 					range.safe_advance( value_size );
 				}
@@ -170,26 +187,29 @@ namespace daw {
 					throw JsonParserException( "Not a valid JSON number" );
 				}
 
-				auto const number_range_size = static_cast<size_t>( first_range_size - range.size( ) );
+				auto const number_range_size =
+				  static_cast<size_t>( first_range_size - range.size( ) );
 				auto number_range = std::make_unique<char[]>( number_range_size );
-				std::transform( first, range.begin( ), number_range.get( ),
-				                []( std::iterator_traits<range::UTFIterator>::value_type const &value ) {
-					                return static_cast<char>( value );
-				                } );
+				std::transform(
+				  first, range.begin( ), number_range.get( ),
+				  []( std::iterator_traits<range::UTFIterator>::value_type const
+				        &value ) { return static_cast<char>( value ); } );
 				if( is_float ) {
 					try {
-						auto result =
-						    json_value_t( boost::lexical_cast<double>( number_range.get( ), number_range_size ) );
+						auto result = json_value_t( boost::lexical_cast<double>(
+						  number_range.get( ), number_range_size ) );
 						return result;
 					} catch( boost::bad_lexical_cast const & ) {
 						throw JsonParserException( "Not a valid JSON number" );
 					}
 				}
 				try {
-					auto result =
-					    json_value_t{ boost::lexical_cast<intmax_t>( number_range.get( ), number_range_size ) };
+					auto result = json_value_t{boost::lexical_cast<intmax_t>(
+					  number_range.get( ), number_range_size )};
 					return result;
-				} catch( boost::bad_lexical_cast const & ) { throw JsonParserException( "Not a valid JSON number" ); }
+				} catch( boost::bad_lexical_cast const & ) {
+					throw JsonParserException( "Not a valid JSON number" );
+				}
 			}
 
 			json_value_t parse_value( range::CharRange &range );
@@ -202,7 +222,8 @@ namespace daw {
 				}
 				skip_ws( ++range );
 				auto value = parse_value( range );
-				auto result = make_object_value_item( std::move( label ), std::move( value ) );
+				auto result =
+				  make_object_value_item( std::move( label ), std::move( value ) );
 				return result;
 			}
 
@@ -294,7 +315,9 @@ namespace daw {
 				range::UTFIterator it_end( End );
 				range::CharRange range{it_begin, it_end};
 				return impl::parse_value( range );
-			} catch( JsonParserException const & ) { return daw::json::json_value_t{}; }
+			} catch( JsonParserException const & ) {
+				return daw::json::json_value_t{};
+			}
 		}
 
 		json_obj parse_json( daw::string_view json_text ) {
