@@ -36,6 +36,7 @@
 
 #include <daw/cpp_17.h>
 #include <daw/daw_exception.h>
+#include <daw/daw_move.h>
 #include <daw/daw_optional.h>
 #include <daw/daw_optional_poly.h>
 #include <daw/daw_range.h>
@@ -83,7 +84,7 @@ namespace daw {
 				Value value;
 				auto const &value_obj = obj["value"];
 				json_to_value( value, value_obj );
-				to = std::make_pair<Key, Value>( std::move( key ), std::move( value ) );
+				to = std::make_pair<Key, Value>( daw::move( key ), daw::move( value ) );
 			}
 
 			template<typename MapContainer,
@@ -137,7 +138,7 @@ namespace daw {
 				} else {
 					T result;
 					json_to_value( result, from );
-					*to = std::move( result );
+					*to = daw::move( result );
 				}
 			}
 
@@ -152,7 +153,7 @@ namespace daw {
 				} else {
 					T result;
 					json_to_value( result, from );
-					*to = std::move( result );
+					*to = daw::move( result );
 				}
 			}
 

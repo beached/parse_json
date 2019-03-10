@@ -28,6 +28,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <daw/daw_move.h>
+
 #include "daw_json.h"
 #include "daw_json_link.h"
 
@@ -221,10 +223,10 @@ struct Test : public daw::json::JsonLink<Test> {
     Test( Test &&other )
         : daw::json::JsonLink<Test>{}
         , // Root objects must be nameless or it isn't valid json
-        b{std::move( other.b )}
-        , c{std::move( other.c )}
-        , d{std::move( other.d )}
-        , e{std::move( other.e )} {
+        b{daw::move( other.b )}
+        , c{daw::move( other.c )}
+        , d{daw::move( other.d )}
+        , e{daw::move( other.e )} {
 
         link_values( );
     }
@@ -240,7 +242,7 @@ struct Test : public daw::json::JsonLink<Test> {
 
     Test &operator=( Test &&rhs ) {
         if( this != &rhs ) {
-            Test tmp{std::move( rhs )};
+            Test tmp{daw::move( rhs )};
             using std::swap;
             swap( *this, tmp );
         }

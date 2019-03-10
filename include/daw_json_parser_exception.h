@@ -26,11 +26,13 @@
 #include <string>
 #include <utility>
 
+#include <daw/daw_move.h>
+
 namespace daw {
 	namespace json {
 		struct json_parser_exception final : public std::runtime_error {
 			json_parser_exception( std::string message )
-			  : std::runtime_error{std::move( message )} {}
+			  : std::runtime_error{daw::move( message )} {}
 
 			~json_parser_exception( );
 

@@ -24,8 +24,8 @@
 
 #include <algorithm>
 #include <functional>
-#include <iterator>
 #include <istream>
+#include <iterator>
 #include <limits>
 #include <ostream>
 #include <sstream>
@@ -37,6 +37,7 @@
 
 #include <daw/cpp_17.h>
 #include <daw/daw_memory_mapped_file.h>
+#include <daw/daw_move.h>
 #include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 #include <daw/daw_utility.h>
@@ -240,7 +241,7 @@ namespace daw {
 			}
 
 			static void add_json_map( daw::string_view name, mapping_functions_t m ) {
-				get_map( )[name.to_string( )] = std::move( m );
+				get_map( )[name.to_string( )] = daw::move( m );
 			}
 
 			Derived &this_as_derived( ) {
@@ -268,10 +269,10 @@ namespace daw {
 				  [set_function]( Derived &obj, json_value_t const &value ) mutable {
 					  json_value_t::integer_t v = value.get_integer( );
 					  assert( impl::can_fit<decltype( get_function( obj ) )>( v ) );
-					  set_function( obj, std::move( v ) );
+					  set_function( obj, daw::move( v ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -289,7 +290,7 @@ namespace daw {
 					  set_function( obj, value.get_real( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -308,7 +309,7 @@ namespace daw {
 					  set_function( obj, value.get_string( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -326,7 +327,7 @@ namespace daw {
 					  set_function( obj, value.get_boolean( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -343,7 +344,7 @@ namespace daw {
 					  set_function( obj, value.get_array( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -360,7 +361,7 @@ namespace daw {
 					  set_function( obj, value.get_array( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -377,7 +378,7 @@ namespace daw {
 					  set_function( obj, value.get_array( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -394,7 +395,7 @@ namespace daw {
 					  set_function( obj, value.get_array( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 			template<typename GetFunction, typename SetFunction>
@@ -413,7 +414,7 @@ namespace daw {
 					  set_function( obj, value.get_object( ) );
 				  };
 
-				add_json_map( name, std::move( mapping_functions ) );
+				add_json_map( name, daw::move( mapping_functions ) );
 			}
 
 		public:
@@ -509,8 +510,9 @@ namespace daw {
 			return Derived::from_json_value( json_value );
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             json_link<Derived>, Derived>>>
+		template<
+		  typename Derived,
+		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_json_value( json_value_t const &json_value,
 		                                            bool use_default_on_error ) {
 			std::vector<Derived> result;
@@ -532,15 +534,17 @@ namespace daw {
 			return result;
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             json_link<Derived>, Derived>>>
+		template<
+		  typename Derived,
+		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_string( daw::string_view data,
 		                                        bool use_default_on_error ) {
 			return array_from_json_value<Derived>( parse_json( data ) );
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             json_link<Derived>, Derived>>>
+		template<
+		  typename Derived,
+		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_file( daw::string_view file_name,
 		                                      bool use_default_on_error ) {
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
@@ -570,8 +574,9 @@ namespace daw {
 			}
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             json_link<Derived>, Derived>>>
+		template<
+		  typename Derived,
+		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
 		Derived from_file( daw::string_view file_name ) {
 			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
 			daw::exception::daw_throw_on_false( in_file, "Could not open file" );

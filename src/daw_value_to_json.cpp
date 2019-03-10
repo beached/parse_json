@@ -25,6 +25,7 @@
 #include <utility>
 
 #include <daw/daw_range.h>
+#include <daw/daw_move.h>
 #include <daw/daw_string_view.h>
 
 #include "daw_json_interface.h"
@@ -64,7 +65,7 @@ namespace daw {
 				struct get_json_string_t {
 					daw::string_view value_name;
 					get_json_string_t( daw::string_view n )
-					  : value_name{std::move( n )} {}
+					  : value_name{daw::move( n )} {}
 					std::string operator( )( json_value_t::array_t const &v ) const {
 						return value_to_json( value_name, v );
 					}
@@ -87,7 +88,7 @@ namespace daw {
 						return value_to_json( value_name );
 					}
 				}; // get_json_string_t
-				return value.apply_visitor( get_json_string_t{std::move( name )} );
+				return value.apply_visitor( get_json_string_t{daw::move( name )} );
 			}
 
 			std::string value_to_json_value( json_string_value name,

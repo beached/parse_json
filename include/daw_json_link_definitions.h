@@ -45,6 +45,7 @@
 #include <daw/daw_exception.h>
 #include <daw/daw_heap_value.h>
 #include <daw/daw_memory_mapped_file.h>
+#include <daw/daw_move.h>
 #include <daw/daw_optional.h>
 #include <daw/daw_optional_poly.h>
 #include <daw/daw_string_view.h>
@@ -63,7 +64,7 @@ namespace daw {
 
 				standard_encoder_t( daw::string_view n, GetFunction func )
 				  : name_copy{n.to_string( )}
-				  , get_function{std::move( func )} {}
+				  , get_function{daw::move( func )} {}
 
 				standard_encoder_t( ) = delete;
 
@@ -134,7 +135,7 @@ namespace daw {
 			  daw::json::impl::schema::impl::get_schema( name, value );
 			data_description.bind_functions =
 			  standard_bind_functions<Derived>( name, value );
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		template<typename Derived>
@@ -160,7 +161,7 @@ namespace daw {
 				  return daw::json::impl::make_object_value_item(
 				    value.first, value.second.json_type );
 			  } );
-			return daw::json::json_value_t( std::move( result ) );
+			return daw::json::json_value_t( daw::move( result ) );
 		}
 
 		template<typename Derived>
@@ -192,14 +193,14 @@ namespace daw {
 		void
 		JsonLink<Derived>::from_json_string( daw::string_view const json_text ) {
 			auto tmp = parse_json( json_text );
-			from_json_obj( std::move( tmp ) );
+			from_json_obj( daw::move( tmp ) );
 		}
 
 		template<typename Derived>
 		void JsonLink<Derived>::from_json_string( char const *json_text_begin,
 		                                          char const *json_text_end ) {
 			auto tmp = parse_json( json_text_begin, json_text_end );
-			from_json_obj( std::move( tmp ) );
+			from_json_obj( daw::move( tmp ) );
 		}
 
 		template<typename Derived>
@@ -241,7 +242,7 @@ namespace daw {
 		template<typename Derived>
 		void JsonLink<Derived>::call_decode( JsonLink<Derived> &obj,
 		                                     json_obj json_values ) {
-			obj.from_json_obj( std::move( json_values ) );
+			obj.from_json_obj( daw::move( json_values ) );
 		}
 
 		template<typename Derived>
@@ -288,7 +289,7 @@ namespace daw {
 		impl::decode_function_t<Derived>
 		JsonLink<Derived>::standard_decoder( daw::string_view name,
 		                                     GetFunction get_function ) {
-			return [func = std::move( get_function ), name_copy = name.to_string( )](
+			return [func = daw::move( get_function ), name_copy = name.to_string( )](
 			         Derived &derived_obj, json_obj json_values ) mutable {
 				auto new_val =
 				  decoder_helper<Derived, GetFunction>( name_copy, json_values );
@@ -444,7 +445,7 @@ namespace daw {
 		auto name_copy = name.to_string( ); return [value_ptr, name_copy]( json_obj
 		json_values ) mutable { daw::exception::daw_throw_on_false( value_ptr );
 		auto new_val = nullable_decoder_helper<U>( name_copy, json_values ); if(
-		new_val ) { *value_ptr = std::move( new_val ); } else { *value_ptr.reset( );
+		new_val ) { *value_ptr = daw::move( new_val ); } else { *value_ptr.reset( );
 		        }
 		    };
 		}
@@ -455,7 +456,7 @@ namespace daw {
 		&value; auto name_copy = name.to_string( ); return [value_ptr, name_copy](
 		json_obj json_values ) mutable { daw::exception::daw_throw_on_false(
 		value_ptr ); auto new_val = nullable_decoder_helper<U>( name_copy,
-		json_values ); if( new_val ) { *value_ptr = std::move( new_val
+		json_values ); if( new_val ) { *value_ptr = daw::move( new_val
 		); } else { *value_ptr.reset( );
 		        }
 		    };
@@ -480,7 +481,7 @@ namespace daw {
 			auto key = range::create_char_range( name );
 			daw::exception::daw_throw_on_false( m_data.m_data_map.count( key ) == 0 );
 			auto result =
-			  m_data.m_data_map.emplace( std::move( key ), std::move( desc ) );
+			  m_data.m_data_map.emplace( daw::move( key ), daw::move( desc ) );
 			daw::exception::daw_throw_on_false( result.second );
 		}
 
@@ -593,7 +594,7 @@ namespace daw {
 				  daw::exception::daw_throw_on_false( is_optional ||
 				                                      json_values.is_integer( ) );
 			  };
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		///
@@ -621,7 +622,7 @@ namespace daw {
 				  daw::exception::daw_throw_on_false( is_optional ||
 				                                      json_values.is_numeric( ) );
 			  };
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		///
@@ -685,7 +686,7 @@ namespace daw {
 				  daw::exception::daw_throw_on_false( is_optional ||
 				                                      json_values.is_object( ) );
 			  };
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		/// \param name - name of array(vector) value to link
@@ -725,7 +726,7 @@ namespace daw {
 					  json_to_value( get_function( derived_obj ), member->second );
 				  }
 			  };
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		///
@@ -766,7 +767,7 @@ namespace daw {
 					  json_to_value( get_function( derived_obj ), member->second );
 				  }
 			  };
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		///
@@ -812,7 +813,7 @@ namespace daw {
 					  ss >> get_function( derived_obj );
 				  }
 			  };
-			add_to_data_map( name, std::move( data_description ) );
+			add_to_data_map( name, daw::move( data_description ) );
 		}
 
 		//
@@ -857,7 +858,7 @@ namespace daw {
 			for( auto const &d : json.get_array( ) ) {
 				Derived tmp;
 				tmp.from_json_obj( d );
-				result.push_back( std::move( tmp ) );
+				result.push_back( daw::move( tmp ) );
 			}
 			return result;
 		}

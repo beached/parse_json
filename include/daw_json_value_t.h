@@ -22,19 +22,22 @@
 
 #pragma once
 
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
 #include <cstdint>
-#include <ostream>
 #include <memory>
+#include <optional>
+#include <ostream>
 #include <string>
 #include <typeindex>
 #include <utility>
+#include <variant>
 #include <vector>
 
-#include <daw/char_range/daw_char_range.h>
 #include <daw/daw_common_mixins.h>
+#include <daw/daw_move.h>
 #include <daw/daw_string_view.h>
+#include <daw/daw_visit.h>
+#include <daw/utf_range/daw_utf_range.h>
+#include <daw/utf_range/daw_utf_string.h>
 
 namespace daw {
 	namespace json {
@@ -60,7 +63,7 @@ namespace daw {
 			json_object_value( json_object_value && ) = default;
 
 			json_object_value &operator=( json_object_value ov ) {
-				members_v = std::move( ov.members_v );
+				members_v = daw::move( ov.members_v );
 				return *this;
 			}
 
@@ -72,7 +75,7 @@ namespace daw {
 				return members_v;
 			}
 
-			boost::optional<json_value_t> operator( )( daw::string_view key ) const;
+			std::optional<json_value_t> operator( )( daw::string_view key ) const;
 
 			using key_type = std::string;
 			using mapped_type = json_value_t;
@@ -110,11 +113,23 @@ namespace daw {
 			using object_t = json_object_value;
 
 		private:
-			boost::variant<null_t, integer_t, real_t, string_t, boolean_t, array_t,
-			               object_t>
+			std::variant<null_t, integer_t, real_t, string_t, boolean_t, array_t,
+			             object_t>
 			  m_value;
 
 		public:
+			template<typename T>
+			static constexpr size_t index_of( ) {
+				auto result =
+				  daw::traits::pack_index_of<T, null_t, integer_t, real_t, string_t,
+				                             boolean_t, array_t, object_t>( );
+
+				if( result < 0 ) {
+					throw std::out_of_range{"T"};
+				}
+				return result;
+			}
+
 			json_value_t( ) noexcept;
 
 			explicit json_value_t( integer_t value ) noexcept;
@@ -178,7 +193,7 @@ namespace daw {
 
 			array_t &get_array( );
 
-			std::type_index type( ) const noexcept;
+			size_t type( ) const noexcept;
 
 			void cleanup( );
 
@@ -195,20 +210,18 @@ namespace daw {
 
 			template<typename Visitor>
 			decltype( auto ) apply_visitor( Visitor &&visitor ) {
-				return boost::apply_visitor( std::forward<Visitor>( visitor ),
-				                             m_value );
+				return daw::visit_nt( m_value, std::forward<Visitor>( visitor ) );
 			}
-
 			template<typename Visitor>
 			decltype( auto ) apply_visitor( Visitor &&visitor ) const {
-				return boost::apply_visitor( std::forward<Visitor>( visitor ),
-				                             m_value );
+				return daw::visit_nt( m_value, std::forward<Visitor>( visitor ) );
 			}
+
 			std::string to_string( ) const;
 		}; // json_value_t
 
-		std::string to_string( std::type_index const &ti );
-		using value_opt_t = boost::optional<json_value_t>;
+		std::string to_string( size_t ti ) noexcept;
+		using value_opt_t = std::optional<json_value_t>;
 
 		std::string to_string( json_value_t const &value );
 
