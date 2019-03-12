@@ -122,35 +122,6 @@ namespace daw {
 				return value_to_json( to_string_view( name ), object );
 			}
 
-			// double
-			std::string value_to_json( daw::string_view name, double const &value ) {
-				return value_to_json_number( name, value );
-			}
-
-			std::string value_to_json( json_string_value name, double const &value ) {
-				return value_to_json( to_string_view( name ), value );
-			}
-
-			// int32_t
-			std::string value_to_json( daw::string_view name, int32_t const &value ) {
-				return value_to_json_number( name, value );
-			}
-
-			std::string value_to_json( json_string_value name,
-			                           int32_t const &value ) {
-				return value_to_json( to_string_view( name ), value );
-			}
-
-			// int64_t
-			std::string value_to_json( daw::string_view name, int64_t const &value ) {
-				return value_to_json_number( name, value );
-			}
-
-			std::string value_to_json( json_string_value name,
-			                           int64_t const &value ) {
-				return value_to_json( to_string_view( name ), value );
-			}
-
 			// string
 			std::string value_to_json( daw::string_view name,
 			                           std::string const &value ) {
@@ -159,28 +130,6 @@ namespace daw {
 
 			std::string value_to_json( json_string_value name,
 			                           std::string const &value ) {
-				return value_to_json( to_string_view( name ), value );
-			}
-
-			// uint32_t
-			std::string value_to_json( daw::string_view name,
-			                           uint32_t const &value ) {
-				return value_to_json_number( name, value );
-			}
-
-			std::string value_to_json( json_string_value name,
-			                           uint32_t const &value ) {
-				return value_to_json( to_string_view( name ), value );
-			}
-
-			// uint64_t
-			std::string value_to_json( daw::string_view name,
-			                           uint64_t const &value ) {
-				return value_to_json_number( name, value );
-			}
-
-			std::string value_to_json( json_string_value name,
-			                           uint64_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 		} // namespace generate

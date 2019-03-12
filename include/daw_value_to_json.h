@@ -25,8 +25,8 @@
 #include <iomanip>
 #include <limits>
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -59,31 +59,14 @@ namespace daw {
 			std::string value_to_json( json_string_value name,
 			                           daw::json::json_object_value const &object );
 
-			std::string value_to_json( daw::string_view name, double const &value );
-			std::string value_to_json( json_string_value name, double const &value );
-
-			std::string value_to_json( daw::string_view name, int32_t const &value );
-			std::string value_to_json( json_string_value name, int32_t const &value );
-
-			std::string value_to_json( daw::string_view name, int64_t const &value );
-			std::string value_to_json( json_string_value name, int64_t const &value );
-
 			std::string value_to_json( daw::string_view name,
 			                           std::string const &value );
 			std::string value_to_json( json_string_value name,
 			                           std::string const &value );
 
-			std::string value_to_json( daw::string_view name, uint32_t const &value );
-			std::string value_to_json( json_string_value name,
-			                           uint32_t const &value );
-
-			std::string value_to_json( daw::string_view name, uint64_t const &value );
-			std::string value_to_json( json_string_value name,
-			                           uint64_t const &value );
-
 			template<typename Container,
-			         typename std::enable_if_t<
-			           daw::traits::is_container_not_string_v<Container>, long> = 0>
+			         typename daw::enable_if_t<
+			           daw::traits::is_container_not_string_v<Container>> = nullptr>
 			std::string value_to_json( daw::string_view name,
 			                           Container const &values );
 
@@ -122,10 +105,11 @@ namespace daw {
 			                    std::weak_ptr<T> const &value );
 
 			template<typename Container,
-			         typename std::enable_if_t<
-			           daw::traits::is_container_not_string_v<Container>, long>>
+			         typename daw::enable_if_t<
+			           daw::traits::is_container_not_string_v<Container>>>
 			std::string value_to_json( daw::string_view name,
 			                           Container const &values ) {
+
 				daw::string_view const empty_str{""};
 				std::stringstream result;
 				result << daw::json::details::json_name( name ) << "[ ";
@@ -175,6 +159,18 @@ namespace daw {
 			std::string value_to_json_number( daw::string_view name,
 			                                  Number const &value ) {
 				return daw::json::details::json_name( name ) + std::to_string( value );
+			}
+
+			// Number
+			template<typename Number,
+			         daw::enable_if_t<std::is_arithmetic_v<Number>> = nullptr>
+			std::string value_to_json( daw::string_view name, Number value ) {
+				return value_to_json_number( name, value );
+			}
+			template<typename Number,
+			         daw::enable_if_t<std::is_arithmetic_v<Number>> = nullptr>
+			std::string value_to_json( json_string_value name, Number value ) {
+				return value_to_json_number( to_string_view( name ), value );
 			}
 
 			template<typename T>

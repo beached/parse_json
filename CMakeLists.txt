@@ -75,11 +75,11 @@ set( SOURCE_FILES_v2
 	${SOURCE_FOLDER}/daw_json_parser_exception.cpp
 )
 
-add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
+add_library ( parse_json ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json dependency_stub )
 target_link_libraries( parse_json utf_range utf_string tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
-add_library ( parse_json_v2 STATIC ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
+add_library ( parse_json_v2 ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
 add_dependencies( parse_json_v2 dependency_stub )
 target_link_libraries( parse_json_v2 utf_range utf_string tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
