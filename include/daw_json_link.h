@@ -53,12 +53,10 @@ namespace daw {
 
 		namespace impl {
 			template<typename T, typename Dest>
-			using can_dereference_to_t =
-			  std::is_convertible<decltype( *( std::declval<T>( ) ) ), Dest>;
+			using can_dereference_to_detect = decltype( std::declval<Dest>( ) = *(std::declval<T>( )) );
 
 			template<typename T, typename Dest>
-			constexpr bool can_dereference_to_v =
-			  can_dereference_to_t<T, Dest>::value;
+			constexpr bool can_dereference_to_v = daw::is_detected_v<can_dereference_to_detect, T, Dest>;
 
 			std::string to_json_integer( json_value_t::integer_t i );
 			std::string to_json_real( json_value_t::real_t d );
@@ -105,7 +103,7 @@ namespace daw {
 					                } );
 					result += ']';
 					return result;
-				};
+				}
 			} // namespace impl
 
 			template<typename Container>
@@ -171,7 +169,7 @@ namespace daw {
 			copy_array_emplace_value( json_value_t const &source,
 			                          std::vector<T, Args...> const &destination ){
 
-			};
+			}
 
 			/// @brief Copies a value_t::array to a copy assignable value stored in
 			/// destination
@@ -191,7 +189,7 @@ namespace daw {
 					  value_type dest_v = static_cast<value_type>( func( v ) );
 					  return dest_v;
 				  } );
-			};
+			}
 		} // namespace impl
 
 		struct link_types_t {
@@ -448,12 +446,12 @@ namespace daw {
 			}
 
 			static Derived from_json_value( json_value_t const &json_value ) {
-				auto const &json_obj = json_value.get_object( );
+				auto const &obj = json_value.get_object( );
 
 				Derived result;
 
 				for( auto const &linked_item : get_json_maps( ) ) {
-					auto const it = json_obj.find( linked_item.first );
+					auto const it = obj.find( linked_item.first );
 					// TODO: when optional
 
 					try {
@@ -514,7 +512,7 @@ namespace daw {
 		  typename Derived,
 		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_json_value( json_value_t const &json_value,
-		                                            bool use_default_on_error ) {
+		                                            bool ) {
 			std::vector<Derived> result;
 			daw::exception::daw_throw_on_false(
 			  json_value.is_array( ), "Value expected to be json array.  It was as " +

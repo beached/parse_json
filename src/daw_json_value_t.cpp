@@ -486,7 +486,7 @@ namespace daw {
 			return json_value_t::null_t{};
 		}
 
-		create_comparison_operators( json_value_t );
+		create_comparison_operators( json_value_t )
 	} // namespace json
 } // namespace daw
 

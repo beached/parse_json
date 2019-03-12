@@ -117,7 +117,7 @@ namespace daw {
 				return "state_in_object_name";
 			}
 
-			void state_in_object_name_t::on_string( daw::string_view value ) {
+			void state_in_object_name_t::on_string( daw::string_view ) {
 				// json_value_t name{ value };
 
 				// Set current object name json_value_t
@@ -158,25 +158,25 @@ namespace daw {
 			// state_in_object_value
 			//
 
-			void state_in_object_value_t::on_integer( daw::string_view value ) {
+			void state_in_object_value_t::on_integer( daw::string_view ) {
 				// Save data
 				// current_value( ) = json_value_t{ to_integer( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
-			void state_in_object_value_t::on_real( daw::string_view value ) {
+			void state_in_object_value_t::on_real( daw::string_view ) {
 				// Save data
 				// current_value( ) = json_value_t{ to_real( value ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
-			void state_in_object_value_t::on_string( daw::string_view value ) {
+			void state_in_object_value_t::on_string( daw::string_view ) {
 				// Save data
 				// current_value( ) = json_value_t{ value.to_string( ) };
 				set_next_state( current_state_t::in_object_name );
 			}
 
-			void state_in_object_value_t::on_boolean( bool value ) {
+			void state_in_object_value_t::on_boolean( bool ) {
 				// Save data
 				// current_value( ) = json_value_t{ value };
 				set_next_state( current_state_t::in_object_name );
@@ -210,19 +210,19 @@ namespace daw {
 				// Save data
 			}
 
-			void state_in_array_t::on_integer( daw::string_view value ) {
+			void state_in_array_t::on_integer( daw::string_view ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_real( daw::string_view value ) {
+			void state_in_array_t::on_real( daw::string_view ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_string( daw::string_view value ) {
+			void state_in_array_t::on_string( daw::string_view ) {
 				// Save data
 			}
 
-			void state_in_array_t::on_boolean( bool value ) {
+			void state_in_array_t::on_boolean( bool ) {
 				// Save data
 			}
 
@@ -250,19 +250,19 @@ namespace daw {
 				// Save data
 			}
 
-			void state_none_t::on_integer( daw::string_view value ) {
+			void state_none_t::on_integer( daw::string_view ) {
 				// Save data
 			}
 
-			void state_none_t::on_real( daw::string_view value ) {
+			void state_none_t::on_real( daw::string_view ) {
 				// Save data
 			}
 
-			void state_none_t::on_string( daw::string_view value ) {
+			void state_none_t::on_string( daw::string_view ) {
 				// Save data
 			}
 
-			void state_none_t::on_boolean( bool value ) {
+			void state_none_t::on_boolean( bool ) {
 				// Save data
 			}
 

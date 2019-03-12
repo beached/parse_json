@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2017-2018 Darrell Wright
+// Copyright (c) 2017-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -148,17 +148,6 @@ namespace daw {
 
 			std::string value_to_json( json_string_value name,
 			                           int64_t const &value ) {
-				return value_to_json( to_string_view( name ), value );
-			}
-
-			// intmax_t
-			std::string value_to_json( daw::string_view name,
-			                           intmax_t const &value ) {
-				return value_to_json_number( name, value );
-			}
-
-			std::string value_to_json( json_string_value name,
-			                           intmax_t const &value ) {
 				return value_to_json( to_string_view( name ), value );
 			}
 
