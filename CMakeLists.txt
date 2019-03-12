@@ -77,11 +77,11 @@ set( SOURCE_FILES_v2
 
 add_library ( parse_json STATIC ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( parse_json dependency_stub )
-target_link_libraries( parse_json utf_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
+target_link_libraries( parse_json utf_range utf_string tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
 add_library ( parse_json_v2 STATIC ${HEADER_FILES_v2} ${SOURCE_FILES_v2} )
 add_dependencies( parse_json_v2 dependency_stub )
-target_link_libraries( parse_json_v2 utf_range tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
+target_link_libraries( parse_json_v2 utf_range utf_string tz ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${CURL_LIBRARIES} )
 
 install( TARGETS parse_json DESTINATION lib )
 install( TARGETS parse_json_v2 DESTINATION lib )
