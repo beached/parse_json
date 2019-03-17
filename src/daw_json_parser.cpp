@@ -235,21 +235,25 @@ namespace daw {
 					throw JsonParserException( "Not a valid JSON object" );
 				}
 				++range;
+				skip_ws( range );
 				json_object_value result;
-				do {
-					skip_ws( range );
-					if( is_equal( range.begin( ), U'"' ) ) {
-						auto tmp = parse_object_item( range );
-						result.push_back( daw::move( tmp ) );
+				if( !is_equal( range.begin( ), U'}' ) ) {
+					do {
 						skip_ws( range );
-					} else {
-						throw JsonParserException( "Invalid JSON Object" );
-					}
-					if( !is_equal( range.begin( ), U',' ) ) {
-						break;
-					}
-					++range;
-				} while( !at_end( range ) );
+						if( is_equal( range.begin( ), U'"' ) ) {
+							auto tmp = parse_object_item( range );
+							result.push_back( daw::move( tmp ) );
+							skip_ws( range );
+						} else {
+							throw JsonParserException( "Invalid JSON Object" );
+						}
+						if( !is_equal( range.begin( ), U',' ) ) {
+							break;
+						}
+						++range;
+						skip_ws( range );
+					} while( !at_end( range ) );
+				}
 				if( !is_equal( range.begin( ), U'}' ) ) {
 					throw JsonParserException( "Not a valid JSON object" );
 				}
