@@ -89,7 +89,7 @@ install( DIRECTORY ${HEADER_FOLDER}/ DESTINATION include/daw/json )
 
 add_executable( parse_json_test_bin ${HEADER_FILES} ${TEST_FOLDER}/parse_json_test.cpp )
 add_dependencies( parse_json_test_bin dependency_stub )
-target_link_libraries( parse_json_test_bin parse_json utf_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( parse_json_test_bin utf_string utf_range parse_json ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( parse_json_test parse_json_test_bin )
 
 add_executable( parse_json_test_v2_bin ${HEADER_FOLDER}/daw_json_parser_v2.h ${HEADER_FILES_v2} ${TEST_FOLDER}/parse_json_test_v2.cpp )
@@ -99,16 +99,16 @@ add_test( parse_json_test_v2 parse_json_test_v2_bin )
 
 add_executable( json_file_parser_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_file_parser_test.cpp )
 add_dependencies( json_file_parser_test_bin dependency_stub )
-target_link_libraries( json_file_parser_test_bin parse_json utf_range utf_string ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( json_file_parser_test_bin utf_string utf_range parse_json ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( json_file_parser_test json_file_parser_test_bin )
 
 add_executable( daw_json_link_v2_test_bin ${HEADER_FILES_v2} ${TEST_FOLDER}/daw_json_link_v2_test.cpp )
 add_dependencies( daw_json_link_v2_test_bin dependency_stub )
-target_link_libraries( daw_json_link_v2_test_bin parse_json utf_range utf_string ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( daw_json_link_v2_test_bin utf_range utf_string parse_json ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( daw_json_link_v2_test daw_json_link_v2_test_bin )
 
 add_executable( json_link_test_bin ${HEADER_FILES} ${TEST_FOLDER}/json_link_test.cpp )
 add_dependencies( json_link_test_bin dependency_stub )
-target_link_libraries( json_link_test_bin parse_json utf_range ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( json_link_test_bin utf_range utf_string parse_json ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 add_test( json_link_test json_link_test_bin )
 
