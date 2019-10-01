@@ -34,8 +34,6 @@
 namespace daw {
 	namespace json {
 		namespace state {
-			state_t::~state_t( ) {}
-
 			void state_t::on_object_begin( ) {
 				daw::exception::daw_throw<std::runtime_error>(
 				  this->to_string( ) + ": Unexpected state change: on_object_begin" );

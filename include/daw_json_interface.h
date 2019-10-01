@@ -22,17 +22,15 @@
 
 #pragma once
 
-#include <boost/optional.hpp>
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <type_traits>
 #include <utility>
 
-#include <daw/daw_optional.h>
-#include <daw/daw_optional_poly.h>
 #include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 
@@ -80,11 +78,11 @@ namespace daw {
 			template<
 			  typename T,
 			  typename std::enable_if_t<
-			    daw::is_integral_v<T> && !daw::is_same_v<T, int64_t>, long> = 0>
+			    std::is_integral_v<T> && !std::is_same_v<T, int64_t>, long> = 0>
 			void json_to_value( T &to, daw::json::json_value_t const &from );
 
 			template<typename T>
-			void json_to_value( boost::optional<T> &to,
+			void json_to_value( std::optional<T> &to,
 			                    daw::json::json_value_t const &from );
 
 			template<typename T>
@@ -113,4 +111,3 @@ std::ostream &operator<<( std::ostream &os, T const &data ) {
 	os << data.serialize_to_json( );
 	return os;
 }
-

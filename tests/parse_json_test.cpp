@@ -132,7 +132,7 @@ struct B : public daw::json::JsonLink<B> {
 B::~B( ) {}
 
 struct C : public daw::json::JsonLink<C> {
-    boost::optional<int> a;
+    std::optional<int> a;
     C( ) : daw::json::JsonLink<C>{}, a{} {
 
         set_jsonlinks( );

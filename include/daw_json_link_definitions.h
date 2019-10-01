@@ -25,7 +25,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
 #include <chrono>
 #include <date/date.h>
 #include <date/tz.h>
@@ -35,6 +34,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -46,8 +46,6 @@
 #include <daw/daw_heap_value.h>
 #include <daw/daw_memory_mapped_file.h>
 #include <daw/daw_move.h>
-#include <daw/daw_optional.h>
-#include <daw/daw_optional_poly.h>
 #include <daw/daw_string_view.h>
 
 #include "daw_json.h"
@@ -273,7 +271,7 @@ namespace daw {
 
 		template<typename Derived>
 		template<typename T>
-		boost::optional<T>
+		std::optional<T>
 		JsonLink<Derived>::nullable_decoder_helper( daw::string_view name,
 		                                            json_obj const &json_values ) {
 			auto obj = json_values.get_object( );
@@ -431,7 +429,7 @@ namespace daw {
 		/*
 		template<typename Derived> template<typename T, typename U>
 		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder(
-		daw::string_view name, boost::optional<T> & value ) { auto value_ptr =
+		daw::string_view name, std::optional<T> & value ) { auto value_ptr =
 		&value; auto name_copy = name.to_string( ); return [value_ptr, name_copy](
 		json_obj json_values ) mutable { daw::exception::daw_throw_on_false(
 		value_ptr ); auto new_val = nullable_decoder_helper<U>( name_copy,
@@ -441,7 +439,7 @@ namespace daw {
 
 		template<typename Derived> template<typename T, typename U>
 		impl::decode_function_t<Derived> JsonLink<Derived>::standard_decoder(
-		daw::string_view name, daw::optional<T> & value ) { auto value_ptr = &value;
+		daw::string_view name, std::optional<T> & value ) { auto value_ptr = &value;
 		auto name_copy = name.to_string( ); return [value_ptr, name_copy]( json_obj
 		json_values ) mutable { daw::exception::daw_throw_on_false( value_ptr );
 		auto new_val = nullable_decoder_helper<U>( name_copy, json_values ); if(
@@ -832,8 +830,8 @@ namespace daw {
 			return obj.get_schema_obj( );
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             JsonLink<Derived>, Derived>>>
+		template<typename Derived, typename = std::enable_if<
+		                             daw::is_base_of_v<JsonLink<Derived>, Derived>>>
 		auto from_file( daw::string_view file_name, bool use_default_on_error ) {
 			Derived result;
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
@@ -846,8 +844,8 @@ namespace daw {
 			return result;
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             JsonLink<Derived>, Derived>>>
+		template<typename Derived, typename = std::enable_if<
+		                             daw::is_base_of_v<JsonLink<Derived>, Derived>>>
 		auto array_from_json_string( daw::string_view data,
 		                             bool use_default_on_error ) {
 			std::vector<Derived> result;
@@ -863,8 +861,8 @@ namespace daw {
 			return result;
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             JsonLink<Derived>, Derived>>>
+		template<typename Derived, typename = std::enable_if<
+		                             daw::is_base_of_v<JsonLink<Derived>, Derived>>>
 		auto array_from_file( daw::string_view file_name,
 		                      bool use_default_on_error ) {
 			std::vector<Derived> result;
@@ -885,14 +883,14 @@ namespace daw {
 			  use_default_on_error );
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             JsonLink<Derived>, Derived>>>
+		template<typename Derived, typename = std::enable_if<
+		                             daw::is_base_of_v<JsonLink<Derived>, Derived>>>
 		auto from_file( daw::string_view file_name ) {
 			return from_file<Derived>( file_name, false );
 		}
 
-		template<typename Derived, typename = std::enable_if<daw::is_base_of_v<
-		                             JsonLink<Derived>, Derived>>>
+		template<typename Derived, typename = std::enable_if<
+		                             daw::is_base_of_v<JsonLink<Derived>, Derived>>>
 		auto array_from_file( daw::string_view file_name ) {
 			return array_from_file<Derived>( file_name, false );
 		}

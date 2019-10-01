@@ -110,7 +110,7 @@ namespace daw {
 			std::string to_json_integer_array( Container const &container ) {
 				using std::begin;
 				using value_t = std::decay_t<decltype( *begin( container ) )>;
-				static_assert( daw::is_convertible_v<value_t, json_value_t::integer_t>,
+				static_assert( std::is_convertible_v<value_t, json_value_t::integer_t>,
 				               "Must supply an integer type" );
 				return impl::to_json_array( container,
 				                            []( value_t const &v ) -> std::string {
@@ -122,7 +122,7 @@ namespace daw {
 			std::string to_json_real_array( Container const &container ) {
 				using std::begin;
 				using value_t = std::decay_t<decltype( *begin( container ) )>;
-				static_assert( daw::is_convertible_v<value_t, json_value_t::real_t>,
+				static_assert( std::is_convertible_v<value_t, json_value_t::real_t>,
 				               "Must supply an real type" );
 				return impl::to_json_array(
 				  container,
@@ -133,7 +133,7 @@ namespace daw {
 			std::string to_json_boolean_array( Container const &container ) {
 				using std::begin;
 				using value_t = std::decay_t<decltype( *begin( container ) )>;
-				static_assert( daw::is_convertible_v<value_t, json_value_t::boolean_t>,
+				static_assert( std::is_convertible_v<value_t, json_value_t::boolean_t>,
 				               "Must supply an boolean type" );
 				return impl::to_json_array( container,
 				                            []( value_t const &v ) -> std::string {
@@ -145,7 +145,7 @@ namespace daw {
 			std::string to_json_string_array( Container const &container ) {
 				using std::begin;
 				using value_t = std::decay_t<decltype( *begin( container ) )>;
-				static_assert( daw::is_convertible_v<value_t, std::string>,
+				static_assert( std::is_convertible_v<value_t, std::string>,
 				               "Must supply an string type" );
 				return impl::to_json_array( container,
 				                            []( value_t const &v ) -> std::string {
@@ -493,7 +493,7 @@ namespace daw {
 
 		template<
 		  typename Derived,
-		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
+		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		Derived from_file( daw::string_view file_name, bool use_default_on_error ) {
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
@@ -510,7 +510,7 @@ namespace daw {
 
 		template<
 		  typename Derived,
-		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
+		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_json_value( json_value_t const &json_value,
 		                                            bool ) {
 			std::vector<Derived> result;
@@ -534,7 +534,7 @@ namespace daw {
 
 		template<
 		  typename Derived,
-		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
+		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_string( daw::string_view data,
 		                                        bool use_default_on_error ) {
 			return array_from_json_value<Derived>( parse_json( data ) );
@@ -542,7 +542,7 @@ namespace daw {
 
 		template<
 		  typename Derived,
-		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
+		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_file( daw::string_view file_name,
 		                                      bool use_default_on_error ) {
 			if( !boost::filesystem::exists( file_name.data( ) ) ) {
@@ -574,7 +574,7 @@ namespace daw {
 
 		template<
 		  typename Derived,
-		  typename = std::enable_if<daw::is_base_of_v<json_link<Derived>, Derived>>>
+		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		Derived from_file( daw::string_view file_name ) {
 			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
 			daw::exception::daw_throw_on_false( in_file, "Could not open file" );

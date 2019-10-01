@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <daw/daw_string_view.h>
+#include <daw/daw_virtual_base.h>
 
 #include "daw_json_parser_v2.h"
 
@@ -40,14 +41,8 @@ namespace daw {
 				current_state_t_size
 			};
 
-			struct state_t {
+			struct state_t: daw::virtual_base<state_t> {
 				state_t( ) = default;
-				state_t( state_t const & ) = default;
-				state_t( state_t && ) noexcept = default;
-				state_t &operator=( state_t const & ) = default;
-				state_t &operator=( state_t && ) noexcept = default;
-
-				virtual ~state_t( );
 
 				virtual void on_object_begin( );
 				virtual void on_object_end( );

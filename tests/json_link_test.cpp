@@ -23,12 +23,12 @@
 //#define BOOST_TEST_MODULE parse_json_test
 //#include <boost/test/unit_test.hpp>
 
-#include <boost/optional.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <date/date.h>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <unordered_map>
 
