@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2018 Darrell Wright
+// Copyright (c) 2014-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -23,6 +23,7 @@
 #pragma once
 
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #include <functional>
 #include <istream>
 #include <iterator>
@@ -53,10 +54,12 @@ namespace daw {
 
 		namespace impl {
 			template<typename T, typename Dest>
-			using can_dereference_to_detect = decltype( std::declval<Dest>( ) = *(std::declval<T>( )) );
+			using can_dereference_to_detect =
+			  decltype( std::declval<Dest>( ) = *( std::declval<T>( ) ) );
 
 			template<typename T, typename Dest>
-			constexpr bool can_dereference_to_v = daw::is_detected_v<can_dereference_to_detect, T, Dest>;
+			constexpr bool can_dereference_to_v =
+			  daw::is_detected_v<can_dereference_to_detect, T, Dest>;
 
 			std::string to_json_integer( json_value_t::integer_t i );
 			std::string to_json_real( json_value_t::real_t d );
@@ -95,7 +98,7 @@ namespace daw {
 					std::transform( begin( container ), end( container ),
 					                add_appender( result ),
 					                [func, &is_first]( auto const &value ) {
-						                if( !is_first ) {
+						                if( not is_first ) {
 							                return "," + func( value );
 						                }
 						                is_first = false;
@@ -167,9 +170,7 @@ namespace daw {
 			template<typename T, typename... Args>
 			void
 			copy_array_emplace_value( json_value_t const &source,
-			                          std::vector<T, Args...> const &destination ){
-
-			}
+			                          std::vector<T, Args...> const &destination ) {}
 
 			/// @brief Copies a value_t::array to a copy assignable value stored in
 			/// destination
@@ -467,7 +468,7 @@ namespace daw {
 
 			static Derived from_json_string( daw::string_view json_string ) {
 				auto const json_value = parse_json( json_string );
-				daw::exception::daw_throw_on_false(
+				daw::exception::precondition_check(
 				  json_value.is_object( ), "Only JsonObjects can be deserialized" );
 				return from_json_value( json_value );
 			}
@@ -495,14 +496,15 @@ namespace daw {
 		  typename Derived,
 		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		Derived from_file( daw::string_view file_name, bool use_default_on_error ) {
-			if( !boost::filesystem::exists( file_name.data( ) ) ) {
+			if( not boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
 					return Derived{};
 				}
 				throw std::runtime_error( "file not found" );
 			}
-			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
-			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
+			auto in_file = daw::filesystem::memory_mapped_file_t<char>(
+			  {file_name.data( ), file_name.size( )} );
+			daw::exception::precondition_check( in_file, "Could not open file" );
 
 			auto const json_value = parse_json( in_file.begin( ), in_file.end( ) );
 			return Derived::from_json_value( json_value );
@@ -514,7 +516,7 @@ namespace daw {
 		std::vector<Derived> array_from_json_value( json_value_t const &json_value,
 		                                            bool ) {
 			std::vector<Derived> result;
-			daw::exception::daw_throw_on_false(
+			daw::exception::precondition_check(
 			  json_value.is_array( ), "Value expected to be json array.  It was as " +
 			                            daw::json::to_string( json_value.type( ) ) );
 			for( auto const &d : json_value.get_array( ) ) {
@@ -545,14 +547,16 @@ namespace daw {
 		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		std::vector<Derived> array_from_file( daw::string_view file_name,
 		                                      bool use_default_on_error ) {
-			if( !boost::filesystem::exists( file_name.data( ) ) ) {
+			if( not boost::filesystem::exists( file_name.data( ) ) ) {
 				if( use_default_on_error ) {
 					return std::vector<Derived>{};
 				}
 				throw std::runtime_error( "file not found" );
 			}
-			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
-			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
+			auto in_file = daw::filesystem::memory_mapped_file_t<char>(
+			  {file_name.data( ), file_name.size( )} );
+
+			daw::exception::precondition_check( in_file, "Could not open file" );
 			json_value_t json_value;
 			try {
 				json_value = parse_json( in_file.begin( ), in_file.end( ) );
@@ -576,8 +580,10 @@ namespace daw {
 		  typename Derived,
 		  typename = std::enable_if<std::is_base_of_v<json_link<Derived>, Derived>>>
 		Derived from_file( daw::string_view file_name ) {
-			daw::filesystem::memory_mapped_file_t<char> in_file{file_name};
-			daw::exception::daw_throw_on_false( in_file, "Could not open file" );
+			auto in_file = daw::filesystem::memory_mapped_file_t<char>(
+			  {file_name.data( ), file_name.size( )} );
+
+			daw::exception::precondition_check( in_file, "Could not open file" );
 
 			auto const json_value = parse_json( in_file.begin( ), in_file.end( ) );
 			return Derived::from_json_value( json_value );

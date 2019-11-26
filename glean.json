@@ -1,0 +1,26 @@
+{
+	"provides": "parse_json",
+	"build_type": "cmake",
+	"dependencies": [
+		{
+			"provides": "header_libraries",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/header_libraries.git"
+		},
+		{
+			"provides": "date",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/date.git",
+			"cmake_args": [ "-DUSE_SYSTEM_TZ_DB=ON", "-DENABLE_DATE_TESTING=OFF", "-DCMAKE_CXX_STANDARD=17" ]
+		},
+		{
+			"provides": "utf_range",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/utf_range.git"
+		}
+	]
+}
+

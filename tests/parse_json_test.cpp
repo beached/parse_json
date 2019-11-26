@@ -262,41 +262,42 @@ int main( int argc, char **argv ) {
 		std::cerr << "Must supply a filename to open\n";
 		exit( 1 );
 	}
-	auto const json_data = daw::filesystem::memory_mapped_file_t<char>( argv[1] );
+	auto const json_data =
+	  daw::filesystem::memory_mapped_file_t<char>( {argv[1]} );
 	daw::string_view json_sv( json_data.data( ), json_data.size( ) );
 	auto obj = daw::json::parse_json( json_sv );
-	  /*
-	      C ccls;
-	      std::cout << ccls.to_string( ) << std::endl;
-	      ccls.a = 1;
-	      std::cout << ccls.to_string( ) << std::endl;
-	      Test a;
-	      a.b = 1234;
-	      a.c = 10.001;
-	      a.d = "\"This is a string\nline two";
-	      a.e = "15\u00B0C";
-	      std::cout << "to_string:" << std::endl;
-	      auto const json_str = a.to_string( );
-	      std::cout << json_str << std::endl;
+	/*
+	    C ccls;
+	    std::cout << ccls.to_string( ) << std::endl;
+	    ccls.a = 1;
+	    std::cout << ccls.to_string( ) << std::endl;
+	    Test a;
+	    a.b = 1234;
+	    a.c = 10.001;
+	    a.d = "\"This is a string\nline two";
+	    a.e = "15\u00B0C";
+	    std::cout << "to_string:" << std::endl;
+	    auto const json_str = a.to_string( );
+	    std::cout << json_str << std::endl;
 
-	      //	auto f = from_file<Test>( "file.json", true );
-	      Test b;
-	      std::cout << "from_string:" << std::endl;
-	      b.from_string( json_str );
-	      std::cout << "b.d=>'" << b.d << "'\n";
-	      std::cout << "to_string:" << std::endl;
-	      std::cout << b.to_string( ) << std::endl;
-	      b.something( );
-	      std::cout << b.to_string( ) << std::endl;
-	      Test c;
-	      c.something( );
-	      c.from_string( json_str );
-	      std::cout << c.to_string( ) << std::endl;
-	      boost::filesystem::path f{"file.json"};
-	      if( !exists( f ) ) {
-	          std::cout << "Could not test from_file '" << f << "' does not
-	     exist\n"; } else { auto g = from_file<Test>( "file.json" );
-	      }
-	      */
-	  return EXIT_SUCCESS;
+	    //	auto f = from_file<Test>( "file.json", true );
+	    Test b;
+	    std::cout << "from_string:" << std::endl;
+	    b.from_string( json_str );
+	    std::cout << "b.d=>'" << b.d << "'\n";
+	    std::cout << "to_string:" << std::endl;
+	    std::cout << b.to_string( ) << std::endl;
+	    b.something( );
+	    std::cout << b.to_string( ) << std::endl;
+	    Test c;
+	    c.something( );
+	    c.from_string( json_str );
+	    std::cout << c.to_string( ) << std::endl;
+	    boost::filesystem::path f{"file.json"};
+	    if( !exists( f ) ) {
+	        std::cout << "Could not test from_file '" << f << "' does not
+	   exist\n"; } else { auto g = from_file<Test>( "file.json" );
+	    }
+	    */
+	return EXIT_SUCCESS;
 }

@@ -51,7 +51,9 @@ BOOST_AUTO_TEST_CASE( test_files ) {
 		std::cout << "Testing: " << path.stem( ) << '\n';
 		bool success = false;
 		try {
-			auto json_file = daw::filesystem::memory_mapped_file_t<char>( path );
+			auto const p = path.native( );
+			auto json_file =
+			  daw::filesystem::memory_mapped_file_t<char>( {p.data( ), p.size( )} );
 			if( json_file ) {
 				volatile auto const json_obj =
 				  daw::json::parse_json( json_file.cbegin( ), json_file.cend( ) );

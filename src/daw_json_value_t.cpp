@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2014-2018 Darrell Wright
+// Copyright (c) 2014-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -25,8 +25,8 @@
 #include <cstdint>
 #include <iterator>
 #include <memory>
-#include <ostream>
 #include <optional>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <type_traits>
@@ -118,8 +118,8 @@ namespace daw {
 			return *this = json_value_t{rhs};
 		}
 
-		json_value_t &json_value_t::
-		operator=( json_value_t::integer_t rhs ) noexcept {
+		json_value_t &
+		json_value_t::operator=( json_value_t::integer_t rhs ) noexcept {
 			m_value = daw::move( rhs );
 			return *this;
 		}
@@ -134,14 +134,14 @@ namespace daw {
 			return *this;
 		}
 
-		json_value_t &json_value_t::
-		operator=( json_value_t::string_t rhs ) noexcept {
+		json_value_t &
+		json_value_t::operator=( json_value_t::string_t rhs ) noexcept {
 			m_value = daw::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::
-		operator=( json_value_t::boolean_t rhs ) noexcept {
+		json_value_t &
+		json_value_t::operator=( json_value_t::boolean_t rhs ) noexcept {
 			m_value = daw::move( rhs );
 			return *this;
 		}
@@ -151,14 +151,14 @@ namespace daw {
 			return *this;
 		}
 
-		json_value_t &json_value_t::
-		operator=( json_value_t::array_t rhs ) noexcept {
+		json_value_t &
+		json_value_t::operator=( json_value_t::array_t rhs ) noexcept {
 			m_value = daw::move( rhs );
 			return *this;
 		}
 
-		json_value_t &json_value_t::
-		operator=( json_value_t::object_t rhs ) noexcept {
+		json_value_t &
+		json_value_t::operator=( json_value_t::object_t rhs ) noexcept {
 			m_value = daw::move( rhs );
 			return *this;
 		}
@@ -405,8 +405,8 @@ namespace daw {
 			return find( key ) != end( );
 		}
 
-		std::optional<json_value_t> json_object_value::
-		operator( )( daw::string_view key ) const {
+		std::optional<json_value_t>
+		json_object_value::operator( )( daw::string_view key ) const {
 			auto it = find( key );
 			if( it != end( ) ) {
 				return std::optional<json_value_t>{it->second};
@@ -414,19 +414,18 @@ namespace daw {
 			return {};
 		}
 
-		json_object_value::mapped_type &json_object_value::
-		operator[]( daw::string_view key ) {
+		json_object_value::mapped_type &
+		  json_object_value::operator[]( daw::string_view key ) {
 			auto pos = find( key );
 			if( end( ) == pos ) {
-				pos =
-				  insert( pos, make_object_value_item( json_string_value( key ),
-				                                       json_value_t{} ) );
+				pos = insert( pos, make_object_value_item( json_string_value( key ),
+				                                           json_value_t{} ) );
 			}
 			return pos->second;
 		}
 
-		json_object_value::mapped_type const &json_object_value::
-		operator[]( daw::string_view key ) const {
+		json_object_value::mapped_type const &
+		  json_object_value::operator[]( daw::string_view key ) const {
 			auto pos = find( key );
 			if( end( ) == pos ) {
 				throw std::out_of_range(
