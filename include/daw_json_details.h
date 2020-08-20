@@ -109,8 +109,8 @@ namespace daw {
 			}
 
 			template<typename T, typename std::enable_if_t<
-			                       (std::is_integral_v<T> &&
-			                        !std::is_same_v<T, json_value_t::integer_t>),
+			                       (std::is_integral_v<T> and
+			                        not std::is_same_v<T, json_value_t::integer_t>),
 			                       long>>
 			void json_to_value( T &to, daw::json::json_value_t const &from ) {
 				static_assert( !std::is_const_v<decltype( to )>,
@@ -143,7 +143,7 @@ namespace daw {
 			template<typename T>
 			void json_to_value( std::shared_ptr<T> &to,
 			                    daw::json::json_value_t const &from ) {
-				static_assert( !std::is_const_v<decltype( to )>,
+				static_assert( not std::is_const_v<decltype( to )>,
 				               "To parameter on json_to_value cannot be const" );
 				daw::exception::daw_throw_on_false( to );
 				if( from.is_null( ) ) {

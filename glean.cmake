@@ -14,7 +14,7 @@ externalproject_add(
   GIT_REPOSITORY "https://github.com/beached/utf_range.git"
   SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/utf_range"
   INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install -DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install
+  CMAKE_ARGS -DDAW_USE_FULL_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install -DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install
 )
 
 externalproject_add(
