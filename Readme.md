@@ -1,6 +1,6 @@
 # Parse Json & json_link
 
-This is mainly a serialization/deserializatio library that allows your to easily use json as the transport medium.
+This is mainly a serialization/deserialization library that allows your to easily use json as the transport medium.
 
 ```c++
 #include <cstdlib>

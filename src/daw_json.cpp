@@ -1,33 +1,18 @@
-// The MIT License (MIT)
+// Copyright (c) Darrell Wright
 //
-// Copyright (c) 2014-2019 Darrell Wright
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to
-// deal in the Software without restriction, including without limitation the
-// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
-// sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+// Official repository: https://github.com/beached/parse_json
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
 
-#include <iomanip>
-#include <time.h>
+#include "daw/json/daw_json.h"
+#include "daw/json/daw_json_parser.h"
 
 #include <daw/daw_exception.h>
 #include <daw/daw_string_view.h>
 
-#include "daw_json.h"
-#include "daw_json_parser.h"
+#include <ctime>
 
 namespace daw {
 	void localtime_s( std::time_t const *source, struct tm *result ) {
@@ -42,7 +27,7 @@ namespace daw {
 		std::string ts_to_string( std::time_t const &timestamp,
 		                          std::string format ) {
 			char buffer[200];
-			std::tm tm = {};
+			std::tm tm = { };
 			daw::localtime_s( &timestamp, &tm );
 			auto count = std::strftime( buffer, 200, format.c_str( ), &tm );
 			daw::exception::daw_throw_on_false( count < 200 );
