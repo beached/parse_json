@@ -6,10 +6,10 @@
 # Official repository: https://github.com/beached/parse_json
 #
 
-cmake_minimum_required( VERSION 3.13 ) 
+cmake_minimum_required( VERSION 3.18 ) 
 
 project( "parse_json"
-	VERSION "1.0.0" 
+	VERSION "1.1.0" 
 	DESCRIPTION "Parse JSON & json_link"
 	HOMEPAGE_URL "https://github.com/beached/parse_json"
 	LANGUAGES C CXX)
@@ -17,14 +17,16 @@ project( "parse_json"
 set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
 set( CMAKE_CXX_STANDARD_REQUIRED ON)
 set( CMAKE_CXX_EXTENSIONS OFF)
+set(Boost_NO_WARN_NEW_VERSIONS ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package( Boost 1.62 COMPONENTS system filesystem regex iostreams unit_test_framework REQUIRED )
 find_package( CURL REQUIRED )
 find_package( OpenSSL REQUIRED )
-
-add_subdirectory(extern)
+find_package( daw-header-libraries REQUIRED )
+find_package( daw-utf-range REQUIRED )
+find_package( date REQUIRED )
 
 include(GNUInstallDirs)
 set(parse_json_INSTALL_CMAKEDIR
@@ -38,8 +40,8 @@ add_library ( ${PROJECT_NAME} )
 add_library( daw::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
 
 target_link_libraries( ${PROJECT_NAME} 
-	daw::header_libraries 
-	daw::utf_range 
+	daw::daw-header-libraries 
+	daw::daw-utf-range 
 	date::date 
 	Boost::system 
 	Boost::filesystem 
@@ -55,8 +57,8 @@ add_library ( ${PROJECT_NAME}_v2 )
 add_library( daw::${PROJECT_NAME}_v2 ALIAS ${PROJECT_NAME}_v2 )
 
 target_link_libraries( ${PROJECT_NAME}_v2 
-	daw::header_libraries 
-	daw::utf_range 
+	daw::daw-header-libraries 
+	daw::daw-utf-range 
 	date::date 
 	Boost::system 
 	Boost::filesystem 
