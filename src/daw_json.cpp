@@ -95,7 +95,7 @@ namespace daw {
 			}
 
 			std::string enbrace( daw::string_view json_value ) {
-				return "{ " + json_value.to_string( ) + " }";
+				return "{ " + static_cast<std::string>( json_value ) + " }";
 			}
 		} // namespace details
 

@@ -49,7 +49,7 @@ namespace daw::json::impl {
 	                             InputIterator const &last,
 	                             daw::string_view message ) {
 		if( pos == last ) {
-			throw json_parser_exception{ message.to_string( ) };
+			throw json_parser_exception{ static_cast<std::string>( message ) };
 		}
 	}
 

@@ -25,7 +25,7 @@ namespace daw::json::impl {
 
 	std::string to_json_string( daw::string_view s ) {
 		std::string result;
-		result = "\"" + s.to_string( ) + "\"";
+		result = "\"" + static_cast<std::string>( s ) + "\"";
 		return result;
 	}
 

@@ -48,7 +48,7 @@ namespace daw::json {
 		json_object_value( json_object_value && ) = default;
 
 		json_object_value &operator=( json_object_value ov ) {
-			members_v = daw::move( ov.members_v );
+			members_v = DAW_MOVE( ov.members_v );
 			return *this;
 		}
 
@@ -195,11 +195,11 @@ namespace daw::json {
 
 		template<typename Visitor>
 		decltype( auto ) apply_visitor( Visitor &&visitor ) {
-			return daw::visit_nt( m_value, std::forward<Visitor>( visitor ) );
+			return daw::visit_nt( m_value, DAW_FWD( visitor ) );
 		}
 		template<typename Visitor>
 		decltype( auto ) apply_visitor( Visitor &&visitor ) const {
-			return daw::visit_nt( m_value, std::forward<Visitor>( visitor ) );
+			return daw::visit_nt( m_value, DAW_FWD( visitor ) );
 		}
 
 		std::string to_string( ) const;

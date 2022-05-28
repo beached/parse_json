@@ -223,7 +223,7 @@ namespace daw::json {
 		}
 
 		static void add_json_map( daw::string_view name, mapping_functions_t m ) {
-			get_map( )[name.to_string( )] = daw::move( m );
+			get_map( )[static_cast<std::string>( name )] = daw::move( m );
 		}
 
 		Derived &this_as_derived( ) {
@@ -426,7 +426,7 @@ namespace daw::json {
 		}
 
 		static bool has_key( daw::string_view name ) {
-			return get_json_maps( ).count( name.to_string( ) ) > 0;
+			return get_json_maps( ).count( static_cast<std::string>( name ) ) > 0;
 		}
 
 		static Derived from_json_value( json_value_t const &json_value ) {
@@ -541,7 +541,8 @@ namespace daw::json {
 			json_value = parse_json( in_file.begin( ), in_file.end( ) );
 		} catch( std::exception const &ex ) {
 			std::string msg = "Exception while parsing json file '" +
-			                  file_name.to_string( ) + "': " + ex.what( );
+			                  static_cast<std::string>( file_name ) +
+			                  "': " + ex.what( );
 			throw std::runtime_error( msg );
 		}
 		try {
@@ -549,7 +550,7 @@ namespace daw::json {
 		} catch( std::exception const &ex ) {
 			std::string msg =
 			  "Exception while deserializing json array value from file '" +
-			  file_name.to_string( ) + "': " + ex.what( );
+			  static_cast<std::string>( file_name ) + "': " + ex.what( );
 			throw std::runtime_error( msg );
 		}
 	}

@@ -9,7 +9,7 @@
 cmake_minimum_required( VERSION 3.18 ) 
 
 project( "parse_json"
-	VERSION "1.1.0" 
+	VERSION "1.1.1" 
 	DESCRIPTION "Parse JSON & json_link"
 	HOMEPAGE_URL "https://github.com/beached/parse_json"
 	LANGUAGES C CXX)

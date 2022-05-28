@@ -11,7 +11,6 @@
 #include <daw/daw_exception.h>
 #include <daw/daw_move.h>
 #include <daw/daw_operators.h>
-#include <daw/daw_range.h>
 #include <daw/daw_string_view.h>
 #include <daw/utf_range/daw_utf_range.h>
 
@@ -210,7 +209,7 @@ namespace daw::json {
 	}
 
 	std::string to_string( daw::string_view const &str ) {
-		return str.to_string( );
+		return static_cast<std::string>( str );
 	}
 
 	std::string json_value_t::get_string( ) const {
@@ -360,7 +359,7 @@ namespace daw::json {
 	json_object_value::~json_object_value( ) {}
 
 	json_object_value::iterator json_object_value::find( daw::string_view key ) {
-		auto const k = key.to_string( );
+		auto const k = static_cast<std::string>( key );
 		return std::find_if( members_v.begin( ), members_v.end( ),
 		                     [&]( json_object_value_item const &item ) {
 			                     // hack be here
@@ -371,7 +370,7 @@ namespace daw::json {
 
 	json_object_value::const_iterator
 	json_object_value::find( daw::string_view key ) const {
-		auto const k = key.to_string( );
+		auto const k = static_cast<std::string>( key );
 		return std::find_if( members_v.begin( ), members_v.end( ),
 		                     [&]( json_object_value_item const &item ) {
 			                     // hack be here
