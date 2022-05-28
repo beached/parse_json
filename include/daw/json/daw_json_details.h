@@ -17,6 +17,7 @@
 #include <daw/daw_range.h>
 #include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
+#include <daw/daw_traits_is_a_type.h>
 
 #include <algorithm>
 #include <cstddef>
